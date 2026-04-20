@@ -6,7 +6,7 @@ export default function AdminDashboard() {
       <h1 className="text-3xl font-bold mb-8">Panel de Administración</h1>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl">
-        <Link href="/admin/nuevo-equipo" className="p-6 bg-zinc-900 border border-zinc-800 rounded-xl hover:border-green-500 transition">
+        <Link href="/admin/gestionar-equipos" className="p-6 bg-zinc-900 border border-zinc-800 rounded-xl hover:border-green-500 transition">
           <h2 className="text-xl font-bold mb-2">🛡️ Gestionar Equipos</h2>
           <p className="text-zinc-400">Añade o elimina equipos del torneo.</p>
         </Link>
