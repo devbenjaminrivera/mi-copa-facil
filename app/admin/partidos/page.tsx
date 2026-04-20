@@ -23,9 +23,14 @@ export default function GestionPartidos() {
 
     // 1. Guardar el registro del partido
     const { error: pError } = await supabase.from('partidos').insert([
-      { local_id: localId, visita_id: visitaId, goles_local: golesL, goles_visita: golesV, jugado: true }
-    ]);
-
+  { 
+    equipo_local: localId,    // Antes decía local_id
+    equipo_visita: visitaId,  // Antes decía visita_id
+    goles_local: golesL, 
+    goles_visita: golesV, 
+    estado: 'jugado'          // Usamos 'estado' porque así está en tu tabla
+  }
+]);
     if (pError) return alert("Error al guardar partido");
 
     // 2. Lógica de Puntos
