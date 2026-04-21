@@ -43,6 +43,13 @@ export default function GestionarEquipos() {
       else fetchEquipos();
     }
   };
+  const editarNombreEquipo = async (id: string, nuevoNombre: string) => {
+  const { error } = await supabase
+    .from('equipos')
+    .update({ nombre: nuevoNombre })
+    .eq('id', id);
+  if (!error) fetchEquipos();
+};
 
   return (
     <div className="p-8 bg-black min-h-screen text-white font-sans">

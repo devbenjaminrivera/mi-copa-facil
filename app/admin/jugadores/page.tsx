@@ -21,6 +21,24 @@ export default function GestionJugadores() {
     if (eq) setEquipos(eq);
     if (jug) setJugadores(jug);
   };
+      // Función para borrar jugador
+    const eliminarJugador = async (id: string) => {
+      if (confirm("¿Estás seguro de eliminar a este jugador?")) {
+        const { error } = await supabase.from('jugadores').delete().eq('id', id);
+        if (!error) fetchData();
+      }
+    };
+
+    // Función para editar goles manualmente (Corrección)
+    const corregirGoles = async (id: string, nuevosGoles: number) => {
+      await supabase.from('jugadores').update({ goles: nuevosGoles }).eq('id', id);
+      fetchData();
+    };
+
+    const quitarSancion = async (sancionId: number) => {
+    const { error } = await supabase.from('sanciones').delete().eq('id', sancionId);
+    if (!error) fetchData();
+    };
 
   useEffect(() => { fetchData(); }, []);
 
