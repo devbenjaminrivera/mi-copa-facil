@@ -11,7 +11,13 @@ export default function GestionJugadores() {
 
   const fetchData = async () => {
     const { data: eq } = await supabase.from('equipos').select('*').order('nombre');
-    const { data: jug } = await supabase.from('jugadores').select('*, equipos(nombre)').order('goles', { ascending: false });
+    
+    // MODIFICADO: Ahora traemos también las sanciones asociadas
+    const { data: jug } = await supabase
+      .from('jugadores')
+      .select('*, equipos(nombre), sanciones(tipo)')
+      .order('goles', { ascending: false });
+
     if (eq) setEquipos(eq);
     if (jug) setJugadores(jug);
   };
@@ -49,10 +55,11 @@ export default function GestionJugadores() {
         </form>
 
         <div className="bg-zinc-900 rounded-xl border border-zinc-800 overflow-hidden">
-          <table className="w-full text-left">
-            <thead className="bg-zinc-800 text-zinc-400 text-xs uppercase">
+          <table className="w-full text-left border-collapse">
+            <thead className="bg-zinc-800 text-zinc-400 text-[10px] uppercase tracking-widest">
               <tr>
                 <th className="p-4">Jugador</th>
+                <th className="p-4">Sanciones</th>
                 <th className="p-4">Equipo</th>
                 <th className="p-4 text-center">Goles</th>
               </tr>
@@ -60,8 +67,30 @@ export default function GestionJugadores() {
             <tbody className="divide-y divide-zinc-800">
               {jugadores.map(j => (
                 <tr key={j.id} className="hover:bg-zinc-800/50 transition">
-                  <td className="p-4">{j.nombre}</td>
-                  <td className="p-4 text-zinc-400">{j.equipos?.nombre}</td>
+                  <td className="p-4">
+                    <span className="font-medium">{j.nombre}</span>
+                  </td>
+                  
+                  {/* NUEVA COLUMNA: Renderizado de Tarjetas */}
+                  <td className="p-4">
+                    <div className="flex gap-1">
+                      {j.sanciones && j.sanciones.length > 0 ? (
+                        j.sanciones.map((s: any, idx: number) => (
+                          <div 
+                            key={idx}
+                            title={s.tipo === 'amarilla' ? 'Tarjeta Amarilla' : 'Tarjeta Roja'}
+                            className={`w-3 h-4 rounded-[1px] shadow-sm animate-in fade-in zoom-in duration-300 ${
+                              s.tipo === 'amarilla' ? 'bg-yellow-400' : 'bg-red-600'
+                            }`}
+                          />
+                        ))
+                      ) : (
+                        <span className="text-[10px] text-zinc-700 italic">Limpio</span>
+                      )}
+                    </div>
+                  </td>
+
+                  <td className="p-4 text-zinc-400 text-sm">{j.equipos?.nombre}</td>
                   <td className="p-4 text-center font-bold text-green-400">{j.goles}</td>
                 </tr>
               ))}

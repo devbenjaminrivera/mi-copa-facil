@@ -29,11 +29,10 @@ export default async function Home() {
     .order('created_at', { ascending: false })
     .limit(5);
 
-  // 3. Traemos el Top 5 de Goleadores (Pichichi)
-  // Agregamos !inner para asegurar la relación y facilitar el tipado
+  // 3. Traemos el Top 5 de Goleadores e incluimos sus sanciones
   const { data: goleadores } = await supabase
     .from('jugadores')
-    .select('nombre, goles, equipos!inner(nombre)')
+    .select('nombre, goles, equipos!inner(nombre), sanciones(tipo)')
     .gt('goles', 0)
     .order('goles', { ascending: false })
     .limit(5);
@@ -102,7 +101,7 @@ export default async function Home() {
         {/* SECCIÓN: GOLEADORES Y ÚLTIMOS RESULTADOS */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           
-          {/* TABLA DE GOLEADORES */}
+          {/* TABLA DE GOLEADORES CON SANCIONES */}
           <section>
             <h2 className="text-zinc-500 text-xs font-bold uppercase tracking-[0.2em] mb-4 ml-2 italic">Top Goleadores</h2>
             <div className="bg-zinc-900/30 border border-zinc-800 rounded-2xl overflow-hidden">
@@ -111,9 +110,21 @@ export default async function Home() {
                   <div className="flex items-center">
                     <span className="text-zinc-600 font-mono text-[10px] mr-3">0{i + 1}</span>
                     <div>
-                      <p className="font-bold text-sm leading-none">{g.nombre}</p>
+                      <div className="flex items-center gap-2">
+                        <p className="font-bold text-sm leading-none">{g.nombre}</p>
+                        {/* Visualización de tarjetas en Home */}
+                        <div className="flex gap-0.5">
+                          {g.sanciones?.map((s: any, idx: number) => (
+                            <div 
+                              key={idx}
+                              className={`w-2 h-3 rounded-[1px] ${
+                                s.tipo === 'amarilla' ? 'bg-yellow-400' : 'bg-red-600'
+                              }`}
+                            />
+                          ))}
+                        </div>
+                      </div>
                       <p className="text-[10px] text-zinc-500 uppercase mt-1 tracking-tighter">
-                        {/* Solución al error de Vercel: manejamos si equipos viene como objeto o array */}
                         {Array.isArray(g.equipos) ? g.equipos[0]?.nombre : g.equipos?.nombre}
                       </p>
                     </div>
@@ -148,7 +159,7 @@ export default async function Home() {
       </div>
 
       <footer className="max-w-4xl mx-auto mt-20 pb-8 text-center text-zinc-700 text-[10px] uppercase tracking-[0.4em]">
-        DESARROLLADO POR BENJAMÍN RIVERA ARANEDA • 2026
+        SISTEMA DE GESTIÓN DEPORTIVA • BENJAMÍN RIVERA ARANEDA • 2026
       </footer>
     </main>
   );
