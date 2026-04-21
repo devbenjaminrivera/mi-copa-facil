@@ -14,7 +14,7 @@ export default function GestionJugadores() {
     
     const { data: jug } = await supabase
       .from('jugadores')
-      .select('*, equipos(nombre), sanciones(id, tipo)') // Traemos el id de la sanción para borrarla
+      .select('*, equipos(nombre), sanciones(id, tipo)')
       .order('goles', { ascending: false });
 
     if (eq) setEquipos(eq);
@@ -38,6 +38,15 @@ export default function GestionJugadores() {
       const { error } = await supabase.from('sanciones').delete().eq('id', sancionId);
       if (!error) fetchData();
     }
+  };
+
+  // NUEVA FUNCIÓN: Agregar sanción rápida
+  const agregarSancion = async (jugadorId: string, tipo: string) => {
+    if (!tipo) return;
+    const { error } = await supabase.from('sanciones').insert([
+      { jugador_id: jugadorId, tipo: tipo }
+    ]);
+    if (!error) fetchData();
   };
 
   useEffect(() => { fetchData(); }, []);
@@ -92,23 +101,38 @@ export default function GestionJugadores() {
                   </td>
                   
                   <td className="p-4">
-                    <div className="flex gap-1.5">
-                      {j.sanciones && j.sanciones.length > 0 ? (
-                        j.sanciones.map((s: any) => (
-                          <button 
-                            key={s.id}
-                            onClick={() => quitarSancion(s.id)}
-                            title="Click para quitar sanción"
-                            className={`w-3 h-4 rounded-[1px] relative group/card cursor-pointer transition-transform hover:scale-110 ${
-                              s.tipo === 'amarilla' ? 'bg-yellow-400' : 'bg-red-600'
-                            }`}
-                          >
-                            <span className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/card:opacity-100 bg-black/40 text-[8px] font-bold text-white">✕</span>
-                          </button>
-                        ))
-                      ) : (
-                        <span className="text-[10px] text-zinc-700 italic">Limpio</span>
-                      )}
+                    <div className="flex items-center gap-2">
+                      <div className="flex gap-1.5">
+                        {j.sanciones && j.sanciones.length > 0 ? (
+                          j.sanciones.map((s: any) => (
+                            <button 
+                              key={s.id}
+                              onClick={() => quitarSancion(s.id)}
+                              title="Click para quitar sanción"
+                              className={`w-3 h-4 rounded-[1px] relative group/card cursor-pointer transition-transform hover:scale-110 ${
+                                s.tipo === 'amarilla' ? 'bg-yellow-400' : 'bg-red-600'
+                              }`}
+                            >
+                              <span className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/card:opacity-100 bg-black/40 text-[8px] font-bold text-white">✕</span>
+                            </button>
+                          ))
+                        ) : (
+                          <span className="text-[10px] text-zinc-700 italic">Limpio</span>
+                        )}
+                      </div>
+                      
+                      {/* SELECTOR RÁPIDO PARA AGREGAR SANCION */}
+                      <select 
+                        className="bg-zinc-800 text-[10px] rounded px-1 py-0.5 outline-none border border-zinc-700 focus:border-green-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                        onChange={(e) => {
+                          agregarSancion(j.id, e.target.value);
+                          e.target.value = ""; // Reset del select
+                        }}
+                      >
+                        <option value="">+</option>
+                        <option value="amarilla">🟨 Amarilla</option>
+                        <option value="roja">🟥 Roja</option>
+                      </select>
                     </div>
                   </td>
 
