@@ -1,8 +1,7 @@
 import { supabase } from '@/lib/supabase';
-import Link from 'next/link';
+import AdminButton from '@/components/AdminButton';
 
-// FUERZA a Next.js a no usar cache. 
-// Sin esto, Vercel mostrará la tabla vacía hasta que hagas un nuevo deploy.
+// FUERZA a Next.js a no usar cache para mostrar siempre datos reales.
 export const revalidate = 0;
 export const dynamic = 'force-dynamic';
 
@@ -14,7 +13,7 @@ export default async function Home() {
     .order('puntos', { ascending: false })
     .order('pj', { ascending: true });
 
-  // 2. Traemos los últimos 5 partidos jugados para darle vida a la página
+  // 2. Traemos los últimos 5 partidos jugados
   const { data: partidos } = await supabase
     .from('partidos')
     .select(`
@@ -33,17 +32,14 @@ export default async function Home() {
 
   return (
     <main className="p-4 md:p-8 bg-black text-white min-h-screen font-sans">
-      {/* Header */}
+      {/* Header Dinámico */}
       <div className="max-w-4xl mx-auto flex justify-between items-center mb-10">
         <h1 className="text-3xl font-extrabold tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-600">
           🏆 COPA CEVI
         </h1>
-        <Link 
-          href="/login" 
-          className="text-xs font-mono text-zinc-500 hover:text-green-400 border border-zinc-800 px-3 py-1 rounded-full transition-all"
-        >
-          ADMIN_PANEL {'>'}
-        </Link>
+        
+        {/* El componente AdminButton decide si mostrar LOGIN o IR AL PANEL */}
+        <AdminButton />
       </div>
       
       <div className="max-w-4xl mx-auto grid grid-cols-1 gap-8">
@@ -83,7 +79,7 @@ export default async function Home() {
           </div>
         </section>
 
-        {/* SECCIÓN: ÚLTIMOS RESULTADOS (Estilo Copa Fácil) */}
+        {/* SECCIÓN: ÚLTIMOS RESULTADOS */}
         {partidos && partidos.length > 0 && (
           <section>
             <h2 className="text-zinc-500 text-xs font-bold uppercase tracking-[0.2em] mb-4 ml-2">Últimos Resultados</h2>
