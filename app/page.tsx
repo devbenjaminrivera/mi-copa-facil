@@ -66,36 +66,41 @@ export default async function Home() {
         
         {/* SECCIÓN: TABLA DE POSICIONES */}
         <section>
-          <h2 className="text-zinc-500 text-xs font-bold uppercase tracking-[0.2em] mb-4 ml-2 italic">Clasificación General</h2>
-          <div className="bg-zinc-900/50 rounded-2xl p-1 border border-zinc-800 shadow-2xl overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="text-zinc-500 uppercase text-[10px] tracking-widest border-b border-zinc-800">
-                    <th className="px-4 py-4 text-center">Pos</th>
-                    <th className="px-4 py-4">Equipo</th>
-                    <th className="px-4 py-4 text-center">PJ</th>
-                    <th className="px-4 py-4 text-center">DF</th>
-                    <th className="px-4 py-4 text-right">Pts</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-zinc-800/50">
-                  {equipos?.map((eq, index) => (
-                    <tr key={eq.id} className="group hover:bg-zinc-800/40 transition-colors">
-                      <td className="px-4 py-4 text-zinc-500 font-mono text-xs text-center">{index + 1}</td>
-                      <td className="px-4 py-4 font-bold text-zinc-200 uppercase tracking-tight text-sm">{eq.nombre}</td>
-                      <td className="px-4 py-4 text-center text-zinc-400 text-sm">{eq.pj}</td>
-                      <td className="px-4 py-4 text-center font-mono text-xs text-zinc-300">
-                        {(eq.df || 0) > 0 ? `+${eq.df}` : eq.df || 0}
-                      </td>
-                      <td className="px-4 py-4 text-right font-black text-green-400">{eq.puntos}</td>
+            <h2 className="text-zinc-500 text-xs font-bold uppercase tracking-[0.2em] mb-4 ml-2 italic">Clasificación General</h2>
+            <div className="bg-zinc-900/50 rounded-2xl p-1 border border-zinc-800 shadow-2xl overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="text-zinc-500 uppercase text-[10px] tracking-widest border-b border-zinc-800">
+                      <th className="px-4 py-4 text-center">Pos</th>
+                      <th className="px-4 py-4">Equipo</th>
+                      <th className="px-4 py-4 text-center">PJ</th>
+                      <th className="px-4 py-4 text-center">GF</th>
+                      <th className="px-4 py-4 text-center">GC</th>
+                      <th className="px-4 py-4 text-center">DF</th>
+                      <th className="px-4 py-4 text-right">Pts</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="divide-y divide-zinc-800/50">
+                    {equipos?.map((eq, index) => (
+                      <tr key={eq.id} className="group hover:bg-zinc-800/40 transition-colors">
+                        <td className="px-4 py-4 text-zinc-500 font-mono text-xs text-center">{index + 1}</td>
+                        <td className="px-4 py-4 font-bold text-zinc-200 uppercase tracking-tight text-sm">{eq.nombre}</td>
+                        <td className="px-4 py-4 text-center text-zinc-400 text-sm">{eq.pj}</td>
+                        {/* Columnas recuperadas */}
+                        <td className="px-4 py-4 text-center text-zinc-500 text-xs font-mono">{eq.gf || 0}</td>
+                        <td className="px-4 py-4 text-center text-zinc-500 text-xs font-mono">{eq.gc || 0}</td>
+                        <td className="px-4 py-4 text-center font-mono text-xs text-zinc-300">
+                          {(eq.df || 0) > 0 ? `+${eq.df}` : eq.df || 0}
+                        </td>
+                        <td className="px-4 py-4 text-right font-black text-green-400">{eq.puntos}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
 
         {/* SECCIÓN: CALENDARIO DE PRÓXIMOS PARTIDOS */}
         {proximos && proximos.length > 0 && (
