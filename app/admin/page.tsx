@@ -15,6 +15,10 @@ export default function AdminDashboard() {
           <h2 className="text-xl font-bold mb-2">⚽ Registrar Resultados</h2>
           <p className="text-zinc-400">Ingresa goles y actualiza la tabla automáticamente.</p>
         </Link>
+        <Link href="/admin/jugadores" className="p-6 bg-zinc-900 border border-zinc-800 rounded-xl hover:border-green-500 transition">
+          <h2 className="text-xl font-bold mb-2">🏃 Gestionar Jugadores</h2>
+          <p className="text-zinc-400">Inscribe jugadores y revisa sus estadísticas.</p>
+        </Link>
       </div>
 
       <div className="mt-8">
