@@ -237,8 +237,8 @@ export default function RegistrarPartido() {
                         setSanciones(copy);
                       }}
                     >
-                      <option value="amarilla">🟨 AMARILLA</option>
-                      <option value="roja">🟥 ROJA</option>
+                      <option value="amarilla" className="bg-zinc-900 text-yellow-500">🟨 AMARILLA</option>
+                      <option value="roja" className="bg-zinc-900 text-red-500">🟥 ROJA</option>
                     </select>
                   </div>
                 ))}
