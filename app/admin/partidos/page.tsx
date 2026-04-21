@@ -212,16 +212,18 @@ export default function RegistrarPartido() {
                 {sanciones.map((s, i) => (
                   <div key={i} className="flex gap-2 mb-3 bg-black/40 p-2 rounded-xl border border-zinc-800/50">
                     <select 
-                      className="flex-1 bg-transparent p-1 text-sm outline-none"
+                      className="flex-1 bg-zinc-900 border border-zinc-800 p-2 rounded-lg text-sm text-white outline-none focus:border-green-500 appearance-none"
                       onChange={(e) => {
                         const copy = [...sanciones];
                         copy[i].jugador_id = e.target.value;
                         setSanciones(copy);
                       }}
                     >
-                      <option value="">Seleccionar Jugador...</option>
+                      <option value="" className="bg-zinc-900 text-white">Seleccionar Jugador...</option>
                       {[...jugadoresLocal, ...jugadoresVisita].map(j => (
-                        <option key={j.id} value={j.id}>{j.nombre}</option>
+                        <option key={j.id} value={j.id} className="bg-zinc-900 text-white">
+                          {j.nombre}
+                        </option>
                       ))}
                     </select>
                     
