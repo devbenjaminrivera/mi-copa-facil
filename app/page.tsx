@@ -1,12 +1,13 @@
 import { supabase } from '@/lib/supabase';
 import AdminButton from '@/components/AdminButton';
 
+// FUERZA a Next.js a no usar cache para mostrar siempre datos reales.
 export const revalidate = 0;
 export const dynamic = 'force-dynamic';
 
 export default async function Home() {
-  // 1. Clasificación
-  const { data: equipos } = await supabase
+  // 1. Clasificación con desempate profesional
+  const { data: equipos, error: errorEquipos } = await supabase
     .from('equipos')
     .select('*')
     .order('puntos', { ascending: false })
@@ -26,7 +27,7 @@ export default async function Home() {
     .order('created_at', { ascending: false })
     .limit(5);
 
-  // 3. NUEVO: Próximos Partidos (Calendario)
+  // 3. Próximos Partidos (Calendario)
   const { data: proximos } = await supabase
     .from('partidos')
     .select(`
@@ -38,7 +39,7 @@ export default async function Home() {
     .order('fecha', { ascending: true })
     .limit(4);
 
-  // 4. Goleadores
+  // 4. Goleadores con Sanciones
   const { data: goleadores } = await supabase
     .from('jugadores')
     .select('nombre, goles, equipos!inner(nombre), sanciones(tipo)')
@@ -46,8 +47,13 @@ export default async function Home() {
     .order('goles', { ascending: false })
     .limit(5);
 
+  if (errorEquipos) {
+    console.error("Error cargando equipos:", errorEquipos);
+  }
+
   return (
     <main className="p-4 md:p-8 bg-black text-white min-h-screen font-sans">
+      {/* Header */}
       <div className="max-w-4xl mx-auto flex justify-between items-center mb-10">
         <h1 className="text-3xl font-extrabold tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-600">
           🏆 COPA CEVI
@@ -90,7 +96,7 @@ export default async function Home() {
           </div>
         </section>
 
-        {/* NUEVA SECCIÓN: CALENDARIO DE PRÓXIMOS PARTIDOS */}
+        {/* SECCIÓN: CALENDARIO DE PRÓXIMOS PARTIDOS */}
         {proximos && proximos.length > 0 && (
           <section>
             <h2 className="text-zinc-500 text-xs font-bold uppercase tracking-[0.2em] mb-4 ml-2 italic text-center">Próximos Encuentros</h2>
@@ -102,7 +108,7 @@ export default async function Home() {
                   </div>
                   <div className="flex justify-between items-center w-full px-2">
                     <span className="flex-1 text-right text-xs font-black truncate uppercase">{p.equipo_local?.nombre}</span>
-                    <span className="mx-3 text-zinc-700 font-bold italic">VS</span>
+                    <span className="mx-3 text-zinc-700 font-bold italic text-[10px]">VS</span>
                     <span className="flex-1 text-left text-xs font-black truncate uppercase">{p.equipo_visita?.nombre}</span>
                   </div>
                 </div>
@@ -112,13 +118,15 @@ export default async function Home() {
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* TOP GOLEADORES */}
+          
+          {/* TABLA DE GOLEADORES */}
           <section>
             <h2 className="text-zinc-500 text-xs font-bold uppercase tracking-[0.2em] mb-4 ml-2 italic">Top Goleadores</h2>
             <div className="bg-zinc-900/30 border border-zinc-800 rounded-2xl overflow-hidden">
-              {goleadores && goleadores.map((g, i) => (
-                <div key={i} className="flex justify-between items-center p-4 border-b border-zinc-800/50 last:border-0">
-                  <div className="flex items-center gap-3">
+              {goleadores && (goleadores as any[]).map((g, i) => (
+                <div key={i} className="flex justify-between items-center p-4 border-b border-zinc-800/50 last:border-0 hover:bg-white/5 transition-colors">
+                  <div className="flex items-center">
+                    <span className="text-zinc-600 font-mono text-[10px] mr-3">0{i + 1}</span>
                     <div>
                       <div className="flex items-center gap-2">
                         <p className="font-bold text-sm leading-none">{g.nombre}</p>
@@ -128,7 +136,10 @@ export default async function Home() {
                           ))}
                         </div>
                       </div>
-                      <p className="text-[9px] text-zinc-500 uppercase mt-1 tracking-tighter">{g.equipos?.nombre}</p>
+                      <p className="text-[10px] text-zinc-500 uppercase mt-1 tracking-tighter">
+                        {/* Solución al error de compilación de Vercel */}
+                        {Array.isArray(g.equipos) ? g.equipos[0]?.nombre : g.equipos?.nombre}
+                      </p>
                     </div>
                   </div>
                   <span className="text-green-500 font-black text-lg">{g.goles}</span>
@@ -141,7 +152,7 @@ export default async function Home() {
           <section>
             <h2 className="text-zinc-500 text-xs font-bold uppercase tracking-[0.2em] mb-4 ml-2 italic">Resultados Recientes</h2>
             <div className="space-y-3">
-              {partidos?.map((partido: any) => (
+              {partidos && partidos.map((partido: any) => (
                 <div key={partido.id} className="bg-zinc-900/30 border border-zinc-800 p-4 rounded-xl flex justify-between items-center">
                   <div className="flex-1 text-right font-bold text-xs uppercase truncate pr-2">{partido.equipo_local?.nombre}</div>
                   <div className="bg-zinc-800 px-3 py-1 rounded font-mono font-black text-green-500 text-sm">
@@ -152,10 +163,12 @@ export default async function Home() {
               ))}
             </div>
           </section>
+
         </div>
       </div>
+
       <footer className="max-w-4xl mx-auto mt-20 pb-8 text-center text-zinc-700 text-[10px] uppercase tracking-[0.4em]">
-        DESARROLLADO POR BENJAMÍN RIVERA ARANEDA • 2026
+        SISTEMA DE GESTIÓN DEPORTIVA • BENJAMÍN RIVERA ARANEDA • 2026
       </footer>
     </main>
   );
