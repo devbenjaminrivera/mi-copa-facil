@@ -40,7 +40,6 @@ export default function GestionJugadores() {
     }
   };
 
-  // NUEVA FUNCIÓN: Agregar sanción rápida
   const agregarSancion = async (jugadorId: string, tipo: string) => {
     if (!tipo) return;
     const { error } = await supabase.from('sanciones').insert([
@@ -53,8 +52,22 @@ export default function GestionJugadores() {
 
   const agregarJugador = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // VALIDACIÓN: Evita que se registre si falta el nombre o el equipo
+    if (!nombre.trim() || !equipoId) {
+      alert("Debes ingresar un nombre y seleccionar un equipo obligatoriamente.");
+      return;
+    }
+
     const { error } = await supabase.from('jugadores').insert([{ nombre, equipo_id: equipoId }]);
-    if (!error) { setNombre(''); fetchData(); }
+    
+    if (!error) { 
+      setNombre(''); 
+      setEquipoId(''); // También reseteamos el select
+      fetchData(); 
+    } else {
+      alert("Error al registrar: " + error.message);
+    }
   };
 
   return (
@@ -65,16 +78,20 @@ export default function GestionJugadores() {
           <Link href="/admin" className="text-zinc-500 hover:text-white text-xs font-mono">← Volver</Link>
         </div>
 
+        {/* Formulario de Inscripción con validaciones */}
         <form onSubmit={agregarJugador} className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-zinc-900/50 p-6 rounded-xl border border-zinc-800 mb-8">
           <input 
             placeholder="Nombre del jugador" 
             className="bg-black border border-zinc-700 p-2 rounded-lg outline-none focus:border-green-500 text-sm"
-            value={nombre} onChange={e => setNombre(e.target.value)}
+            value={nombre} 
+            onChange={e => setNombre(e.target.value)}
+            required // Validación nativa del navegador
           />
           <select 
             className="bg-black border border-zinc-700 p-2 rounded-lg outline-none text-sm"
             onChange={e => setEquipoId(e.target.value)}
             value={equipoId}
+            required // Validación nativa del navegador
           >
             <option value="">Selecciona Equipo</option>
             {equipos.map(eq => <option key={eq.id} value={eq.id} className="bg-zinc-900">{eq.nombre}</option>)}
@@ -96,10 +113,7 @@ export default function GestionJugadores() {
             <tbody className="divide-y divide-zinc-800/50">
               {jugadores.map(j => (
                 <tr key={j.id} className="hover:bg-white/[0.02] transition group">
-                  <td className="p-4">
-                    <span className="font-bold text-sm">{j.nombre}</span>
-                  </td>
-                  
+                  <td className="p-4 text-sm font-bold">{j.nombre}</td>
                   <td className="p-4">
                     <div className="flex items-center gap-2">
                       <div className="flex gap-1.5">
@@ -108,7 +122,6 @@ export default function GestionJugadores() {
                             <button 
                               key={s.id}
                               onClick={() => quitarSancion(s.id)}
-                              title="Click para quitar sanción"
                               className={`w-3 h-4 rounded-[1px] relative group/card cursor-pointer transition-transform hover:scale-110 ${
                                 s.tipo === 'amarilla' ? 'bg-yellow-400' : 'bg-red-600'
                               }`}
@@ -120,13 +133,11 @@ export default function GestionJugadores() {
                           <span className="text-[10px] text-zinc-700 italic">Limpio</span>
                         )}
                       </div>
-                      
-                      {/* SELECTOR RÁPIDO PARA AGREGAR SANCION */}
                       <select 
                         className="bg-zinc-800 text-[10px] rounded px-1 py-0.5 outline-none border border-zinc-700 focus:border-green-500 opacity-0 group-hover:opacity-100 transition-opacity"
                         onChange={(e) => {
                           agregarSancion(j.id, e.target.value);
-                          e.target.value = ""; // Reset del select
+                          e.target.value = "";
                         }}
                       >
                         <option value="">+</option>
@@ -135,9 +146,7 @@ export default function GestionJugadores() {
                       </select>
                     </div>
                   </td>
-
                   <td className="p-4 text-zinc-500 text-xs uppercase">{j.equipos?.nombre}</td>
-                  
                   <td className="p-4">
                     <div className="flex justify-center">
                       <input 
@@ -148,12 +157,8 @@ export default function GestionJugadores() {
                       />
                     </div>
                   </td>
-
                   <td className="p-4 text-right">
-                    <button 
-                      onClick={() => eliminarJugador(j.id)}
-                      className="text-zinc-600 hover:text-red-500 transition-colors p-2"
-                    >
+                    <button onClick={() => eliminarJugador(j.id)} className="text-zinc-600 hover:text-red-500 transition-colors p-2">
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                       </svg>
