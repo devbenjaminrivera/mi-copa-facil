@@ -6,14 +6,15 @@ export const revalidate = 0;
 export const dynamic = 'force-dynamic';
 
 export default async function Home() {
-  // 1. Clasificación con desempate profesional
+  // 1. Clasificación con desempate profesional REFINADO
   const { data: equipos, error: errorEquipos } = await supabase
     .from('equipos')
     .select('*')
-    .order('puntos', { ascending: false })
-    .order('df', { ascending: false })
-    .order('gf', { ascending: false })
-    .order('pj', { ascending: true });
+    .order('puntos', { ascending: false }) // 1° Más puntos arriba
+    .order('df', { ascending: false })     // 2° Mejor diferencia de goles
+    .order('gf', { ascending: false })     // 3° Más goles a favor
+    .order('pj', { ascending: true })      // 4° Menos partidos jugados (opcional)
+    .order('nombre', { ascending: true }); // 5° Orden alfabético (evita saltos aleatorios)
 
   // 2. Resultados Pasados
   const { data: partidos } = await supabase
@@ -137,7 +138,6 @@ export default async function Home() {
                         </div>
                       </div>
                       <p className="text-[10px] text-zinc-500 uppercase mt-1 tracking-tighter">
-                        {/* Solución al error de compilación de Vercel */}
                         {Array.isArray(g.equipos) ? g.equipos[0]?.nombre : g.equipos?.nombre}
                       </p>
                     </div>
