@@ -10,10 +10,10 @@ export default async function Home() {
   const { data: equipos, error: errorEquipos } = await supabase
     .from('equipos')
     .select('*')
-    .order('puntos', { ascending: false }) // 1ero Puntos
-    .order('df', { ascending: false })     // 2do Diferencia de Goles
-    .order('gf', { ascending: false })     // 3ero Goles a Favor
-    .order('pj', { ascending: true });      // 4to Menos partidos jugados (opcional)
+    .order('puntos', { ascending: false })
+    .order('df', { ascending: false })
+    .order('gf', { ascending: false })
+    .order('pj', { ascending: true });
 
   // 2. Traemos los últimos 5 partidos jugados
   const { data: partidos } = await supabase
@@ -30,9 +30,10 @@ export default async function Home() {
     .limit(5);
 
   // 3. Traemos el Top 5 de Goleadores (Pichichi)
+  // Agregamos !inner para asegurar la relación y facilitar el tipado
   const { data: goleadores } = await supabase
     .from('jugadores')
-    .select('nombre, goles, equipos(nombre)')
+    .select('nombre, goles, equipos!inner(nombre)')
     .gt('goles', 0)
     .order('goles', { ascending: false })
     .limit(5);
@@ -105,13 +106,16 @@ export default async function Home() {
           <section>
             <h2 className="text-zinc-500 text-xs font-bold uppercase tracking-[0.2em] mb-4 ml-2 italic">Top Goleadores</h2>
             <div className="bg-zinc-900/30 border border-zinc-800 rounded-2xl overflow-hidden">
-              {goleadores && goleadores.length > 0 ? goleadores.map((g, i) => (
+              {goleadores && goleadores.length > 0 ? (goleadores as any[]).map((g, i) => (
                 <div key={i} className="flex justify-between items-center p-4 border-b border-zinc-800/50 last:border-0 hover:bg-white/5 transition-colors">
                   <div className="flex items-center">
                     <span className="text-zinc-600 font-mono text-[10px] mr-3">0{i + 1}</span>
                     <div>
                       <p className="font-bold text-sm leading-none">{g.nombre}</p>
-                      <p className="text-[10px] text-zinc-500 uppercase mt-1 tracking-tighter">{g.equipos?.nombre}</p>
+                      <p className="text-[10px] text-zinc-500 uppercase mt-1 tracking-tighter">
+                        {/* Solución al error de Vercel: manejamos si equipos viene como objeto o array */}
+                        {Array.isArray(g.equipos) ? g.equipos[0]?.nombre : g.equipos?.nombre}
+                      </p>
                     </div>
                   </div>
                   <span className="text-green-500 font-black text-lg">{g.goles}</span>
@@ -144,7 +148,7 @@ export default async function Home() {
       </div>
 
       <footer className="max-w-4xl mx-auto mt-20 pb-8 text-center text-zinc-700 text-[10px] uppercase tracking-[0.4em]">
-        SISTEMA DE GESTIÓN DEPORTIVA • BENJAMÍN RIVERA ARANEDA • 2026
+        DESARROLLADO POR BENJAMÍN RIVERA ARANEDA • 2026
       </footer>
     </main>
   );
