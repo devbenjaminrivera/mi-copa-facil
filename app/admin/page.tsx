@@ -19,6 +19,10 @@ export default function AdminDashboard() {
           <h2 className="text-xl font-bold mb-2">🏃 Gestionar Jugadores</h2>
           <p className="text-zinc-400">Inscribe jugadores y revisa sus estadísticas.</p>
         </Link>
+        <Link href="/admin/historial" className="p-6 bg-zinc-900 border border-zinc-800 rounded-xl hover:border-red-500 transition">
+          <h2 className="text-xl font-bold mb-2">📜 Historial y Corrección</h2>
+          <p className="text-zinc-400">Edita o elimina partidos mal registrados.</p>
+        </Link>
       </div>
 
       <div className="mt-8">
