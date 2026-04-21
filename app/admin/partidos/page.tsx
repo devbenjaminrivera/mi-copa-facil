@@ -13,12 +13,11 @@ export default function RegistrarPartido() {
   const [golesL, setGolesL] = useState(0);
   const [golesV, setGolesV] = useState(0);
   
-  const [paso, setPaso] = useState(1); // 1: Resultado, 2: Detalle (Goles/Tarjetas)
+  const [paso, setPaso] = useState(1); 
   const [partidoId, setPartidoId] = useState<number | null>(null);
   const [goleadoresL, setGoleadoresL] = useState<string[]>([]);
   const [goleadoresV, setGoleadoresV] = useState<string[]>([]);
   
-  // Nuevo estado para sanciones
   const [sanciones, setSanciones] = useState<{jugador_id: string, tipo: 'amarilla' | 'roja'}[]>([]);
 
   useEffect(() => {
@@ -74,14 +73,27 @@ export default function RegistrarPartido() {
   };
 
   const finalizarRegistro = async () => {
+    // VALIDACIÓN: Verificar que todos los goles tengan un autor asignado
+    const faltaGoleadorLocal = goleadoresL.some(id => id === '');
+    const faltaGoleadorVisita = goleadoresV.some(id => id === '');
+
+    if (faltaGoleadorLocal || faltaGoleadorVisita) {
+      alert("Debes seleccionar obligatoriamente a los autores de todos los goles marcados.");
+      return;
+    }
+
     // 1. Guardar Goleadores
     const todosLosGoles = [
       ...goleadoresL.map(id => ({ partido_id: partidoId, jugador_id: id, equipo_id: localId })),
       ...goleadoresV.map(id => ({ partido_id: partidoId, jugador_id: id, equipo_id: visitaId }))
-    ].filter(g => g.jugador_id !== '');
+    ];
 
     if (todosLosGoles.length > 0) {
-        await supabase.from('goles').insert(todosLosGoles);
+        const { error: errorGoles } = await supabase.from('goles').insert(todosLosGoles);
+        if (errorGoles) {
+            alert("Error al guardar goleadores: " + errorGoles.message);
+            return;
+        }
     }
 
     // 2. Guardar Sanciones
@@ -101,7 +113,7 @@ export default function RegistrarPartido() {
     <div className="p-4 md:p-8 bg-black min-h-screen text-white font-sans">
       <div className="max-w-2xl mx-auto">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-2xl font-bold tracking-tighter">⚽ REGISTRAR PARTIDO</h1>
+          <h1 className="text-2xl font-bold tracking-tighter text-green-500">⚽ REGISTRAR PARTIDO</h1>
           <Link href="/admin" className="text-zinc-500 hover:text-white text-xs font-mono">/CANCELAR</Link>
         </div>
 
@@ -113,12 +125,14 @@ export default function RegistrarPartido() {
                 <select 
                   className="w-full bg-black border border-zinc-800 p-3 rounded-xl outline-none focus:border-green-500 transition-colors"
                   onChange={(e) => setLocalId(e.target.value)}
+                  value={localId}
                 >
                   <option value="">Equipo...</option>
-                  {equipos.map(eq => <option key={eq.id} value={eq.id}>{eq.nombre}</option>)}
+                  {equipos.map(eq => <option key={eq.id} value={eq.id} className="bg-zinc-900">{eq.nombre}</option>)}
                 </select>
                 <input 
                   type="number" 
+                  min="0"
                   placeholder="0"
                   className="w-full bg-black border border-zinc-800 p-4 rounded-xl outline-none text-center text-3xl font-black text-green-500"
                   onChange={(e) => setGolesL(parseInt(e.target.value) || 0)}
@@ -130,12 +144,14 @@ export default function RegistrarPartido() {
                 <select 
                   className="w-full bg-black border border-zinc-800 p-3 rounded-xl outline-none focus:border-green-500 transition-colors text-right"
                   onChange={(e) => setVisitaId(e.target.value)}
+                  value={visitaId}
                 >
                   <option value="">Equipo...</option>
-                  {equipos.map(eq => <option key={eq.id} value={eq.id}>{eq.nombre}</option>)}
+                  {equipos.map(eq => <option key={eq.id} value={eq.id} className="bg-zinc-900">{eq.nombre}</option>)}
                 </select>
                 <input 
                   type="number" 
+                  min="0"
                   placeholder="0"
                   className="w-full bg-black border border-zinc-800 p-4 rounded-xl outline-none text-center text-3xl font-black text-green-500"
                   onChange={(e) => setGolesV(parseInt(e.target.value) || 0)}
@@ -154,7 +170,6 @@ export default function RegistrarPartido() {
           <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500">
             <div className="bg-zinc-900/50 p-6 rounded-2xl border border-zinc-800">
               
-              {/* Sección Goleadores */}
               <h2 className="text-[10px] font-black text-zinc-500 mb-6 uppercase tracking-[0.2em]">Autores de los Goles</h2>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -163,6 +178,7 @@ export default function RegistrarPartido() {
                   {golesL > 0 ? goleadoresL.map((_, i) => (
                     <select 
                       key={`l-${i}`}
+                      required
                       className="w-full bg-black border border-zinc-800 p-2 rounded-lg mb-2 text-sm outline-none focus:border-green-500"
                       onChange={(e) => {
                         const copy = [...goleadoresL];
@@ -171,7 +187,7 @@ export default function RegistrarPartido() {
                       }}
                     >
                       <option value="">Seleccionar Jugador</option>
-                      {jugadoresLocal.map(j => <option key={j.id} value={j.id}>{j.nombre}</option>)}
+                      {jugadoresLocal.map(j => <option key={j.id} value={j.id} className="bg-zinc-900">{j.nombre}</option>)}
                     </select>
                   )) : <p className="text-zinc-600 text-xs italic">Sin goles</p>}
                 </div>
@@ -181,6 +197,7 @@ export default function RegistrarPartido() {
                   {golesV > 0 ? goleadoresV.map((_, i) => (
                     <select 
                       key={`v-${i}`}
+                      required
                       className="w-full bg-black border border-zinc-800 p-2 rounded-lg mb-2 text-sm outline-none focus:border-green-500 text-right"
                       onChange={(e) => {
                         const copy = [...goleadoresV];
@@ -189,13 +206,13 @@ export default function RegistrarPartido() {
                       }}
                     >
                       <option value="">Seleccionar Jugador</option>
-                      {jugadoresVisita.map(j => <option key={j.id} value={j.id}>{j.nombre}</option>)}
+                      {jugadoresVisita.map(j => <option key={j.id} value={j.id} className="bg-zinc-900">{j.nombre}</option>)}
                     </select>
                   )) : <p className="text-zinc-600 text-xs italic text-right">Sin goles</p>}
                 </div>
               </div>
 
-              {/* Sección Sanciones */}
+              {/* Sanciones */}
               <div className="mt-10 pt-8 border-t border-zinc-800">
                 <div className="flex justify-between items-center mb-6">
                   <h2 className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em]">Sanciones</h2>
@@ -207,11 +224,10 @@ export default function RegistrarPartido() {
                   </button>
                 </div>
 
-                {sanciones.length === 0 && <p className="text-zinc-600 text-xs italic text-center mb-4">No se registraron tarjetas en este partido.</p>}
-
                 {sanciones.map((s, i) => (
                   <div key={i} className="flex gap-2 mb-3 bg-black/40 p-2 rounded-xl border border-zinc-800/50">
                     <select 
+                      required
                       className="flex-1 bg-zinc-900 border border-zinc-800 p-2 rounded-lg text-sm text-white outline-none focus:border-green-500 appearance-none"
                       onChange={(e) => {
                         const copy = [...sanciones];
@@ -230,7 +246,7 @@ export default function RegistrarPartido() {
                     <select 
                       className={`w-32 p-1 rounded-lg text-[10px] font-black uppercase tracking-widest outline-none ${
                         s.tipo === 'amarilla' ? 'text-yellow-500' : 'text-red-500'
-                      }`}
+                      } bg-zinc-900`}
                       onChange={(e) => {
                         const copy = [...sanciones];
                         copy[i].tipo = e.target.value as 'amarilla' | 'roja';
