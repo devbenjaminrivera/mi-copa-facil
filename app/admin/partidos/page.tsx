@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
+import Link from 'next/link';
 
 export default function GestionPartidos() {
   const [equipos, setEquipos] = useState<any[]>([]);
@@ -65,6 +66,7 @@ export default function GestionPartidos() {
   return (
     <div className="p-8 bg-black min-h-screen text-white">
       <h1 className="text-2xl font-bold mb-6">Registrar Resultado</h1>
+      <Link href="/admin" className="text-zinc-500 hover:text-white text-sm">← Volver</Link>
       <form onSubmit={registrarPartido} className="grid grid-cols-2 gap-4 max-w-xl bg-zinc-900 p-6 rounded-lg border border-zinc-800">
         <div>
           <label>Local</label>
