@@ -14,15 +14,16 @@ export default async function Home() {
     .order('nombre', { ascending: true });
 
   const { data: partidos } = await supabase
-    .from('partidos')
-    .select(`
-      id, goles_local, goles_visita,
-      equipo_local:equipos!equipo_local(nombre),
-      equipo_visita:equipos!equipo_visita(nombre)
-    `)
-    .eq('estado', 'jugado')
-    .order('created_at', { ascending: false })
-    .limit(5);
+  .from('partidos')
+  .select(`
+    id, goles_local, goles_visita,
+    equipo_local:equipos!equipo_local(id, nombre),
+    equipo_visita:equipos!equipo_visita(id, nombre),
+    sanciones(tipo, jugador_id, equipos(id))
+  `)
+  .eq('estado', 'jugado')
+  .order('created_at', { ascending: false })
+  .limit(5);
 
   const { data: proximos } = await supabase
     .from('partidos')
@@ -108,11 +109,6 @@ export default async function Home() {
                   <div>
                     <div className="flex items-center gap-2">
                       <p className="font-bold text-sm leading-none">{g.nombre}</p>
-                      <div className="flex gap-0.5">
-                        {g.sanciones?.map((s: any, idx: number) => (
-                          <div key={idx} className={`w-2 h-3 rounded-[1px] ${s.tipo === 'amarilla' ? 'bg-yellow-400' : 'bg-red-600'}`} />
-                        ))}
-                      </div>
                     </div>
                     <p className="text-[10px] text-zinc-500 uppercase mt-1 tracking-tighter">
                       {g.equipos?.nombre}
@@ -127,19 +123,50 @@ export default async function Home() {
 
         {/* BOTTOM LEFT: Resultados Recientes */}
         <section className="lg:col-span-6">
-          <h2 className="text-zinc-500 text-xs font-bold uppercase tracking-[0.2em] mb-4 ml-2 italic">Resultados Recientes</h2>
-          <div className="space-y-3">
-            {partidos && partidos.map((partido: any) => (
-              <div key={partido.id} className="bg-zinc-900/30 border border-zinc-800 p-4 rounded-xl flex justify-between items-center">
-                <div className="flex-1 text-right font-bold text-xs uppercase truncate pr-2">{partido.equipo_local?.nombre}</div>
-                <div className="bg-zinc-800 px-3 py-1 rounded font-mono font-black text-green-500 text-sm">
-                  {partido.goles_local} - {partido.goles_visita}
-                </div>
-                <div className="flex-1 text-left font-bold text-xs uppercase truncate pl-2">{partido.equipo_visita?.nombre}</div>
+  <h2 className="text-zinc-500 text-xs font-bold uppercase tracking-[0.2em] mb-4 ml-2 italic">Resultados Recientes</h2>
+  <div className="space-y-3">
+    {partidos && partidos.map((partido: any) => (
+      <div key={partido.id} className="bg-zinc-900/30 border border-zinc-800 p-4 rounded-xl flex flex-col gap-3">
+        <div className="flex justify-between items-center">
+          {/* Equipo Local */}
+          <div className="flex-1 flex flex-col items-end pr-2 overflow-hidden">
+            <div className="flex items-center gap-1.5 flex-wrap justify-end">
+              {/* Tarjetas Local */}
+              <div className="flex gap-0.5">
+                {partido.sanciones
+                  ?.filter((s: any) => s.equipos?.id === partido.equipo_local?.id)
+                  .map((s: any, i: number) => (
+                    <div key={i} className={`w-2 h-3 rounded-[1px] ${s.tipo === 'amarilla' ? 'bg-yellow-400' : 'bg-red-600'}`} />
+                  ))}
               </div>
-            ))}
+              <span className="font-bold text-xs uppercase truncate">{partido.equipo_local?.nombre}</span>
+            </div>
           </div>
-        </section>
+
+          {/* Marcador */}
+          <div className="bg-zinc-800 px-3 py-1 rounded font-mono font-black text-green-500 text-sm shrink-0">
+            {partido.goles_local} - {partido.goles_visita}
+          </div>
+
+          {/* Equipo Visita */}
+          <div className="flex-1 flex flex-col items-start pl-2 overflow-hidden">
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <span className="font-bold text-xs uppercase truncate">{partido.equipo_visita?.nombre}</span>
+              {/* Tarjetas Visita */}
+              <div className="flex gap-0.5">
+                {partido.sanciones
+                  ?.filter((s: any) => s.equipos?.id === partido.equipo_visita?.id)
+                  .map((s: any, i: number) => (
+                    <div key={i} className={`w-2 h-3 rounded-[1px] ${s.tipo === 'amarilla' ? 'bg-yellow-400' : 'bg-red-600'}`} />
+                  ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    ))}
+  </div>
+</section>
 
         {/* BOTTOM RIGHT: Próximos Encuentros */}
         {proximos && proximos.length > 0 && (

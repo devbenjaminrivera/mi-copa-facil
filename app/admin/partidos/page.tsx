@@ -28,233 +28,227 @@ export default function RegistrarPartido() {
     fetchEquipos();
   }, []);
 
-  useEffect(() => {
-    if (localId) fetchJugadores(localId, setJugadoresLocal);
-  }, [localId]);
-
-  useEffect(() => {
-    if (visitaId) fetchJugadores(visitaId, setJugadoresVisita);
-  }, [visitaId]);
-
-  const fetchJugadores = async (id: string, setter: any) => {
-    const { data } = await supabase.from('jugadores').select('*').eq('equipo_id', id);
-    if (data) setter(data);
-  };
-
-  const agregarSancion = () => {
-    setSanciones([...sanciones, { jugador_id: '', tipo: 'amarilla' }]);
-  };
-
-  const guardarPartido = async () => {
+  const iniciarPartido = async () => {
     if (!localId || !visitaId || localId === visitaId) {
-      alert("Selecciona equipos válidos");
+      alert("Selecciona dos equipos distintos");
       return;
     }
 
-    const { data, error } = await supabase.from('partidos').insert([
-      { 
-        equipo_local: localId, 
-        equipo_visita: visitaId, 
-        goles_local: golesL, 
+    const { data: pLocal } = await supabase.from('jugadores').select('*').eq('equipo_id', localId);
+    const { data: pVisita } = await supabase.from('jugadores').select('*').eq('equipo_id', visitaId);
+    
+    if (pLocal) setJugadoresLocal(pLocal);
+    if (pVisita) setJugadoresVisita(pVisita);
+
+    const { data, error } = await supabase
+      .from('partidos')
+      .insert([{
+        equipo_local: localId,
+        equipo_visita: visitaId,
+        goles_local: golesL,
         goles_visita: golesV,
         estado: 'jugado'
-      }
-    ]).select();
+      }])
+      .select();
 
-    if (error) {
-      alert("Error: " + error.message);
-      return;
+    if (error) alert(error.message);
+    else {
+      setPartidoId(data[0].id);
+      setGoleadoresL(new Array(golesL).fill(''));
+      setGoleadoresV(new Array(golesV).fill(''));
+      setPaso(2);
     }
-
-    setPartidoId(data[0].id);
-    setGoleadoresL(new Array(golesL).fill(''));
-    setGoleadoresV(new Array(golesV).fill(''));
-    setPaso(2);
   };
 
   const finalizarRegistro = async () => {
-    // VALIDACIÓN: Verificar que todos los goles tengan un autor asignado
-    const faltaGoleadorLocal = goleadoresL.some(id => id === '');
-    const faltaGoleadorVisita = goleadoresV.some(id => id === '');
+    try {
+      // 1. Registrar Goles
+      const todosLosGoles = [
+        ...goleadoresL.map(id => ({ partido_id: partidoId, jugador_id: id, equipo_id: localId })),
+        ...goleadoresV.map(id => ({ partido_id: partidoId, jugador_id: id, equipo_id: visitaId }))
+      ].filter(g => g.jugador_id !== '');
 
-    if (faltaGoleadorLocal || faltaGoleadorVisita) {
-      alert("Debes seleccionar obligatoriamente a los autores de todos los goles marcados.");
-      return;
-    }
-
-    // 1. Guardar Goleadores
-    const todosLosGoles = [
-      ...goleadoresL.map(id => ({ partido_id: partidoId, jugador_id: id, equipo_id: localId })),
-      ...goleadoresV.map(id => ({ partido_id: partidoId, jugador_id: id, equipo_id: visitaId }))
-    ];
-
-    if (todosLosGoles.length > 0) {
-        const { error: errorGoles } = await supabase.from('goles').insert(todosLosGoles);
-        if (errorGoles) {
-            alert("Error al guardar goleadores: " + errorGoles.message);
-            return;
+      if (todosLosGoles.length > 0) {
+        await supabase.from('goles').insert(todosLosGoles);
+        for (const g of todosLosGoles) {
+          await supabase.rpc('incrementar_goles', { row_id: g.jugador_id });
         }
+      }
+
+      // 2. Registrar Sanciones con asignación automática de equipo (CAMBIO SOLICITADO)
+      const todasLasSanciones = sanciones
+        .filter(s => s.jugador_id !== '')
+        .map(s => {
+          // Determinamos si el jugador es del local o visita para asignar la tarjeta al equipo
+          const esLocal = jugadoresLocal.some(j => j.id === s.jugador_id);
+          return { 
+            partido_id: partidoId, 
+            jugador_id: s.jugador_id, 
+            tipo: s.tipo,
+            equipo_id: esLocal ? localId : visitaId // Se asocia la tarjeta al equipo correspondiente
+          };
+        });
+
+      if (todasLasSanciones.length > 0) {
+        await supabase.from('sanciones').insert(todasLasSanciones);
+      }
+
+      // 3. Actualizar Tabla de Posiciones
+      await supabase.rpc('actualizar_tabla_posiciones', {
+        id_local: localId,
+        id_visita: visitaId,
+        g_local: golesL,
+        g_visita: golesV
+      });
+
+      alert("Acta cerrada y tabla actualizada correctamente.");
+      window.location.href = '/admin';
+
+    } catch (err) {
+      console.error(err);
+      alert("Error al procesar el acta.");
     }
-
-    // 2. Guardar Sanciones
-    const todasLasSanciones = sanciones
-      .filter(s => s.jugador_id !== '')
-      .map(s => ({ ...s, partido_id: partidoId }));
-
-    if (todasLasSanciones.length > 0) {
-      await supabase.from('sanciones').insert(todasLasSanciones);
-    }
-
-    alert("Registro completado con éxito 🏁");
-    window.location.href = '/admin';
   };
 
   return (
-    <div className="p-4 md:p-8 bg-black min-h-screen text-white font-sans">
-      <div className="max-w-2xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-2xl font-bold tracking-tighter text-green-500">⚽ REGISTRAR PARTIDO</h1>
-          <Link href="/admin" className="text-zinc-500 hover:text-white text-xs font-mono">/CANCELAR</Link>
-        </div>
+    <div className="p-4 md:p-12 bg-black min-h-screen text-white font-sans">
+      <div className="max-w-4xl mx-auto">
+        <header className="mb-10">
+          <Link href="/admin" className="text-zinc-500 hover:text-white text-xs font-bold tracking-widest transition-colors">
+            ← VOLVER AL PANEL
+          </Link>
+          <h1 className="text-3xl font-black uppercase italic mt-4 tracking-tighter">Registrar Resultados</h1>
+        </header>
 
         {paso === 1 ? (
-          <div className="space-y-6 bg-zinc-900/50 p-6 md:p-8 rounded-2xl border border-zinc-800 shadow-2xl">
-            <div className="grid grid-cols-2 gap-4 md:gap-8">
+          <div className="bg-zinc-900/50 border border-zinc-800 p-8 rounded-3xl">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
               <div className="space-y-4">
-                <label className="block text-[10px] uppercase tracking-[0.2em] text-zinc-500 font-bold">Local</label>
+                <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Local</label>
                 <select 
-                  className="w-full bg-black border border-zinc-800 p-3 rounded-xl outline-none focus:border-green-500 transition-colors"
+                  className="w-full bg-black border border-zinc-800 p-4 rounded-xl font-bold outline-none focus:border-green-500"
                   onChange={(e) => setLocalId(e.target.value)}
-                  value={localId}
                 >
-                  <option value="">Equipo...</option>
-                  {equipos.map(eq => <option key={eq.id} value={eq.id} className="bg-zinc-900">{eq.nombre}</option>)}
+                  <option value="">Seleccionar Equipo</option>
+                  {equipos.map(e => <option key={e.id} value={e.id}>{e.nombre}</option>)}
                 </select>
                 <input 
                   type="number" 
-                  min="0"
                   placeholder="0"
-                  className="w-full bg-black border border-zinc-800 p-4 rounded-xl outline-none text-center text-3xl font-black text-green-500"
+                  className="w-full bg-black border border-zinc-800 p-4 rounded-xl text-center text-2xl font-black text-green-500"
                   onChange={(e) => setGolesL(parseInt(e.target.value) || 0)}
                 />
               </div>
 
+              <div className="text-center text-zinc-700 font-black italic text-4xl">VS</div>
+
               <div className="space-y-4">
-                <label className="block text-[10px] uppercase tracking-[0.2em] text-zinc-500 font-bold text-right">Visita</label>
+                <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Visita</label>
                 <select 
-                  className="w-full bg-black border border-zinc-800 p-3 rounded-xl outline-none focus:border-green-500 transition-colors text-right"
+                  className="w-full bg-black border border-zinc-800 p-4 rounded-xl font-bold outline-none focus:border-green-500"
                   onChange={(e) => setVisitaId(e.target.value)}
-                  value={visitaId}
                 >
-                  <option value="">Equipo...</option>
-                  {equipos.map(eq => <option key={eq.id} value={eq.id} className="bg-zinc-900">{eq.nombre}</option>)}
+                  <option value="">Seleccionar Equipo</option>
+                  {equipos.map(e => <option key={e.id} value={e.id}>{e.nombre}</option>)}
                 </select>
                 <input 
                   type="number" 
-                  min="0"
                   placeholder="0"
-                  className="w-full bg-black border border-zinc-800 p-4 rounded-xl outline-none text-center text-3xl font-black text-green-500"
+                  className="w-full bg-black border border-zinc-800 p-4 rounded-xl text-center text-2xl font-black text-green-500"
                   onChange={(e) => setGolesV(parseInt(e.target.value) || 0)}
                 />
               </div>
             </div>
 
             <button 
-              onClick={guardarPartido}
-              className="w-full bg-white text-black hover:bg-green-400 py-4 rounded-xl font-black uppercase tracking-widest transition-all mt-4"
+              onClick={iniciarPartido}
+              className="w-full mt-10 bg-white text-black py-4 rounded-xl font-black uppercase tracking-[0.2em] hover:bg-green-500 transition-all"
             >
-              Siguiente etapa →
+              Siguiente Paso: Detalles →
             </button>
           </div>
         ) : (
-          <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500">
-            <div className="bg-zinc-900/50 p-6 rounded-2xl border border-zinc-800">
-              
-              <h2 className="text-[10px] font-black text-zinc-500 mb-6 uppercase tracking-[0.2em]">Autores de los Goles</h2>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <p className="text-[10px] font-bold text-green-500 mb-3 uppercase tracking-widest border-b border-green-500/20 pb-1">Goles Local</p>
-                  {golesL > 0 ? goleadoresL.map((_, i) => (
-                    <select 
-                      key={`l-${i}`}
-                      required
-                      className="w-full bg-black border border-zinc-800 p-2 rounded-lg mb-2 text-sm outline-none focus:border-green-500"
-                      onChange={(e) => {
-                        const copy = [...goleadoresL];
-                        copy[i] = e.target.value;
-                        setGoleadoresL(copy);
-                      }}
-                    >
-                      <option value="">Seleccionar Jugador</option>
-                      {jugadoresLocal.map(j => <option key={j.id} value={j.id} className="bg-zinc-900">{j.nombre}</option>)}
-                    </select>
-                  )) : <p className="text-zinc-600 text-xs italic">Sin goles</p>}
-                </div>
-
-                <div>
-                  <p className="text-[10px] font-bold text-green-500 mb-3 uppercase tracking-widest border-b border-green-500/20 pb-1 text-right">Goles Visita</p>
-                  {golesV > 0 ? goleadoresV.map((_, i) => (
-                    <select 
-                      key={`v-${i}`}
-                      required
-                      className="w-full bg-black border border-zinc-800 p-2 rounded-lg mb-2 text-sm outline-none focus:border-green-500 text-right"
-                      onChange={(e) => {
-                        const copy = [...goleadoresV];
-                        copy[i] = e.target.value;
-                        setGoleadoresV(copy);
-                      }}
-                    >
-                      <option value="">Seleccionar Jugador</option>
-                      {jugadoresVisita.map(j => <option key={j.id} value={j.id} className="bg-zinc-900">{j.nombre}</option>)}
-                    </select>
-                  )) : <p className="text-zinc-600 text-xs italic text-right">Sin goles</p>}
-                </div>
+          <div className="space-y-10">
+            {/* Registro de Goleadores */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="bg-zinc-900/50 border border-zinc-800 p-6 rounded-2xl">
+                <h3 className="text-xs font-black text-green-500 uppercase tracking-widest mb-6">Goleadores Local</h3>
+                {goleadoresL.map((_, i) => (
+                  <select 
+                    key={i}
+                    className="w-full bg-black border border-zinc-800 p-3 rounded-lg mb-3 text-sm font-bold"
+                    onChange={(e) => {
+                      const copy = [...goleadoresL];
+                      copy[i] = e.target.value;
+                      setGoleadoresL(copy);
+                    }}
+                  >
+                    <option value="">Seleccionar Jugador</option>
+                    {jugadoresLocal.map(j => <option key={j.id} value={j.id}>{j.nombre}</option>)}
+                  </select>
+                ))}
               </div>
 
-              {/* Sanciones */}
-              <div className="mt-10 pt-8 border-t border-zinc-800">
-                <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em]">Sanciones</h2>
-                  <button 
-                    onClick={agregarSancion}
-                    className="text-[10px] bg-zinc-800 hover:bg-zinc-700 px-3 py-1 rounded-full font-bold transition-colors"
+              <div className="bg-zinc-900/50 border border-zinc-800 p-6 rounded-2xl">
+                <h3 className="text-xs font-black text-green-500 uppercase tracking-widest mb-6">Goleadores Visita</h3>
+                {goleadoresV.map((_, i) => (
+                  <select 
+                    key={i}
+                    className="w-full bg-black border border-zinc-800 p-3 rounded-lg mb-3 text-sm font-bold"
+                    onChange={(e) => {
+                      const copy = [...goleadoresV];
+                      copy[i] = e.target.value;
+                      setGoleadoresV(copy);
+                    }}
                   >
-                    + AGREGAR TARJETA
-                  </button>
-                </div>
+                    <option value="">Seleccionar Jugador</option>
+                    {jugadoresVisita.map(j => <option key={j.id} value={j.id}>{j.nombre}</option>)}
+                  </select>
+                ))}
+              </div>
+            </div>
 
+            {/* Sección de Tarjetas */}
+            <div className="bg-zinc-900/30 border border-zinc-800 p-8 rounded-3xl">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-sm font-black uppercase tracking-[0.2em]">Registro de Sanciones</h2>
+                <button 
+                  onClick={() => setSanciones([...sanciones, { jugador_id: '', tipo: 'amarilla' }])}
+                  className="bg-zinc-800 hover:bg-zinc-700 text-[10px] font-black px-4 py-2 rounded-full transition-colors"
+                >
+                  + AÑADIR TARJETA
+                </button>
+              </div>
+
+              <div className="space-y-4">
                 {sanciones.map((s, i) => (
-                  <div key={i} className="flex gap-2 mb-3 bg-black/40 p-2 rounded-xl border border-zinc-800/50">
+                  <div key={i} className="flex gap-4 items-center bg-black/40 p-4 rounded-xl border border-zinc-800/50">
                     <select 
-                      required
-                      className="flex-1 bg-zinc-900 border border-zinc-800 p-2 rounded-lg text-sm text-white outline-none focus:border-green-500 appearance-none"
+                      className="flex-1 bg-transparent font-bold text-sm outline-none"
                       onChange={(e) => {
                         const copy = [...sanciones];
                         copy[i].jugador_id = e.target.value;
                         setSanciones(copy);
                       }}
                     >
-                      <option value="" className="bg-zinc-900 text-white">Seleccionar Jugador...</option>
+                      <option value="">Seleccionar Jugador</option>
                       {[...jugadoresLocal, ...jugadoresVisita].map(j => (
-                        <option key={j.id} value={j.id} className="bg-zinc-900 text-white">
-                          {j.nombre}
-                        </option>
+                        <option key={j.id} value={j.id} className="bg-zinc-900">{j.nombre}</option>
                       ))}
                     </select>
                     
                     <select 
-                      className={`w-32 p-1 rounded-lg text-[10px] font-black uppercase tracking-widest outline-none ${
+                      className={`w-32 p-2 rounded-lg text-[10px] font-black uppercase tracking-widest outline-none bg-zinc-900 ${
                         s.tipo === 'amarilla' ? 'text-yellow-500' : 'text-red-500'
-                      } bg-zinc-900`}
+                      }`}
                       onChange={(e) => {
                         const copy = [...sanciones];
                         copy[i].tipo = e.target.value as 'amarilla' | 'roja';
                         setSanciones(copy);
                       }}
                     >
-                      <option value="amarilla" className="bg-zinc-900 text-yellow-500">🟨 AMARILLA</option>
-                      <option value="roja" className="bg-zinc-900 text-red-500">🟥 ROJA</option>
+                      <option value="amarilla">🟨 AMARILLA</option>
+                      <option value="roja">🟥 ROJA</option>
                     </select>
                   </div>
                 ))}
