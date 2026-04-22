@@ -51,16 +51,16 @@ export default async function Home() {
         <AdminButton />
       </div>
       
-      {/* GRID PRINCIPAL DE 12 COLUMNAS */}
-      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         
-        {/* TOP LEFT: Clasificación General (8 columnas) */}
+        {/* TOP LEFT: Clasificación con Scroll Interno */}
         <section className="lg:col-span-8">
           <h2 className="text-zinc-500 text-xs font-bold uppercase tracking-[0.2em] mb-4 ml-2 italic">Clasificación General</h2>
-          <div className="bg-zinc-900/50 rounded-2xl p-1 border border-zinc-800 shadow-2xl overflow-hidden h-full">
-            <div className="overflow-x-auto">
+          <div className="bg-zinc-900/50 rounded-2xl p-1 border border-zinc-800 shadow-2xl overflow-hidden">
+            {/* Altura fija para ~5 equipos + cabecera */}
+            <div className="overflow-auto max-h-[310px] custom-scrollbar">
               <table className="w-full text-left border-collapse text-xs">
-                <thead>
+                <thead className="sticky top-0 bg-zinc-900 z-10">
                   <tr className="text-zinc-500 uppercase text-[10px] tracking-widest border-b border-zinc-800">
                     <th className="px-4 py-4 text-center">Pos</th>
                     <th className="px-4 py-4">Equipo</th>
@@ -97,10 +97,10 @@ export default async function Home() {
           </div>
         </section>
 
-        {/* TOP RIGHT: Top Goleadores (4 columnas) */}
+        {/* TOP RIGHT: Top Goleadores */}
         <section className="lg:col-span-4 flex flex-col">
           <h2 className="text-zinc-500 text-xs font-bold uppercase tracking-[0.2em] mb-4 ml-2 italic">Top Goleadores</h2>
-          <div className="bg-zinc-900/30 border border-zinc-800 rounded-2xl overflow-hidden flex-1">
+          <div className="bg-zinc-900/30 border border-zinc-800 rounded-2xl overflow-hidden">
             {goleadores && goleadores.map((g: any, i: number) => (
               <div key={i} className="flex justify-between items-center p-4 border-b border-zinc-800/50 last:border-0 hover:bg-white/5 transition-colors">
                 <div className="flex items-center">
@@ -125,7 +125,7 @@ export default async function Home() {
           </div>
         </section>
 
-        {/* BOTTOM LEFT: Resultados Recientes (6 columnas) */}
+        {/* BOTTOM LEFT: Resultados Recientes */}
         <section className="lg:col-span-6">
           <h2 className="text-zinc-500 text-xs font-bold uppercase tracking-[0.2em] mb-4 ml-2 italic">Resultados Recientes</h2>
           <div className="space-y-3">
@@ -141,7 +141,7 @@ export default async function Home() {
           </div>
         </section>
 
-        {/* BOTTOM RIGHT: Próximos Encuentros (6 columnas) */}
+        {/* BOTTOM RIGHT: Próximos Encuentros */}
         {proximos && proximos.length > 0 && (
           <section className="lg:col-span-6">
             <h2 className="text-zinc-500 text-xs font-bold uppercase tracking-[0.2em] mb-4 ml-2 italic text-center">Próximos Encuentros</h2>
