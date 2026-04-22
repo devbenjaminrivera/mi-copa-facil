@@ -70,9 +70,9 @@ export default async function Home() {
                     <th className="px-4 py-4 text-center">Pos</th>
                     <th className="px-4 py-4">Equipo</th>
                     <th className="px-4 py-4 text-center">PJ</th>
-                    <th className="px-4 py-4 text-center text-green-500/70">PG</th>
-                    <th className="px-4 py-4 text-center text-yellow-500/70">PE</th>
-                    <th className="px-4 py-4 text-center text-red-500/70">PP</th>
+                    <th className="px-4 py-4 text-center text-green-500/70">G</th>
+                    <th className="px-4 py-4 text-center text-yellow-500/70">E</th>
+                    <th className="px-4 py-4 text-center text-red-500/70">P</th>
                     <th className="px-4 py-4 text-center">GF</th>
                     <th className="px-4 py-4 text-center">GC</th>
                     <th className="px-4 py-4 text-center">DG</th>
@@ -173,7 +173,7 @@ export default async function Home() {
       </div>
 
       <footer className="max-w-5xl mx-auto mt-20 pb-8 text-center text-zinc-700 text-[10px] uppercase tracking-[0.4em]">
-        SISTEMA DE GESTIÓN DEPORTIVA • BENJAMÍN RIVERA ARANEDA • 2026
+        CEVI • 2026
       </footer>
     </main>
   );
