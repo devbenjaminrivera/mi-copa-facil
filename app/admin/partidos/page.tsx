@@ -61,12 +61,23 @@ export default function RegistrarPartido() {
   };
 
   const finalizarRegistro = async () => {
+    // --- VALIDACIÓN OBLIGATORIA DE GOLEADORES ---
+    // Verifica que no haya campos vacíos en las listas de goleadores local y visita
+    const faltaGoleadorLocal = goleadoresL.some(id => id === '');
+    const faltaGoleadorVisita = goleadoresV.some(id => id === '');
+
+    if (faltaGoleadorLocal || faltaGoleadorVisita) {
+      alert("Error: Debes asignar obligatoriamente todos los goles a un jugador antes de cerrar el acta.");
+      return;
+    }
+    // --------------------------------------------
+
     try {
       // 1. Registrar Goles
       const todosLosGoles = [
         ...goleadoresL.map(id => ({ partido_id: partidoId, jugador_id: id, equipo_id: localId })),
         ...goleadoresV.map(id => ({ partido_id: partidoId, jugador_id: id, equipo_id: visitaId }))
-      ].filter(g => g.jugador_id !== '');
+      ]; // Eliminamos el .filter ya que la validación superior asegura que no habrá IDs vacíos
 
       if (todosLosGoles.length > 0) {
         await supabase.from('goles').insert(todosLosGoles);
@@ -75,17 +86,16 @@ export default function RegistrarPartido() {
         }
       }
 
-      // 2. Registrar Sanciones con asignación automática de equipo (CAMBIO SOLICITADO)
+      // 2. Registrar Sanciones (Tu lógica actual de equipo_id se mantiene igual)
       const todasLasSanciones = sanciones
         .filter(s => s.jugador_id !== '')
         .map(s => {
-          // Determinamos si el jugador es del local o visita para asignar la tarjeta al equipo
           const esLocal = jugadoresLocal.some(j => j.id === s.jugador_id);
           return { 
             partido_id: partidoId, 
             jugador_id: s.jugador_id, 
             tipo: s.tipo,
-            equipo_id: esLocal ? localId : visitaId // Se asocia la tarjeta al equipo correspondiente
+            equipo_id: esLocal ? localId : visitaId 
           };
         });
 
