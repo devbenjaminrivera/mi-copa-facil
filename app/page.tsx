@@ -1,21 +1,18 @@
 import { supabase } from '@/lib/supabase';
 import AdminButton from '@/components/AdminButton';
 
-// Configuración de renderizado dinámico
 export const revalidate = 0;
 export const dynamic = 'force-dynamic';
 
 export default async function Home() {
-  // 1. AUDITORÍA ESTADÍSTICA: Clasificación profesional (Puntos -> DG -> GF)
   const { data: equipos, error: errorEquipos } = await supabase
     .from('equipos')
     .select('*')
-    .order('puntos', { ascending: false }) // (PG * 3) + PE
-    .order('df', { ascending: false })     // GF - GC
-    .order('gf', { ascending: false })     // Goles a favor
+    .order('puntos', { ascending: false })
+    .order('df', { ascending: false })
+    .order('gf', { ascending: false })
     .order('nombre', { ascending: true });
 
-  // 2. ÚLTIMOS RESULTADOS (Partidos ya jugados)
   const { data: partidos } = await supabase
     .from('partidos')
     .select(`
@@ -27,7 +24,6 @@ export default async function Home() {
     .order('created_at', { ascending: false })
     .limit(5);
 
-  // 3. PRÓXIMOS PARTIDOS (Calendario programado)
   const { data: proximos } = await supabase
     .from('partidos')
     .select(`
@@ -39,7 +35,6 @@ export default async function Home() {
     .order('fecha', { ascending: true })
     .limit(4);
 
-  // 4. TOP GOLEADORES (Pichichi con sanciones)
   const { data: goleadores } = await supabase
     .from('jugadores')
     .select('nombre, goles, equipos!inner(nombre), sanciones(tipo)')
@@ -49,20 +44,20 @@ export default async function Home() {
 
   return (
     <main className="p-4 md:p-8 bg-black text-white min-h-screen font-sans">
-      {/* Header */}
-      <div className="max-w-5xl mx-auto flex justify-between items-center mb-10">
+      <div className="max-w-7xl mx-auto flex justify-between items-center mb-10">
         <h1 className="text-3xl font-extrabold tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-600">
           🏆 COPA CEVI
         </h1>
         <AdminButton />
       </div>
       
-      <div className="max-w-5xl mx-auto grid grid-cols-1 gap-12">
+      {/* GRID PRINCIPAL DE 12 COLUMNAS */}
+      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8">
         
-        {/* SECCIÓN 1: TABLA DE POSICIONES AUDITADA */}
-        <section>
+        {/* TOP LEFT: Clasificación General (8 columnas) */}
+        <section className="lg:col-span-8">
           <h2 className="text-zinc-500 text-xs font-bold uppercase tracking-[0.2em] mb-4 ml-2 italic">Clasificación General</h2>
-          <div className="bg-zinc-900/50 rounded-2xl p-1 border border-zinc-800 shadow-2xl overflow-hidden">
+          <div className="bg-zinc-900/50 rounded-2xl p-1 border border-zinc-800 shadow-2xl overflow-hidden h-full">
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
@@ -102,9 +97,53 @@ export default async function Home() {
           </div>
         </section>
 
-        {/* SECCIÓN 2: CALENDARIO DE PRÓXIMOS PARTIDOS */}
+        {/* TOP RIGHT: Top Goleadores (4 columnas) */}
+        <section className="lg:col-span-4 flex flex-col">
+          <h2 className="text-zinc-500 text-xs font-bold uppercase tracking-[0.2em] mb-4 ml-2 italic">Top Goleadores</h2>
+          <div className="bg-zinc-900/30 border border-zinc-800 rounded-2xl overflow-hidden flex-1">
+            {goleadores && goleadores.map((g: any, i: number) => (
+              <div key={i} className="flex justify-between items-center p-4 border-b border-zinc-800/50 last:border-0 hover:bg-white/5 transition-colors">
+                <div className="flex items-center">
+                  <span className="text-zinc-600 font-mono text-[10px] mr-3">0{i + 1}</span>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <p className="font-bold text-sm leading-none">{g.nombre}</p>
+                      <div className="flex gap-0.5">
+                        {g.sanciones?.map((s: any, idx: number) => (
+                          <div key={idx} className={`w-2 h-3 rounded-[1px] ${s.tipo === 'amarilla' ? 'bg-yellow-400' : 'bg-red-600'}`} />
+                        ))}
+                      </div>
+                    </div>
+                    <p className="text-[10px] text-zinc-500 uppercase mt-1 tracking-tighter">
+                      {g.equipos?.nombre}
+                    </p>
+                  </div>
+                </div>
+                <span className="text-green-500 font-black text-lg">{g.goles}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* BOTTOM LEFT: Resultados Recientes (6 columnas) */}
+        <section className="lg:col-span-6">
+          <h2 className="text-zinc-500 text-xs font-bold uppercase tracking-[0.2em] mb-4 ml-2 italic">Resultados Recientes</h2>
+          <div className="space-y-3">
+            {partidos && partidos.map((partido: any) => (
+              <div key={partido.id} className="bg-zinc-900/30 border border-zinc-800 p-4 rounded-xl flex justify-between items-center">
+                <div className="flex-1 text-right font-bold text-xs uppercase truncate pr-2">{partido.equipo_local?.nombre}</div>
+                <div className="bg-zinc-800 px-3 py-1 rounded font-mono font-black text-green-500 text-sm">
+                  {partido.goles_local} - {partido.goles_visita}
+                </div>
+                <div className="flex-1 text-left font-bold text-xs uppercase truncate pl-2">{partido.equipo_visita?.nombre}</div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* BOTTOM RIGHT: Próximos Encuentros (6 columnas) */}
         {proximos && proximos.length > 0 && (
-          <section>
+          <section className="lg:col-span-6">
             <h2 className="text-zinc-500 text-xs font-bold uppercase tracking-[0.2em] mb-4 ml-2 italic text-center">Próximos Encuentros</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {proximos.map((p: any) => (
@@ -123,56 +162,9 @@ export default async function Home() {
           </section>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          
-          {/* SECCIÓN 3: TABLA DE GOLEADORES */}
-          <section>
-            <h2 className="text-zinc-500 text-xs font-bold uppercase tracking-[0.2em] mb-4 ml-2 italic">Top Goleadores</h2>
-            <div className="bg-zinc-900/30 border border-zinc-800 rounded-2xl overflow-hidden">
-              {goleadores && goleadores.map((g: any, i: number) => (
-                <div key={i} className="flex justify-between items-center p-4 border-b border-zinc-800/50 last:border-0 hover:bg-white/5 transition-colors">
-                  <div className="flex items-center">
-                    <span className="text-zinc-600 font-mono text-[10px] mr-3">0{i + 1}</span>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <p className="font-bold text-sm leading-none">{g.nombre}</p>
-                        <div className="flex gap-0.5">
-                          {g.sanciones?.map((s: any, idx: number) => (
-                            <div key={idx} className={`w-2 h-3 rounded-[1px] ${s.tipo === 'amarilla' ? 'bg-yellow-400' : 'bg-red-600'}`} />
-                          ))}
-                        </div>
-                      </div>
-                      <p className="text-[10px] text-zinc-500 uppercase mt-1 tracking-tighter">
-                        {g.equipos?.nombre}
-                      </p>
-                    </div>
-                  </div>
-                  <span className="text-green-500 font-black text-lg">{g.goles}</span>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          {/* SECCIÓN 4: ÚLTIMOS RESULTADOS */}
-          <section>
-            <h2 className="text-zinc-500 text-xs font-bold uppercase tracking-[0.2em] mb-4 ml-2 italic">Resultados Recientes</h2>
-            <div className="space-y-3">
-              {partidos && partidos.map((partido: any) => (
-                <div key={partido.id} className="bg-zinc-900/30 border border-zinc-800 p-4 rounded-xl flex justify-between items-center">
-                  <div className="flex-1 text-right font-bold text-xs uppercase truncate pr-2">{partido.equipo_local?.nombre}</div>
-                  <div className="bg-zinc-800 px-3 py-1 rounded font-mono font-black text-green-500 text-sm">
-                    {partido.goles_local} - {partido.goles_visita}
-                  </div>
-                  <div className="flex-1 text-left font-bold text-xs uppercase truncate pl-2">{partido.equipo_visita?.nombre}</div>
-                </div>
-              ))}
-            </div>
-          </section>
-
-        </div>
       </div>
 
-      <footer className="max-w-5xl mx-auto mt-20 pb-8 text-center text-zinc-700 text-[10px] uppercase tracking-[0.4em]">
+      <footer className="max-w-7xl mx-auto mt-20 pb-8 text-center text-zinc-700 text-[10px] uppercase tracking-[0.4em]">
         CEVI • 2026
       </footer>
     </main>
