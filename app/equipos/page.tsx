@@ -1,6 +1,10 @@
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
 
+// --- ESTAS LÍNEAS SOLUCIONAN EL PROBLEMA ---
+export const revalidate = 0; // Desactiva el caché para que siempre consulte datos nuevos
+export const dynamic = 'force-dynamic'; // Asegura que la página se genere en cada visita
+
 export default async function ListaEquipos() {
   const { data: equipos } = await supabase.from('equipos').select('*').order('nombre');
 
