@@ -38,11 +38,14 @@ export default async function Home() {
 
   const { data: goleadores } = await supabase
     .from('jugadores')
-    .select('nombre, goles, equipos!inner(id, nombre), sanciones(tipo)')
+    .select(`
+      nombre, 
+      goles, 
+      equipos:id_equipos (id, nombre)
+    `)
     .gt('goles', 0)
     .order('goles', { ascending: false })
     .limit(5);
-
   return (
     <main className="p-4 md:p-8 bg-black text-white min-h-screen font-sans pt-20">
       <div className="max-w-7xl mx-auto flex justify-between items-center mb-10">
@@ -104,24 +107,41 @@ export default async function Home() {
         {/* TOP RIGHT: Top Goleadores */}
         <section className="lg:col-span-4 flex flex-col">
           <h2 className="text-zinc-500 text-xs font-bold uppercase tracking-[0.2em] mb-4 ml-2 italic">Top Goleadores</h2>
-          <div className="bg-zinc-900/30 border border-zinc-800 rounded-2xl overflow-hidden">
-            {goleadores && goleadores.map((g: any, i: number) => (
-              <div key={i} className="flex justify-between items-center p-4 border-b border-zinc-800/50 last:border-0 hover:bg-white/5 transition-colors">
-                <div className="flex items-center">
-                  <span className="text-zinc-600 font-mono text-[10px] mr-3">0{i + 1}</span>
-                  <div className="flex items-center gap-3">
-                    <Image src={`/escudos/${g.equipos?.id}.png`} alt="" width={24} height={24} className="object-contain shrink-0" />
-                    <div>
-                      <p className="font-bold text-sm leading-none">{g.nombre}</p>
-                      <p className="text-[10px] text-zinc-500 uppercase mt-1 tracking-tighter">
-                        {g.equipos?.nombre}
-                      </p>
+          <div className="bg-zinc-900/30 border border-zinc-800 rounded-2xl overflow-hidden shadow-xl">
+            {goleadores && goleadores.length > 0 ? (
+              goleadores.map((g: any, i: number) => (
+                <div key={i} className="flex justify-between items-center p-4 border-b border-zinc-800/50 last:border-0 hover:bg-white/5 transition-colors group">
+                  <div className="flex items-center">
+                    <span className="text-zinc-600 font-mono text-[10px] mr-3">0{i + 1}</span>
+                    <div className="flex items-center gap-3">
+                      {/* ESCUDO DEL EQUIPO BASADO EN id_equipos */}
+                      <div className="w-6 h-6 relative shrink-0">
+                        <Image 
+                          src={`/escudos/${g.equipos?.id}.png`} 
+                          alt="" 
+                          fill 
+                          className="object-contain"
+                        />
+                      </div>
+                      <div>
+                        <p className="font-bold text-sm leading-none group-hover:text-green-500 transition-colors">{g.nombre}</p>
+                        <p className="text-[9px] text-zinc-500 uppercase mt-1 tracking-widest font-medium">
+                          {g.equipos?.nombre}
+                        </p>
+                      </div>
                     </div>
                   </div>
+                  <div className="flex flex-col items-end">
+                    <span className="text-green-500 font-black text-lg italic">{g.goles}</span>
+                    <span className="text-[7px] text-zinc-600 uppercase font-black tracking-tighter">Goles</span>
+                  </div>
                 </div>
-                <span className="text-green-500 font-black text-lg">{g.goles}</span>
+              ))
+            ) : (
+              <div className="p-8 text-center">
+                <p className="text-zinc-600 text-[10px] font-black uppercase tracking-widest italic">Sin goles registrados</p>
               </div>
-            ))}
+            )}
           </div>
         </section>
 
