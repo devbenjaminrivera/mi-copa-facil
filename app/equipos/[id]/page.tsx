@@ -10,7 +10,7 @@ export default async function PerfilEquipo({ params }: PageProps) {
   const resolvedParams = await params;
   const id = resolvedParams.id;
 
-  // 2. Consulta a Supabase con la relación correcta (id_equipo)
+  // 2. Consulta a Supabase incluyendo 'numero_camiseta'
   const { data: equipo, error } = await supabase
     .from('equipos')
     .select(`
@@ -20,6 +20,7 @@ export default async function PerfilEquipo({ params }: PageProps) {
         id,
         nombre,
         goles,
+        numero_camiseta,
         sanciones (tipo)
       )
     `)
@@ -54,33 +55,40 @@ export default async function PerfilEquipo({ params }: PageProps) {
             {equipo.nombre}
           </h1>
           
-          {/* Estadísticas rápidas del equipo */}
           <div className="flex gap-8 mt-6 border-y border-zinc-800/50 py-6">
             <div>
               <p className="text-[10px] text-zinc-500 font-black uppercase tracking-widest">Puntos</p>
               <p className="text-2xl font-black text-green-500">{equipo.puntos}</p>
             </div>
             <div>
-              <p className="text-[10px] text-zinc-500 font-black uppercase tracking-widest">Partidos Jugados</p>
+              <p className="text-[10px] text-zinc-500 font-black uppercase tracking-widest">PJ</p>
               <p className="text-2xl font-black">{equipo.pj}</p>
+            </div>
+            <div>
+              <p className="text-[10px] text-zinc-500 font-black uppercase tracking-widest">Dif Goles</p>
+              <p className="text-2xl font-black">{equipo.df > 0 ? `+${equipo.df}` : equipo.df}</p>
             </div>
           </div>
         </header>
 
-        {/* Sección de la Plantilla */}
+        {/* Sección de la Plantilla con Número de Camiseta */}
         <section>
           <h2 className="text-zinc-500 text-xs font-bold uppercase tracking-[0.2em] mb-6 italic px-2">Plantilla Oficial</h2>
           <div className="grid grid-cols-1 gap-3">
             {jugadoresOrdenados.map((jugador: any) => (
               <div key={jugador.id} className="group bg-zinc-900/30 border border-zinc-800/50 p-5 rounded-2xl flex justify-between items-center hover:bg-zinc-900 transition-all">
                 
-                {/* LADO IZQUIERDO: Nombre y Sanciones juntas */}
-                <div className="flex items-center gap-3">
+                {/* LADO IZQUIERDO: Número, Nombre y Sanciones juntas */}
+                <div className="flex items-center gap-4">
+                  {/* Número de camiseta (Dorsal) */}
+                  <span className="text-zinc-600 font-mono text-xs w-6 text-center italic group-hover:text-zinc-400">
+                    {jugador.numero_camiseta ? `#${jugador.numero_camiseta}` : '--'}
+                  </span>
+
                   <p className="font-bold uppercase text-sm tracking-tight group-hover:text-white transition-colors">
                     {jugador.nombre}
                   </p>
                   
-                  {/* Tarjetas al lado del nombre */}
                   <div className="flex gap-1">
                     {jugador.sanciones && jugador.sanciones.length > 0 && (
                       jugador.sanciones.map((s: any, i: number) => (

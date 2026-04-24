@@ -7,6 +7,7 @@ export default function GestionJugadores() {
   const [equipos, setEquipos] = useState<any[]>([]);
   const [jugadores, setJugadores] = useState<any[]>([]);
   const [nombre, setNombre] = useState('');
+  const [numeroCamiseta, setNumeroCamiseta] = useState('');
   const [equipoId, setEquipoId] = useState('');
 
   const fetchData = async () => {
@@ -51,24 +52,25 @@ export default function GestionJugadores() {
   useEffect(() => { fetchData(); }, []);
 
   const agregarJugador = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // VALIDACIÓN: Evita que se registre si falta el nombre o el equipo
-    if (!nombre.trim() || !equipoId) {
-      alert("Debes ingresar un nombre y seleccionar un equipo obligatoriamente.");
-      return;
-    }
+  e.preventDefault();
+  if (!nombre || !equipoId) return;
 
-    const { error } = await supabase.from('jugadores').insert([{ nombre, equipo_id: equipoId }]);
-    
-    if (!error) { 
-      setNombre(''); 
-      setEquipoId(''); // También reseteamos el select
-      fetchData(); 
-    } else {
-      alert("Error al registrar: " + error.message);
-    }
-  };
+  const { error } = await supabase
+    .from('jugadores')
+    .insert([{ 
+      nombre, 
+      id_equipo: equipoId, 
+      numero_camiseta: parseInt(numeroCamiseta) || null // Guardar número
+    }]);
+
+  if (!error) {
+    setNombre('');
+    setNumeroCamiseta(''); // Limpiar campo
+    fetchData();
+  }else {
+    alert("Error al registrar: " + error.message);
+  }
+};
 
   return (
     <div className="p-8 bg-black min-h-screen text-white font-sans">
@@ -79,24 +81,35 @@ export default function GestionJugadores() {
         </div>
 
         {/* Formulario de Inscripción con validaciones */}
-        <form onSubmit={agregarJugador} className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-zinc-900/50 p-6 rounded-xl border border-zinc-800 mb-8">
+        <form onSubmit={agregarJugador} className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10 bg-zinc-900/50 p-6 rounded-2xl border border-zinc-800">
           <input 
-            placeholder="Nombre del jugador" 
-            className="bg-black border border-zinc-700 p-2 rounded-lg outline-none focus:border-green-500 text-sm"
-            value={nombre} 
-            onChange={e => setNombre(e.target.value)}
-            required // Validación nativa del navegador
+            type="text" 
+            placeholder="Nombre del jugador"
+            value={nombre}
+            onChange={(e) => setNombre(e.target.value)}
+            className="bg-black border border-zinc-800 p-3 rounded-xl focus:border-green-500 outline-none text-sm"
+            required
+          />
+          <input 
+            type="number" 
+            placeholder="N° Camiseta"
+            value={numeroCamiseta}
+            onChange={(e) => setNumeroCamiseta(e.target.value)}
+            className="bg-black border border-zinc-800 p-3 rounded-xl focus:border-green-500 outline-none text-sm"
+            required
           />
           <select 
-            className="bg-black border border-zinc-700 p-2 rounded-lg outline-none text-sm"
-            onChange={e => setEquipoId(e.target.value)}
             value={equipoId}
-            required // Validación nativa del navegador
+            onChange={(e) => setEquipoId(e.target.value)}
+            className="bg-black border border-zinc-800 p-3 rounded-xl focus:border-green-500 outline-none text-sm"
           >
-            <option value="">Selecciona Equipo</option>
-            {equipos.map(eq => <option key={eq.id} value={eq.id} className="bg-zinc-900">{eq.nombre}</option>)}
+            <option value="" >Seleccionar Equipo</option>
+            {equipos.map(e => <option key={e.id} value={e.id}>{e.nombre}</option>)}
           </select>
-          <button className="bg-green-600 hover:bg-green-500 font-bold p-2 rounded-lg transition text-sm">Inscribir</button>
+          
+          <button className="md:col-span-3 bg-white text-black font-black uppercase py-3 rounded-xl hover:bg-green-500 transition-colors text-xs tracking-widest">
+            Registrar Jugador
+          </button>
         </form>
 
         <div className="bg-zinc-900/30 rounded-xl border border-zinc-800 overflow-hidden shadow-2xl">
