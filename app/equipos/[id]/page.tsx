@@ -61,12 +61,8 @@ export default async function PerfilEquipo({ params }: PageProps) {
               <p className="text-2xl font-black text-green-500">{equipo.puntos}</p>
             </div>
             <div>
-              <p className="text-[10px] text-zinc-500 font-black uppercase tracking-widest">PJ</p>
+              <p className="text-[10px] text-zinc-500 font-black uppercase tracking-widest">Partidos Jugados</p>
               <p className="text-2xl font-black">{equipo.pj}</p>
-            </div>
-            <div>
-              <p className="text-[10px] text-zinc-500 font-black uppercase tracking-widest">Dif Goles</p>
-              <p className="text-2xl font-black">{equipo.df > 0 ? `+${equipo.df}` : equipo.df}</p>
             </div>
           </div>
         </header>
