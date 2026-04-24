@@ -1,5 +1,6 @@
 'use client';
 import Link from 'next/link';
+import AdminButton from '@/components/AdminButton';
 import { usePathname } from 'next/navigation';
 
 export default function Navbar() {
@@ -28,6 +29,9 @@ export default function Navbar() {
               </Link>
             ))}
           </div>
+        </div>
+        <div className="flex items-center">
+          <AdminButton />
         </div>
       </div>
     </nav>

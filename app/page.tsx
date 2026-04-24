@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase';
-import AdminButton from '@/components/AdminButton';
+
 
 export const revalidate = 0;
 export const dynamic = 'force-dynamic';
@@ -49,7 +49,6 @@ export default async function Home() {
         <h1 className="text-3xl font-extrabold tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-600">
           🏆 COPA CEVI
         </h1>
-        <AdminButton />
       </div>
       
       <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
