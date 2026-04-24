@@ -9,7 +9,7 @@ export default async function PerfilEquipo({ params }: { params: { id: string } 
     .select(`
       nombre,
       pj, puntos, pg, pe, pp, gf, gc, df,
-      jugadores (
+      jugadores!id_equipo (
         id,
         nombre,
         goles,
