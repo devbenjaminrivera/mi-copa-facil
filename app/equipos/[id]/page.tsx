@@ -81,7 +81,7 @@ export default async function PerfilEquipo({ params }: PageProps) {
                 {/* LADO IZQUIERDO: Número, Nombre y Sanciones juntas */}
                 <div className="flex items-center gap-4">
                   {/* Número de camiseta (Dorsal) */}
-                  <span className="text-zinc-600 font-black text-green-500 w-6 text-center italic group-hover:text-zinc-400">
+                  <span className="font-black text-green-500 w-6 text-center italic group-hover:text-zinc-400">
                     {jugador.numero_camiseta ? `${jugador.numero_camiseta}` : '--'}
                   </span>
 
