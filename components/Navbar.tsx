@@ -2,6 +2,7 @@
 import Link from 'next/link';
 import AdminButton from '@/components/AdminButton';
 import { usePathname } from 'next/navigation';
+import Image from 'next/image'; // Importamos el componente Image
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -15,7 +16,21 @@ export default function Navbar() {
     <nav className="fixed top-0 w-full z-50 bg-black/80 backdrop-blur-md border-b border-zinc-800">
       <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
         <div className="flex items-center gap-8">
-          <span className="text-white font-black tracking-tighter uppercase italic text-lg">CEVI</span>
+          
+          {/* Contenedor del Logo y Texto */}
+          <div className="flex items-center gap-3">
+            <Image 
+              src="/logo.png" // Asegúrate de que el archivo logo.jpg esté en la carpeta /public
+              alt="Copa CEVI Logo"
+              width={32}      // Ajusta el tamaño según prefieras
+              height={32}
+              className="rounded-full object-cover border border-zinc-800"
+            />
+            <span className="text-white font-black tracking-tighter uppercase italic text-lg">
+              CEVI
+            </span>
+          </div>
+
           <div className="flex gap-6">
             {links.map((link) => (
               <Link
@@ -30,6 +45,7 @@ export default function Navbar() {
             ))}
           </div>
         </div>
+
         <div className="flex items-center">
           <AdminButton />
         </div>
