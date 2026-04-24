@@ -73,7 +73,6 @@ export default function RegistrarPartido() {
   };
 
   const finalizarRegistro = async () => {
-    // VALIDACIÓN: No permitir goles sin autor asignado
     const faltaGoleadorLocal = goleadoresL.some(id => id === '');
     const faltaGoleadorVisita = goleadoresV.some(id => id === '');
 
@@ -83,38 +82,37 @@ export default function RegistrarPartido() {
     }
 
     try {
-      // 1. Registrar Goles en la tabla 'goles'
-      const todosLosGoles = [
-        ...goleadoresL.map(id => ({ partido_id: partidoId, jugador_id: id, id_equipo: localId })),
-        ...goleadoresV.map(id => ({ partido_id: partidoId, jugador_id: id, id_equipo: visitaId }))
-      ];
+  const todosLosGoles = [
+    ...goleadoresL.map(id => ({ partido_id: partidoId, jugador_id: id, id_equipo: localId })),
+    ...goleadoresV.map(id => ({ partido_id: partidoId, jugador_id: id, id_equipo: visitaId }))
+  ];
 
-      if (todosLosGoles.length > 0) {
-        await supabase.from('goles').insert(todosLosGoles);
-        // Actualizar contador individual de cada jugador
-        for (const g of todosLosGoles) {
-          await supabase.rpc('incrementar_goles', { row_id: g.jugador_id });
-        }
-      }
+  if (todosLosGoles.length > 0) {
+    await supabase.from('goles').insert(todosLosGoles);
+    for (const g of todosLosGoles) {
+      // Importante: row_id debe ser int4 si tus IDs son números
+      await supabase.rpc('incrementar_goles', { row_id: g.jugador_id });
+    }
+  }
 
-      // 2. Registrar Sanciones
-      const todasLasSanciones = sanciones
-        .filter(s => s.jugador_id !== '')
-        .map(s => {
-          const esLocal = jugadoresLocal.some(j => j.id === s.jugador_id);
-          return { 
-            partido_id: partidoId, 
-            jugador_id: s.jugador_id, 
-            tipo: s.tipo,
-            id_equipo: esLocal ? localId : visitaId 
-          };
-        });
+  // Sanciones unificadas
+  const todasLasSanciones = sanciones
+    .filter(s => s.jugador_id !== '')
+    .map(s => {
+      const esLocal = jugadoresLocal.some(j => j.id === s.jugador_id);
+      return { 
+        partido_id: partidoId, 
+        jugador_id: s.jugador_id, 
+        tipo: s.tipo,
+        id_equipo: esLocal ? localId : visitaId 
+      };
+    });
 
       if (todasLasSanciones.length > 0) {
         await supabase.from('sanciones').insert(todasLasSanciones);
       }
 
-      // 3. Actualizar Tabla de Posiciones mediante Función RPC
+      // 3. Actualizar Tabla de Posiciones
       await supabase.rpc('actualizar_tabla_posiciones', {
         id_local: localId,
         id_visita: visitaId,
@@ -122,12 +120,12 @@ export default function RegistrarPartido() {
         g_visita: golesV
       });
 
-      alert("Acta cerrada correctamente. La tabla de posiciones ha sido actualizada.");
+      alert("Acta cerrada y goleadores actualizados.");
       window.location.href = '/admin';
 
     } catch (err) {
-      console.error(err);
-      alert("Ocurrió un error crítico al procesar el acta.");
+      console.error("Error crítico:", err);
+      alert("Error al procesar el acta. Revisa la consola.");
     }
   };
 

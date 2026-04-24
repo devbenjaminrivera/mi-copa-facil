@@ -37,15 +37,15 @@ export default async function Home() {
     .limit(4);
 
   const { data: goleadores } = await supabase
-    .from('jugadores')
-    .select(`
-      nombre, 
-      goles, 
-      equipos:id_equipos (id, nombre)
-    `)
-    .gt('goles', 0)
-    .order('goles', { ascending: false })
-    .limit(5);
+  .from('jugadores')
+  .select(`
+    nombre, 
+    goles, 
+    equipos:id_equipo (id, nombre)
+  `) 
+  .gt('goles', 0)
+  .order('goles', { ascending: false })
+  .limit(5);
   return (
     <main className="p-4 md:p-8 bg-black text-white min-h-screen font-sans pt-20">
       <div className="max-w-7xl mx-auto flex justify-between items-center mb-10">
