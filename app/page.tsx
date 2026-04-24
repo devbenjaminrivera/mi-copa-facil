@@ -1,11 +1,12 @@
 import { supabase } from '@/lib/supabase';
-
+import Image from 'next/image';
 
 export const revalidate = 0;
 export const dynamic = 'force-dynamic';
 
 export default async function Home() {
-  const { data: equipos, error: errorEquipos } = await supabase
+  // 1. Consulta de Equipos para la Tabla
+  const { data: equipos } = await supabase
     .from('equipos')
     .select('*')
     .order('puntos', { ascending: false })
@@ -13,186 +14,147 @@ export default async function Home() {
     .order('gf', { ascending: false })
     .order('nombre', { ascending: true });
 
+  // 2. Consulta de Partidos Jugados (Resultados)
   const { data: partidos } = await supabase
-  .from('partidos')
-  .select(`
-    id, goles_local, goles_visita,
-    equipo_local:equipos!equipo_local(id, nombre),
-    equipo_visita:equipos!equipo_visita(id, nombre),
-    sanciones(tipo, jugador_id, equipos(id))
-  `)
-  .eq('estado', 'jugado')
-  .order('created_at', { ascending: false })
-  .limit(5);
+    .from('partidos')
+    .select(`
+      id, goles_local, goles_visita,
+      equipo_local:equipos!equipo_local(id, nombre),
+      equipo_visita:equipos!equipo_visita(id, nombre)
+    `)
+    .eq('estado', 'jugado')
+    .order('created_at', { ascending: false })
+    .limit(5);
 
+  // 3. Consulta de Próximos Partidos
   const { data: proximos } = await supabase
     .from('partidos')
     .select(`
       id, fecha,
-      equipo_local:equipos!equipo_local(nombre),
-      equipo_visita:equipos!equipo_visita(nombre)
+      equipo_local:equipos!equipo_local(id, nombre),
+      equipo_visita:equipos!equipo_visita(id, nombre)
     `)
     .eq('estado', 'programado')
     .order('fecha', { ascending: true })
     .limit(4);
 
-  const { data: goleadores } = await supabase
-    .from('jugadores')
-    .select('nombre, goles, equipos!inner(nombre), sanciones(tipo)')
-    .gt('goles', 0)
-    .order('goles', { ascending: false })
-    .limit(5);
-
   return (
-    <main className="p-4 md:p-8 bg-black text-white min-h-screen font-sans">
-      <div className="max-w-7xl mx-auto flex justify-between items-center mb-10">
-        <h1 className="text-3xl font-extrabold tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-600">
-          🏆 COPA CEVI
-        </h1>
-      </div>
+    <main className="p-4 md:p-10 max-w-7xl mx-auto text-white min-h-screen pt-24">
       
-      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        
-        {/* TOP LEFT: Clasificación con Scroll Interno */}
-        <section className="lg:col-span-8">
-          <h2 className="text-zinc-500 text-xs font-bold uppercase tracking-[0.2em] mb-4 ml-2 italic">Clasificación General</h2>
-          <div className="bg-zinc-900/50 rounded-2xl p-1 border border-zinc-800 shadow-2xl overflow-hidden">
-            {/* Altura fija para ~5 equipos + cabecera */}
-            <div className="overflow-auto max-h-[310px] custom-scrollbar">
-              <table className="w-full text-left border-collapse text-xs">
-                <thead className="sticky top-0 bg-zinc-900 z-10">
-                  <tr className="text-zinc-500 uppercase text-[10px] tracking-widest border-b border-zinc-800">
-                    <th className="px-4 py-4 text-center">Pos</th>
-                    <th className="px-4 py-4">Equipo</th>
-                    <th className="px-4 py-4 text-center">PJ</th>
-                    <th className="px-4 py-4 text-center text-green-500/70">G</th>
-                    <th className="px-4 py-4 text-center text-yellow-500/70">E</th>
-                    <th className="px-4 py-4 text-center text-red-500/70">P</th>
-                    <th className="px-4 py-4 text-center">GF</th>
-                    <th className="px-4 py-4 text-center">GC</th>
-                    <th className="px-4 py-4 text-center">DG</th>
-                    <th className="px-4 py-4 text-right">Pts</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-zinc-800/50">
-                  {equipos?.map((eq, index) => (
-                    <tr key={eq.id} className="group hover:bg-zinc-800/40 transition-colors">
-                      <td className="px-4 py-4 text-zinc-500 font-mono text-center">{index + 1}</td>
-                      <td className="px-4 py-4 font-bold text-zinc-200 uppercase tracking-tight">{eq.nombre}</td>
-                      <td className="px-4 py-4 text-center text-zinc-400">{eq.pj || 0}</td>
-                      <td className="px-4 py-4 text-center text-zinc-500">{eq.pg || 0}</td>
-                      <td className="px-4 py-4 text-center text-zinc-500">{eq.pe || 0}</td>
-                      <td className="px-4 py-4 text-center text-zinc-500">{eq.pp || 0}</td>
-                      <td className="px-4 py-4 text-center text-zinc-500">{eq.gf || 0}</td>
-                      <td className="px-4 py-4 text-center text-zinc-500">{eq.gc || 0}</td>
-                      <td className="px-4 py-4 text-center font-mono text-zinc-300">
-                        {(eq.df || 0) > 0 ? `+${eq.df}` : eq.df || 0}
-                      </td>
-                      <td className="px-4 py-4 text-right font-black text-green-400 text-sm">{eq.puntos || 0}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </section>
-
-        {/* TOP RIGHT: Top Goleadores */}
-        <section className="lg:col-span-4 flex flex-col">
-          <h2 className="text-zinc-500 text-xs font-bold uppercase tracking-[0.2em] mb-4 ml-2 italic">Top Goleadores</h2>
-          <div className="bg-zinc-900/30 border border-zinc-800 rounded-2xl overflow-hidden">
-            {goleadores && goleadores.map((g: any, i: number) => (
-              <div key={i} className="flex justify-between items-center p-4 border-b border-zinc-800/50 last:border-0 hover:bg-white/5 transition-colors">
-                <div className="flex items-center">
-                  <span className="text-zinc-600 font-mono text-[10px] mr-3">0{i + 1}</span>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <p className="font-bold text-sm leading-none">{g.nombre}</p>
+      {/* SECCIÓN: CLASIFICACIÓN GENERAL */}
+      <section className="mb-12">
+        <h2 className="text-zinc-500 text-xs font-bold uppercase tracking-[0.2em] mb-6 italic ml-2 text-center md:text-left">
+          Clasificación General
+        </h2>
+        <div className="bg-zinc-900/30 border border-zinc-800/50 rounded-3xl overflow-hidden backdrop-blur-sm shadow-2xl">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="border-b border-zinc-800/50 text-[10px] uppercase tracking-widest text-zinc-500">
+                <th className="p-5 font-black text-center">Pos</th>
+                <th className="p-5 font-black">Equipo</th>
+                <th className="p-5 font-black text-center">PJ</th>
+                <th className="p-5 font-black text-center text-green-500">Pts</th>
+              </tr>
+            </thead>
+            <tbody>
+              {equipos?.map((equipo, index) => (
+                <tr key={equipo.id} className="border-b border-zinc-800/30 hover:bg-white/5 transition-colors group">
+                  <td className="p-5 text-sm font-mono text-zinc-600 text-center">{index + 1}</td>
+                  <td className="p-5">
+                    <div className="flex items-center gap-4">
+                      {/* Escudo del equipo en la tabla */}
+                      <div className="w-8 h-8 relative flex-shrink-0">
+                        <Image 
+                          src={`/escudos/${equipo.id}.png`} 
+                          alt={equipo.nombre}
+                          fill
+                          className="object-contain"
+                        />
+                      </div>
+                      <span className="font-bold uppercase tracking-tight group-hover:text-green-500 transition-colors">
+                        {equipo.nombre}
+                      </span>
                     </div>
-                    <p className="text-[10px] text-zinc-500 uppercase mt-1 tracking-tighter">
-                      {g.equipos?.nombre}
-                    </p>
+                  </td>
+                  <td className="p-5 text-center text-sm font-bold text-zinc-400">{equipo.pj}</td>
+                  <td className="p-5 text-center text-lg font-black text-green-500">{equipo.puntos}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+        
+        {/* SECCIÓN: ÚLTIMOS RESULTADOS */}
+        <section className="lg:col-span-6">
+          <h2 className="text-zinc-500 text-xs font-bold uppercase tracking-[0.2em] mb-6 italic ml-2">Últimos Resultados</h2>
+          <div className="space-y-3">
+            {partidos?.map((p: any) => (
+              <div key={p.id} className="group bg-zinc-900/40 border border-zinc-800/50 p-4 rounded-2xl flex items-center justify-between hover:border-green-500/30 transition-all">
+                {/* Equipo Local */}
+                <div className="flex items-center gap-3 flex-1 justify-end">
+                  <span className="text-[10px] font-black uppercase truncate">{p.equipo_local.nombre}</span>
+                  <div className="w-6 h-6 relative flex-shrink-0">
+                    <Image src={`/escudos/${p.equipo_local.id}.png`} alt="" fill className="object-contain" />
                   </div>
                 </div>
-                <span className="text-green-500 font-black text-lg">{g.goles}</span>
+
+                {/* Marcador */}
+                <div className="bg-black px-4 py-1 rounded-full border border-zinc-800 mx-4 shadow-inner">
+                  <span className="font-black text-sm italic tracking-widest">{p.goles_local} - {p.goles_visita}</span>
+                </div>
+
+                {/* Equipo Visitante */}
+                <div className="flex items-center gap-3 flex-1">
+                  <div className="w-6 h-6 relative flex-shrink-0">
+                    <Image src={`/escudos/${p.equipo_visita.id}.png`} alt="" fill className="object-contain" />
+                  </div>
+                  <span className="text-[10px] font-black uppercase truncate">{p.equipo_visita.nombre}</span>
+                </div>
               </div>
             ))}
           </div>
         </section>
 
-        {/* BOTTOM LEFT: Resultados Recientes */}
+        {/* SECCIÓN: PRÓXIMOS PARTIDOS */}
         <section className="lg:col-span-6">
-  <h2 className="text-zinc-500 text-xs font-bold uppercase tracking-[0.2em] mb-4 ml-2 italic">Resultados Recientes</h2>
-  <div className="space-y-3">
-    {partidos && partidos.map((partido: any) => (
-      <div key={partido.id} className="bg-zinc-900/30 border border-zinc-800 p-4 rounded-xl flex flex-col gap-3">
-        <div className="flex justify-between items-center">
-          {/* Equipo Local */}
-          <div className="flex-1 flex flex-col items-end pr-2 overflow-hidden">
-            <div className="flex items-center gap-1.5 flex-wrap justify-end">
-              {/* Tarjetas Local */}
-              <div className="flex gap-0.5">
-                {partido.sanciones
-                  ?.filter((s: any) => s.equipos?.id === partido.equipo_local?.id)
-                  .map((s: any, i: number) => (
-                    <div key={i} className={`w-2 h-3 rounded-[1px] ${s.tipo === 'amarilla' ? 'bg-yellow-400' : 'bg-red-600'}`} />
-                  ))}
-              </div>
-              <span className="font-bold text-xs uppercase truncate">{partido.equipo_local?.nombre}</span>
-            </div>
-          </div>
-
-          {/* Marcador */}
-          <div className="bg-zinc-800 px-3 py-1 rounded font-mono font-black text-green-500 text-sm shrink-0">
-            {partido.goles_local} - {partido.goles_visita}
-          </div>
-
-          {/* Equipo Visita */}
-          <div className="flex-1 flex flex-col items-start pl-2 overflow-hidden">
-            <div className="flex items-center gap-1.5 flex-wrap">
-              <span className="font-bold text-xs uppercase truncate">{partido.equipo_visita?.nombre}</span>
-              {/* Tarjetas Visita */}
-              <div className="flex gap-0.5">
-                {partido.sanciones
-                  ?.filter((s: any) => s.equipos?.id === partido.equipo_visita?.id)
-                  .map((s: any, i: number) => (
-                    <div key={i} className={`w-2 h-3 rounded-[1px] ${s.tipo === 'amarilla' ? 'bg-yellow-400' : 'bg-red-600'}`} />
-                  ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    ))}
-  </div>
-</section>
-
-        {/* BOTTOM RIGHT: Próximos Encuentros */}
-        {proximos && proximos.length > 0 && (
-          <section className="lg:col-span-6">
-            <h2 className="text-zinc-500 text-xs font-bold uppercase tracking-[0.2em] mb-4 ml-2 italic text-center">Próximos Encuentros</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {proximos.map((p: any) => (
-                <div key={p.id} className="bg-gradient-to-br from-zinc-900 to-black border border-zinc-800 p-4 rounded-2xl flex flex-col items-center">
-                  <div className="text-[10px] text-green-500 font-mono mb-2 uppercase">
-                    {new Date(p.fecha).toLocaleString('es-CL', { weekday: 'long', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+          <h2 className="text-zinc-500 text-xs font-bold uppercase tracking-[0.2em] mb-6 italic ml-2 text-center md:text-left">
+            Próximos Encuentros
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {proximos?.map((p: any) => (
+              <div key={p.id} className="bg-gradient-to-br from-zinc-900 to-black border border-zinc-800 p-5 rounded-2xl flex flex-col items-center hover:border-zinc-600 transition-all">
+                <span className="text-[9px] text-green-500 font-black mb-4 uppercase tracking-[0.2em] border-b border-green-500/20 pb-1">
+                  {new Date(p.fecha).toLocaleDateString('es-CL', { weekday: 'short', day: 'numeric', month: 'short' })}
+                </span>
+                
+                <div className="flex justify-between items-center w-full gap-2">
+                  {/* Local */}
+                  <div className="flex flex-col items-center gap-2 flex-1 min-w-0">
+                    <div className="w-10 h-10 relative">
+                      <Image src={`/escudos/${p.equipo_local.id}.png`} alt="" fill className="object-contain" />
+                    </div>
+                    <span className="text-[9px] font-bold uppercase text-center truncate w-full">{p.equipo_local.nombre}</span>
                   </div>
-                  <div className="flex justify-between items-center w-full px-2">
-                    <span className="flex-1 text-right text-xs font-black truncate uppercase">{p.equipo_local?.nombre}</span>
-                    <span className="mx-3 text-zinc-700 font-bold italic text-[10px]">VS</span>
-                    <span className="flex-1 text-left text-xs font-black truncate uppercase">{p.equipo_visita?.nombre}</span>
+
+                  <span className="text-zinc-700 font-black italic text-[10px]">VS</span>
+
+                  {/* Visitante */}
+                  <div className="flex flex-col items-center gap-2 flex-1 min-w-0">
+                    <div className="w-10 h-10 relative">
+                      <Image src={`/escudos/${p.equipo_visita.id}.png`} alt="" fill className="object-contain" />
+                    </div>
+                    <span className="text-[9px] font-bold uppercase text-center truncate w-full">{p.equipo_visita.nombre}</span>
                   </div>
                 </div>
-              ))}
-            </div>
-          </section>
-        )}
+              </div>
+            ))}
+          </div>
+        </section>
 
       </div>
-
-      <footer className="max-w-7xl mx-auto mt-20 pb-8 text-center text-zinc-700 text-[10px] uppercase tracking-[0.4em]">
-        CEVI • 2026
-      </footer>
     </main>
   );
 }
