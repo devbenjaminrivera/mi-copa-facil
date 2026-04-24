@@ -38,8 +38,8 @@ export default function RegistrarPartido() {
     // 1. CARGA DE JUGADORES (Antes de pasar al siguiente paso)
     // Nota: Verifica si en tu DB es 'equipo_id' o 'id_equipo'
     const [resLocal, resVisita] = await Promise.all([
-      supabase.from('jugadores').select('*').eq('equipo_id', localId),
-      supabase.from('jugadores').select('*').eq('equipo_id', visitaId)
+      supabase.from('jugadores').select('*').eq('id_equipo', localId),
+      supabase.from('jugadores').select('*').eq('id_equipo', visitaId)
     ]);
 
     if (resLocal.error || resVisita.error) {
@@ -85,8 +85,8 @@ export default function RegistrarPartido() {
     try {
       // 1. Registrar Goles en la tabla 'goles'
       const todosLosGoles = [
-        ...goleadoresL.map(id => ({ partido_id: partidoId, jugador_id: id, equipo_id: localId })),
-        ...goleadoresV.map(id => ({ partido_id: partidoId, jugador_id: id, equipo_id: visitaId }))
+        ...goleadoresL.map(id => ({ partido_id: partidoId, jugador_id: id, id_equipo: localId })),
+        ...goleadoresV.map(id => ({ partido_id: partidoId, jugador_id: id, id_equipo: visitaId }))
       ];
 
       if (todosLosGoles.length > 0) {
@@ -106,7 +106,7 @@ export default function RegistrarPartido() {
             partido_id: partidoId, 
             jugador_id: s.jugador_id, 
             tipo: s.tipo,
-            equipo_id: esLocal ? localId : visitaId 
+            id_equipo: esLocal ? localId : visitaId 
           };
         });
 
