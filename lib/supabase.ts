@@ -3,13 +3,15 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
-const storage = typeof window !== 'undefined' ? window.sessionStorage : undefined;
+// Es fundamental que esto esté fuera para que se evalúe una sola vez
+const isBrowser = typeof window !== 'undefined';
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
-    storage: storage, // <--- Aquí está el truco: sessionStorage en lugar de localStorage
+    // Usamos sessionStorage para que se borre al cerrar la pestaña/navegador
+    storage: isBrowser ? window.sessionStorage : undefined, 
     autoRefreshToken: true,
-    persistSession: true, 
+    persistSession: true, // Debe ser true para que Supabase use el storage que definimos arriba
     detectSessionInUrl: true
   }
 });
