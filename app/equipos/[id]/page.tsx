@@ -5,19 +5,22 @@ export default async function PerfilEquipo({ params }: { params: { id: string } 
   
   // 1. Añadimos 'goles' a la consulta de jugadores
   const { data: equipo, error } = await supabase
-    .from('equipos')
-    .select(`
+  .from('equipos')
+  .select(`
+    nombre,
+    pj, puntos, pg, pe, pp, gf, gc, df,
+    jugadores!id_equipo ( 
+      id,
       nombre,
-      pj, puntos, pg, pe, pp, gf, gc, df,
-      jugadores!equipo_id (
-        id,
-        nombre,
-        goles,
-        sanciones (tipo)
-      )
-    `)
-    .eq('id', params.id)
-    .single();
+      goles,
+      sanciones (tipo)
+    )
+  `)
+  .eq('id', params.id)
+  .single();
+
+   console.log("Datos del equipo:", equipo);
+   console.log("Error de Supabase:", error);
 
   if (error || !equipo) {
     return (
