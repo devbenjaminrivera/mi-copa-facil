@@ -222,7 +222,7 @@ export default async function Home() {
       </div>
 
       <footer className="max-w-7xl mx-auto mt-20 pb-8 text-center text-zinc-700 text-[10px] uppercase tracking-[0.4em]">
-        CEVI • 2026
+        DESARROLLADO POR BENJAMÍN RIVERA ARANEDA • 2026
       </footer>
     </main>
   );
