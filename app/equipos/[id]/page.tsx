@@ -51,7 +51,7 @@ export default async function PerfilEquipo({ params }: PageProps) {
 
         {/* HEADER: ESTILO "PAGENUEVO" (Centralizado y Premium) */}
         <header className="flex flex-col items-center text-center mb-20">
-          <div className="relative w-48 h-48 mb-6 drop-shadow-[0_0_30px_rgba(34,197,94,0.3)]">
+          <div className="relative w-48 h-48 mb-6 drop-shadow-[0_0_30px_rgba(255,255,255,0.3)]">
             <Image 
               src={`/escudos/${id}.png`} 
               alt={equipo.nombre}
@@ -60,14 +60,14 @@ export default async function PerfilEquipo({ params }: PageProps) {
             />
           </div>
           
-          <h1 className="text-6xl md:text-8xl font-black italic uppercase tracking-tighter text-green-500 mb-8 leading-none">
+          <h1 className="text-6xl md:text-8xl font-black italic uppercase tracking-tighter text-white mb-8 leading-none">
             {equipo.nombre}
           </h1>
           
           <div className="flex gap-12 md:gap-20">
             <div className="text-center">
               <p className="text-[10px] text-zinc-500 font-black uppercase tracking-[0.3em] italic mb-1">Puntos</p>
-              <p className="text-5xl font-black">{equipo.puntos}</p>
+              <p className="text-5xl font-black text-green-500">{equipo.puntos}</p>
             </div>
             <div className="text-center">
               <p className="text-[10px] text-zinc-500 font-black uppercase tracking-[0.3em] italic mb-1">PJ</p>
@@ -82,7 +82,7 @@ export default async function PerfilEquipo({ params }: PageProps) {
             <h2 className="text-zinc-500 text-xs font-bold uppercase tracking-[0.3em] italic">
               Plantilla Oficial
             </h2>
-            <span className="text-[10px] text-zinc-700 font-black uppercase">Goles / Tarjetas</span>
+            <span className="text-[10px] text-zinc-700 font-black uppercase">Goles</span>
           </div>
 
           <div className="grid grid-cols-1 gap-3">
@@ -101,10 +101,6 @@ export default async function PerfilEquipo({ params }: PageProps) {
                   <div>
                     <p className="font-bold uppercase text-sm tracking-tight text-zinc-200 group-hover:text-white transition-colors">
                       {jugador.nombre}
-                    </p>
-                    {/* Indicador de goles pequeño bajo el nombre */}
-                    <p className="text-[9px] font-black text-zinc-600 uppercase tracking-widest">
-                      Stats: {jugador.goles} Goles
                     </p>
                   </div>
                   
