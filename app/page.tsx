@@ -149,62 +149,62 @@ export default async function Home() {
           </div>
         </section>
 
-        {/* BOTTOM LEFT: Resultados Recientes - Optimizado para móvil */}
-       {/* RESULTADOS RECIENTES: Diseño Limpio y Simétrico */}
-          <section className="lg:col-span-12">
-            <h2 className="text-zinc-500 text-[10px] font-black uppercase tracking-[0.2em] mb-4 ml-2 italic text-center lg:text-left">
-              Resultados Recientes
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {partidos && partidos.map((partido: any) => (
-                <div key={partido.id} className="bg-zinc-900/30 border border-zinc-800 p-6 rounded-2xl">
-                  <div className="flex items-center">
-                    
-                    {/* Equipo Local: Texto alineado a la derecha para que "mire" al marcador */}
-                    <div className="flex-1 flex items-center justify-end gap-3 min-w-0">
-                      <span className="font-black text-[11px] md:text-xs uppercase truncate text-right">
-                        {partido.equipo_local?.nombre}
-                      </span>
-                      <div className="relative w-8 h-8 md:w-10 md:h-10 shrink-0">
-                        <Image src={`/escudos/${partido.equipo_local?.id}.png`} alt="" fill className="object-contain" />
-                      </div>
+       {/* BOTTOM LEFT: Resultados Recientes */}
+        <section className="lg:col-span-6">
+          <h2 className="text-zinc-500 text-[10px] font-black uppercase tracking-[0.2em] mb-4 ml-2 italic text-center lg:text-left">
+            Resultados Recientes
+          </h2>
+          <div className="grid grid-cols-1 gap-3">
+            {partidos && partidos.map((partido: any) => (
+              <div key={partido.id} className="bg-zinc-900/30 border border-zinc-800 p-4 rounded-2xl">
+                <div className="flex items-center">
+                  
+                  {/* Equipo Local */}
+                  <div className="flex-1 flex items-center justify-end gap-2 min-w-0">
+                    <span className="font-black text-[10px] md:text-xs uppercase truncate text-right">
+                      {partido.equipo_local?.nombre}
+                    </span>
+                    <div className="relative w-7 h-7 md:w-8 md:h-8 shrink-0">
+                      <Image src={`/escudos/${partido.equipo_local?.id}.png`} alt="" fill className="object-contain" />
                     </div>
-
-                    {/* Marcador Central: Fijo e inamovible */}
-                    <div className="mx-4 flex flex-col items-center">
-                      <div className="bg-zinc-800 px-3 py-1 rounded-lg font-mono font-black text-green-500 text-base md:text-lg shadow-inner border border-zinc-700/50">
-                        {partido.goles_local} - {partido.goles_visita}
-                      </div>
-                      <span className="text-[7px] font-black text-zinc-700 mt-1 tracking-tighter">FINAL</span>
-                    </div>
-
-                    {/* Equipo Visita: Texto alineado a la izquierda */}
-                    <div className="flex-1 flex items-center justify-start gap-3 min-w-0">
-                      <div className="relative w-8 h-8 md:w-10 md:h-10 shrink-0">
-                        <Image src={`/escudos/${partido.equipo_visita?.id}.png`} alt="" fill className="object-contain" />
-                      </div>
-                      <span className="font-black text-[11px] md:text-xs uppercase truncate text-left">
-                        {partido.equipo_visita?.nombre}
-                      </span>
-                    </div>
-
                   </div>
-                </div>
-              ))}
-            </div>
-          </section>
 
-        {/* BOTTOM RIGHT: Próximos Encuentros */}
+                  {/* Marcador */}
+                  <div className="mx-3 flex flex-col items-center">
+                    <div className="bg-zinc-800 px-2 py-1 rounded-lg font-mono font-black text-green-500 text-sm md:text-base border border-zinc-700/50">
+                      {partido.goles_local} - {partido.goles_visita}
+                    </div>
+                  </div>
+
+                  {/* Equipo Visita */}
+                  <div className="flex-1 flex items-center justify-start gap-2 min-w-0">
+                    <div className="relative w-7 h-7 md:w-8 md:h-8 shrink-0">
+                      <Image src={`/escudos/${partido.equipo_visita?.id}.png`} alt="" fill className="object-contain" />
+                    </div>
+                    <span className="font-black text-[10px] md:text-xs uppercase truncate text-left">
+                      {partido.equipo_visita?.nombre}
+                    </span>
+                  </div>
+
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+       {/* BOTTOM RIGHT: Próximos Encuentros */}
         {proximos && proximos.length > 0 && (
           <section className="lg:col-span-6">
-            <h2 className="text-zinc-500 text-xs font-bold uppercase tracking-[0.2em] mb-4 ml-2 italic text-center">Próximos Encuentros</h2>
+            <h2 className="text-zinc-500 text-xs font-bold uppercase tracking-[0.2em] mb-4 ml-2 italic text-center">
+              Próximos Encuentros
+            </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {proximos.map((p: any) => (
                 <div key={p.id} className="bg-gradient-to-br from-zinc-900 to-black border border-zinc-800 p-4 rounded-2xl flex flex-col items-center">
                   <div className="text-[10px] text-green-500 font-mono mb-2 uppercase text-center">
                     {new Date(p.fecha).toLocaleString('es-CL', { 
                       timeZone: 'America/Santiago', 
-                      weekday: 'long',
+                      weekday: 'short',
                       day: 'numeric', 
                       month: 'short', 
                       hour: '2-digit', 
@@ -216,14 +216,14 @@ export default async function Home() {
                       <div className="relative w-8 h-8 shrink-0">
                         <Image src={`/escudos/${p.equipo_local?.id}.png`} alt="" fill className="object-contain" />
                       </div>
-                      <span className="text-center text-[10px] font-black truncate uppercase w-full">{p.equipo_local?.nombre}</span>
+                      <span className="text-center text-[9px] font-black truncate uppercase w-full">{p.equipo_local?.nombre}</span>
                     </div>
                     <span className="text-zinc-700 font-bold italic text-[10px] shrink-0">VS</span>
                     <div className="flex-1 flex flex-col items-center gap-1 overflow-hidden">
                       <div className="relative w-8 h-8 shrink-0">
                         <Image src={`/escudos/${p.equipo_visita?.id}.png`} alt="" fill className="object-contain" />
                       </div>
-                      <span className="text-center text-[10px] font-black truncate uppercase w-full">{p.equipo_visita?.nombre}</span>
+                      <span className="text-center text-[9px] font-black truncate uppercase w-full">{p.equipo_visita?.nombre}</span>
                     </div>
                   </div>
                 </div>
