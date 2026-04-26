@@ -112,40 +112,84 @@ export default async function Home() {
         {/* TOP RIGHT: Top Goleadores */}
         <section className="lg:col-span-4 flex flex-col">
           <h2 className="text-zinc-500 text-xs font-bold uppercase tracking-[0.2em] mb-4 ml-2 italic">Top Goleadores</h2>
-          <div className="bg-zinc-900/30 border border-zinc-800 rounded-2xl overflow-hidden shadow-xl">
-            {goleadores && goleadores.length > 0 ? (
-              goleadores.map((g: any, i: number) => (
-                <div key={i} className="flex justify-between items-center p-4 border-b border-zinc-800/50 last:border-0 hover:bg-white/5 transition-colors group">
-                  <div className="flex items-center min-w-0">
-                    <span className="text-zinc-600 font-mono text-[10px] mr-3">0{i + 1}</span>
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-8 h-8 relative shrink-0">
-                        <Image 
-                          src={`/escudos/${g.equipos?.id}.png`} 
-                          alt="" 
-                          fill 
-                          className="object-contain"
-                        />
+          
+          <div className="flex flex-col gap-4">
+            {/* DISEÑO DE PODIO PARA LOS TOP 3 */}
+            {goleadores && goleadores.length > 0 && (
+              <div className="grid grid-cols-3 gap-2 items-end mb-2 px-1">
+                {[1, 0, 2].map((index) => { // Orden visual: 2do, 1ro, 3ro
+                  const g = goleadores[index];
+                  if (!g) return <div key={index} />;
+                  
+                  const isFirst = index === 0;
+                  const isSecond = index === 1;
+                  const isThird = index === 2;
+
+                  return (
+                    <div key={index} className={`flex flex-col items-center ${isFirst ? 'z-10' : ''}`}>
+                      {/* Avatar/Escudo Circle */}
+                      <div className={`relative rounded-full mb-2 flex items-center justify-center 
+                        ${isFirst ? 'w-16 h-16 border-2 border-yellow-500 shadow-[0_0_15px_rgba(234,179,8,0.3)]' : 
+                          isSecond ? 'w-12 h-12 border-2 border-zinc-400' : 
+                          'w-12 h-12 border-2 border-orange-700'}`}>
+                        <div className="relative w-3/4 h-3/4">
+                          <Image src={`/escudos/${g.equipos?.id}.png`} alt="" fill className="object-contain" />
+                        </div>
+                        {/* Medalla */}
+                        <div className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black
+                          ${isFirst ? 'bg-yellow-500 text-black' : isSecond ? 'bg-zinc-400 text-black' : 'bg-orange-700 text-white'}`}>
+                          {index + 1}
+                        </div>
                       </div>
-                      <div className="truncate">
-                        <p className="font-bold text-sm leading-none group-hover:text-green-500 transition-colors truncate">{g.nombre}</p>
-                        <p className="text-[9px] text-zinc-500 uppercase mt-1 tracking-widest font-medium truncate">
-                          {g.equipos?.nombre}
+                      {/* Info del Podio */}
+                      <div className="text-center w-full">
+                        <p className={`font-black uppercase truncate text-[10px] ${isFirst ? 'text-white' : 'text-zinc-400'}`}>
+                          {g.nombre.split(' ')[0]}
                         </p>
+                        <div className="flex flex-col leading-none">
+                          <span className={`font-black italic ${isFirst ? 'text-green-500 text-xl' : 'text-green-500/80 text-lg'}`}>
+                            {g.goles}
+                          </span>
+                          <span className="text-[7px] text-zinc-600 uppercase font-black">Goles</span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  <div className="flex flex-col items-end ml-2 shrink-0">
-                    <span className="text-green-500 font-black text-lg italic">{g.goles}</span>
-                    <span className="text-[7px] text-zinc-600 uppercase font-black tracking-tighter">Goles</span>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="p-8 text-center">
-                <p className="text-zinc-600 text-[10px] font-black uppercase tracking-widest italic">Sin goles registrados</p>
+                  );
+                })}
               </div>
             )}
+
+            {/* RESTO DE LA LISTA (Posiciones 4 en adelante) */}
+            <div className="bg-zinc-900/30 border border-zinc-800 rounded-2xl overflow-hidden shadow-xl">
+              {goleadores && goleadores.length > 3 ? (
+                goleadores.slice(3).map((g: any, i: number) => (
+                  <div key={i} className="flex justify-between items-center p-4 border-b border-zinc-800/50 last:border-0 hover:bg-white/5 transition-colors group">
+                    <div className="flex items-center min-w-0">
+                      <span className="text-zinc-600 font-mono text-[10px] mr-3">0{i + 4}</span>
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-8 h-8 relative shrink-0">
+                          <Image src={`/escudos/${g.equipos?.id}.png`} alt="" fill className="object-contain" />
+                        </div>
+                        <div className="truncate">
+                          <p className="font-bold text-sm leading-none group-hover:text-green-500 transition-colors truncate">{g.nombre}</p>
+                          <p className="text-[9px] text-zinc-500 uppercase mt-1 tracking-widest font-medium truncate">
+                            {g.equipos?.nombre}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex flex-col items-end ml-2 shrink-0">
+                      <span className="text-green-500 font-black text-lg italic">{g.goles}</span>
+                      <span className="text-[7px] text-zinc-600 uppercase font-black tracking-tighter">Goles</span>
+                    </div>
+                  </div>
+                ))
+              ) : goleadores && goleadores.length <= 3 ? null : (
+                <div className="p-8 text-center">
+                  <p className="text-zinc-600 text-[10px] font-black uppercase tracking-widest italic">Sin goles registrados</p>
+                </div>
+              )}
+            </div>
           </div>
         </section>
 
