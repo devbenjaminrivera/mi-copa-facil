@@ -15,7 +15,7 @@ export default function ProgramarCalendario() {
     if (eq) setEquipos(eq);
 
     // OBTENEMOS LA HORA ACTUAL EN FORMATO ISO
-    const ahora = new Date().toISOString();
+    const ahora = new Date(new Date().getTime() - (4 * 60 * 60 * 1000)).toISOString();
 
     // FILTRAMOS: Solo partidos 'programados' cuya fecha sea MAYOR que 'ahora'
     const { data: part } = await supabase

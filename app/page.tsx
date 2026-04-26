@@ -26,7 +26,7 @@ export default async function Home() {
   .order('created_at', { ascending: false })
   .limit(5);
 
-  const ahora = new Date().toISOString();
+  const ahora = new Date(new Date().getTime() - (4 * 60 * 60 * 1000)).toISOString();
 
   const { data: proximos } = await supabase
     .from('partidos')
