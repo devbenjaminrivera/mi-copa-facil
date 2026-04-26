@@ -24,7 +24,7 @@ export default function Navbar() {
               alt="Copa CEVI Logo"
               width={32}      // Ajusta el tamaño según prefieras
               height={32}
-              className="rounded-full object-cover border border-zinc-800"
+              className="object-contain"
             />
             <span className="text-white font-black tracking-tighter uppercase italic text-lg">
               CEVI
