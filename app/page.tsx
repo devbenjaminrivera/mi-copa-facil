@@ -222,57 +222,64 @@ export default function Home() {
           </div>
         </motion.section>
 
-        {/* PRÓXIMOS ENCUENTROS */}
-        {data.proximos && data.proximos.length > 0 && (
-          <motion.section 
-            variants={itemVariants} 
-            initial="hidden" 
-            animate="visible" 
-            className="lg:col-span-12 mt-12"
-          >
-            <div className="flex items-center justify-between mb-6 px-2">
-              <h2 className="text-zinc-500 text-[10px] font-black uppercase tracking-[0.3em] italic">
-                Próximos Encuentros
-              </h2>
-              <div className="h-[1px] flex-1 bg-zinc-800 ml-4 opacity-50"></div>
+        {/* PRÓXIMOS ENCUENTROS: Escudos y Nombres alineados horizontalmente */}
+{data.proximos && data.proximos.length > 0 && (
+  <motion.section 
+    variants={itemVariants} 
+    initial="hidden" 
+    animate="visible" 
+    className="lg:col-span-12 mt-12"
+  >
+    <div className="flex items-center justify-between mb-6 px-2">
+      <h2 className="text-zinc-500 text-[10px] font-black uppercase tracking-[0.3em] italic">
+        Próximos Encuentros
+      </h2>
+      <div className="h-[1px] flex-1 bg-zinc-800 ml-4 opacity-50"></div>
+    </div>
+
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {data.proximos.map((p: any) => (
+        <motion.div 
+          key={p.id} 
+          whileHover={{ scale: 1.01 }}
+          className="bg-zinc-900/40 border border-zinc-800/50 p-6 rounded-2xl flex flex-col items-center gap-6"
+        >
+          {/* Fecha del encuentro */}
+          <div className="text-[10px] text-green-500 font-mono font-black uppercase tracking-tighter bg-green-500/10 px-4 py-1.5 rounded-full">
+            {new Date(p.fecha).toLocaleString('es-CL', { 
+              weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' 
+            })}
+          </div>
+          
+          <div className="flex items-center justify-between w-full max-w-md gap-4">
+            {/* Equipo Local: Nombre + Escudo */}
+            <div className="flex-1 flex items-center justify-end gap-3 min-w-0">
+              <span className="text-[11px] font-black uppercase text-zinc-200 text-right truncate">
+                {p.equipo_local?.nombre}
+              </span>
+              <div className="relative w-10 h-10 shrink-0">
+                <Image src={`/escudos/${p.equipo_local?.id}.png`} alt="" fill className="object-contain" />
+              </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {data.proximos.map((p: any) => (
-                <motion.div 
-                  key={p.id} 
-                  whileHover={{ scale: 1.02 }}
-                  className="bg-zinc-900/40 border border-zinc-800/50 p-5 rounded-2xl flex flex-col items-center gap-4 group"
-                >
-                  <div className="text-[10px] text-green-500 font-mono font-black uppercase tracking-tighter bg-green-500/10 px-3 py-1 rounded-full">
-                    {new Date(p.fecha).toLocaleString('es-CL', { 
-                      weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' 
-                    })}
-                  </div>
-                  
-                  <div className="flex items-center justify-center gap-4 w-full">
-                    <div className="relative w-10 h-10">
-                      <Image src={`/escudos/${p.equipo_local?.id}.png`} alt="" fill className="object-contain" />
-                    </div>
-                    <span className="text-zinc-700 font-bold italic text-[10px]">VS</span>
-                    <div className="relative w-10 h-10">
-                      <Image src={`/escudos/${p.equipo_visita?.id}.png`} alt="" fill className="object-contain" />
-                    </div>
-                  </div>
+            {/* Separador VS */}
+            <span className="text-zinc-700 font-black italic text-xs shrink-0 px-2">VS</span>
 
-                  <div className="flex flex-col items-center gap-0.5 w-full">
-                    <span className="text-[10px] font-black uppercase text-zinc-300 text-center truncate w-full tracking-tighter">
-                      {p.equipo_local?.nombre}
-                    </span>
-                    <span className="text-[10px] font-black uppercase text-zinc-300 text-center truncate w-full tracking-tighter">
-                      {p.equipo_visita?.nombre}
-                    </span>
-                  </div>
-                </motion.div>
-              ))}
+            {/* Equipo Visita: Escudo + Nombre */}
+            <div className="flex-1 flex items-center justify-start gap-3 min-w-0">
+              <div className="relative w-10 h-10 shrink-0">
+                <Image src={`/escudos/${p.equipo_visita?.id}.png`} alt="" fill className="object-contain" />
+              </div>
+              <span className="text-[11px] font-black uppercase text-zinc-200 text-left truncate">
+                {p.equipo_visita?.nombre}
+              </span>
             </div>
-          </motion.section>
-        )}
+          </div>
+        </motion.div>
+      ))}
+    </div>
+  </motion.section>
+)}
       </div>
 
       <footer className="mt-20 pb-10 text-center opacity-50">
