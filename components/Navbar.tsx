@@ -22,8 +22,8 @@ export default function Navbar() {
             <Image 
               src="/logo.png" // Asegúrate de que el archivo logo.jpg esté en la carpeta /public
               alt="Copa CEVI Logo"
-              width={32}      // Ajusta el tamaño según prefieras
-              height={32}
+              width={38}      // Ajusta el tamaño según prefieras
+              height={38}
               className="object-contain"
             />
             <span className="text-white font-black tracking-tighter uppercase italic text-lg">
