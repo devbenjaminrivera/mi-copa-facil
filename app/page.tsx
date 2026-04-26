@@ -151,7 +151,7 @@ export default async function Home() {
 
        {/* BOTTOM LEFT: Resultados Recientes */}
         <section className="lg:col-span-6">
-          <h2 className="text-zinc-500 text-[10px] font-black uppercase tracking-[0.2em] mb-4 ml-2 italic text-center lg:text-left">
+          <h2 className="text-zinc-500 text-xs font-bold uppercase tracking-[0.2em] mb-4 ml-2 italic text-center">
             Resultados Recientes
           </h2>
           <div className="grid grid-cols-1 gap-3">
