@@ -1,16 +1,15 @@
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
+import Image from 'next/image';
 
 interface PageProps {
   params: Promise<{ id: string }>;
 }
 
 export default async function PerfilEquipo({ params }: PageProps) {
-  // 1. Esperar a que se resuelvan los parámetros de la URL
   const resolvedParams = await params;
   const id = resolvedParams.id;
 
-  // 2. Consulta a Supabase incluyendo 'numero_camiseta'
   const { data: equipo, error } = await supabase
     .from('equipos')
     .select(`
@@ -27,11 +26,10 @@ export default async function PerfilEquipo({ params }: PageProps) {
     .eq('id', id)
     .single();
 
-  // Manejo de error si el equipo no existe
   if (error || !equipo) {
     return (
       <div className="p-20 text-center bg-black text-white min-h-screen">
-        <p className="text-zinc-500 mb-4">Equipo no encontrado (ID: {id})</p>
+        <p className="text-zinc-500 mb-4">Equipo no encontrado</p>
         <Link href="/equipos" className="text-green-500 font-black uppercase text-xs tracking-widest">
           ← Volver a la lista
         </Link>
@@ -39,72 +37,89 @@ export default async function PerfilEquipo({ params }: PageProps) {
     );
   }
 
-  // 3. Ordenar jugadores por cantidad de goles
+  // Ordenamos por goles (máximos anotadores primero)
   const jugadoresOrdenados = equipo.jugadores?.sort((a: any, b: any) => b.goles - a.goles) || [];
 
   return (
-    <main className="p-4 md:p-12 bg-black text-white min-h-screen font-sans">
-      <div className="max-w-4xl mx-auto">
-        <Link href="/equipos" className="text-zinc-500 hover:text-white text-[10px] font-black uppercase tracking-[0.3em] transition-colors">
-          ← Volver a Equipos
+    <main className="p-4 md:p-12 bg-black text-white min-h-screen font-sans pt-12">
+      <div className="max-w-6xl mx-auto">
+        {/* BOTÓN VOLVER (Estilo Minimalista) */}
+        <Link href="/equipos" className="inline-block border border-white px-4 py-2 text-[10px] font-black uppercase tracking-widest hover:bg-white hover:text-black transition-all rounded-sm mb-12">
+          ← VOLVER A EQUIPOS
         </Link>
 
-        {/* Encabezado con el nombre del equipo */}
-        <header className="mt-8 mb-12">
-          <h1 className="text-5xl md:text-7xl font-black italic uppercase tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-white to-zinc-500">
+        {/* HEADER CENTRALIZADO (Según imagen) */}
+        <header className="flex flex-col items-center text-center mb-16">
+          <div className="relative w-48 h-48 mb-6 drop-shadow-[0_0_30px_rgba(34,197,94,0.2)]">
+            <Image 
+              src={`/escudos/${id}.png`} 
+              alt={equipo.nombre}
+              fill
+              className="object-contain"
+            />
+          </div>
+          
+          <h1 className="text-6xl md:text-7xl font-black italic uppercase tracking-tighter text-green-500 mb-8">
             {equipo.nombre}
           </h1>
           
-          <div className="flex gap-8 mt-6 border-y border-zinc-800/50 py-6">
-            <div>
-              <p className="text-[10px] text-zinc-500 font-black uppercase tracking-widest">Puntos</p>
-              <p className="text-2xl font-black text-green-500">{equipo.puntos}</p>
+          <div className="flex gap-12 md:gap-20">
+            <div className="text-center">
+              <p className="text-xs text-zinc-500 font-black uppercase tracking-[0.3em] italic mb-1">Puntos</p>
+              <p className="text-5xl font-black">{equipo.puntos}</p>
             </div>
-            <div>
-              <p className="text-[10px] text-zinc-500 font-black uppercase tracking-widest">Partidos Jugados</p>
-              <p className="text-2xl font-black">{equipo.pj}</p>
+            <div className="text-center">
+              <p className="text-xs text-zinc-500 font-black uppercase tracking-[0.3em] italic mb-1">PJ</p>
+              <p className="text-5xl font-black">{equipo.pj}</p>
             </div>
           </div>
         </header>
 
-        {/* Sección de la Plantilla con Número de Camiseta */}
+        {/* SECCIÓN DE PLANTILLA */}
         <section>
-          <h2 className="text-zinc-500 text-xs font-bold uppercase tracking-[0.2em] mb-6 italic px-2">Plantilla Oficial</h2>
-          <div className="grid grid-cols-1 gap-3">
-            {jugadoresOrdenados.map((jugador: any) => (
-              <div key={jugador.id} className="group bg-zinc-900/30 border border-zinc-800/50 p-5 rounded-2xl flex justify-between items-center hover:bg-zinc-900 transition-all">
-                
-                {/* LADO IZQUIERDO: Número, Nombre y Sanciones juntas */}
-                <div className="flex items-center gap-4">
-                  {/* Número de camiseta (Dorsal) */}
-                  <span className="font-black text-green-500 w-6 text-center italic group-hover:text-zinc-400">
-                    {jugador.numero_camiseta ? `${jugador.numero_camiseta}` : '--'}
-                  </span>
+          <h2 className="text-center text-4xl font-black italic uppercase mb-12 tracking-tight">
+            Plantilla Oficial
+          </h2>
 
-                  <p className="font-bold uppercase text-sm tracking-tight group-hover:text-white transition-colors">
-                    {jugador.nombre}
-                  </p>
-                  
-                  <div className="flex gap-1">
-                    {jugador.sanciones && jugador.sanciones.length > 0 && (
-                      jugador.sanciones.map((s: any, i: number) => (
-                        <div 
-                          key={i} 
-                          className={`w-2.5 h-3.5 rounded-[1px] shadow-sm ${
-                            s.tipo === 'amarilla' ? 'bg-yellow-400' : 'bg-red-600'
-                          }`} 
-                        />
-                      ))
-                    )}
+          {/* GRID DE JUGADORES (3 COLUMNAS EN DESKTOP) */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {jugadoresOrdenados.map((jugador: any) => (
+              <div key={jugador.id} className="bg-white p-6 rounded-lg flex justify-between items-center shadow-lg transition-transform hover:scale-[1.02]">
+                
+                <div className="flex items-center gap-4">
+                  {/* Icono de Pelota Verde */}
+                  <div className="bg-green-500 p-2 rounded-full shadow-inner">
+                    <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z" />
+                    </svg>
+                  </div>
+
+                  <div className="text-black">
+                    <p className="text-[10px] font-black uppercase text-zinc-400 tracking-wider">
+                      N. CAMISETA {jugador.numero_camiseta || '--'} |
+                    </p>
+                    <p className="text-lg font-black uppercase leading-tight italic">
+                      {jugador.nombre}
+                    </p>
+                    <p className="text-[11px] font-bold text-zinc-500">
+                      (Goles: {jugador.goles})
+                    </p>
                   </div>
                 </div>
 
-                {/* LADO DERECHO: Goles alineados al final */}
-                <div className="flex items-center gap-2 min-w-[60px] justify-end">
-                  <span className={`font-black text-sm ${jugador.goles > 0 ? 'text-green-500' : 'text-zinc-700'}`}>
-                    {jugador.goles}
-                  </span>
-                  <span className="text-xs opacity-60">⚽</span>
+                {/* SANCIONES (Tarjetas alineadas a la derecha) */}
+                <div className="flex gap-1.5 self-center">
+                  {jugador.sanciones?.map((s: any, i: number) => (
+                    <div 
+                      key={i} 
+                      className={`w-6 h-8 rounded-sm shadow-md ${
+                        s.tipo === 'amarilla' ? 'bg-yellow-400 border-2 border-yellow-500' : 'bg-red-600 border-2 border-red-700'
+                      }`} 
+                    />
+                  ))}
+                  {(!jugador.sanciones || jugador.sanciones.length === 0) && (
+                    <div className="w-6 h-8 rounded-sm bg-green-500/20 border-2 border-green-500/30" title="Sin sanciones" />
+                  )}
                 </div>
 
               </div>
