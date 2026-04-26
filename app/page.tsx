@@ -2,11 +2,11 @@
 
 import { supabase } from '@/lib/supabase';
 import Image from 'next/image';
-import { motion } from 'framer-motion';
+import { motion, Variants } from 'framer-motion'; //
 import { useState, useEffect } from 'react';
 
 // Variantes para animaciones de entrada
-const containerVariants = {
+const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
@@ -14,14 +14,17 @@ const containerVariants = {
   }
 };
 
-const itemVariants = {
+const itemVariants: Variants = {
   hidden: { y: 20, opacity: 0 },
   visible: {
     y: 0,
     opacity: 1,
-    transition: { duration: 0.5, ease: "easeOut" }
+    transition: { 
+      duration: 0.5, 
+      ease: "easeOut" // Ahora TypeScript aceptará este string como un tipo de Easing válido
+    }
   }
-};
+}; //
 
 export default function Home() {
   const [data, setData] = useState<any>({ equipos: [], partidos: [], proximos: [], goleadores: [] });
