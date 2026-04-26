@@ -86,7 +86,7 @@ export default async function Home() {
                       <td className="px-4 py-4 text-zinc-500 font-mono text-center">{index + 1}</td>
                       <td className="px-4 py-4 font-bold text-zinc-200 uppercase tracking-tight">
                         <div className="flex items-center gap-3">
-                          <Image src={`/escudos/${eq.id}.png`} alt="" width={20} height={20} className="object-contain shrink-0" />
+                          <Image src={`/escudos/${eq.id}.png`} alt="" width={28} height={28} className="object-contain shrink-0" />
                           {eq.nombre}
                         </div>
                       </td>
@@ -119,7 +119,7 @@ export default async function Home() {
                     <span className="text-zinc-600 font-mono text-[10px] mr-3">0{i + 1}</span>
                     <div className="flex items-center gap-3">
                       {/* ESCUDO DEL EQUIPO BASADO EN id_equipos */}
-                      <div className="w-6 h-6 relative shrink-0">
+                      <div className="w-8 h-8 relative shrink-0">
                         <Image 
                           src={`/escudos/${g.equipos?.id}.png`} 
                           alt="" 
@@ -167,7 +167,7 @@ export default async function Home() {
                           ))}
                       </div>
                       <span className="font-bold text-xs uppercase truncate">{partido.equipo_local?.nombre}</span>
-                      <Image src={`/escudos/${partido.equipo_local?.id}.png`} alt="" width={20} height={20} className="object-contain shrink-0" />
+                      <Image src={`/escudos/${partido.equipo_local?.id}.png`} alt="" width={28} height={28} className="object-contain shrink-0" />
                     </div>
                   </div>
 
@@ -179,7 +179,7 @@ export default async function Home() {
                   {/* Equipo Visita */}
                   <div className="flex-1 flex flex-col items-start pl-2 overflow-hidden">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <Image src={`/escudos/${partido.equipo_visita?.id}.png`} alt="" width={20} height={20} className="object-contain shrink-0" />
+                      <Image src={`/escudos/${partido.equipo_visita?.id}.png`} alt="" width={28} height={28} className="object-contain shrink-0" />
                       <span className="font-bold text-xs uppercase truncate">{partido.equipo_visita?.nombre}</span>
                       <div className="flex gap-0.5">
                         {partido.sanciones
@@ -216,11 +216,11 @@ export default async function Home() {
                   <div className="flex justify-between items-center w-full px-2">
                     <div className="flex-1 flex items-center gap-2 justify-end overflow-hidden">
                       <span className="text-right text-xs font-black truncate uppercase">{p.equipo_local?.nombre}</span>
-                      <Image src={`/escudos/${p.equipo_local?.id}.png`} alt="" width={24} height={24} className="object-contain shrink-0" />
+                      <Image src={`/escudos/${p.equipo_local?.id}.png`} alt="" width={32} height={32} className="object-contain shrink-0" />
                     </div>
                     <span className="mx-3 text-zinc-700 font-bold italic text-[10px]">VS</span>
                     <div className="flex-1 flex items-center gap-2 justify-start overflow-hidden">
-                      <Image src={`/escudos/${p.equipo_visita?.id}.png`} alt="" width={24} height={24} className="object-contain shrink-0" />
+                      <Image src={`/escudos/${p.equipo_visita?.id}.png`} alt="" width={32} height={32} className="object-contain shrink-0" />
                       <span className="text-left text-xs font-black truncate uppercase">{p.equipo_visita?.nombre}</span>
                     </div>
                   </div>
@@ -233,7 +233,7 @@ export default async function Home() {
       </div>
 
       <footer className="max-w-7xl mx-auto mt-20 pb-8 text-center text-zinc-700 text-[10px] uppercase tracking-[0.4em]">
-        BENJAMÍN RIVERA ARANEDA • 2026
+        DESARROLLADO POR BENJAMÍN RIVERA ARANEDA • 2026
       </footer>
     </main>
   );
