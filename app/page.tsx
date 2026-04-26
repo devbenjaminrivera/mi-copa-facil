@@ -109,7 +109,7 @@ export default async function Home() {
           </div>
         </section>
 
-        {/* TOP RIGHT: Top Goleadores */}
+              {/* TOP RIGHT: Top Goleadores */}
         <section className="lg:col-span-4 flex flex-col">
           <h2 className="text-zinc-500 text-xs font-bold uppercase tracking-[0.2em] mb-4 ml-2 italic">Top Goleadores</h2>
           
@@ -117,40 +117,45 @@ export default async function Home() {
             {/* DISEÑO DE PODIO PARA LOS TOP 3 */}
             {goleadores && goleadores.length > 0 && (
               <div className="grid grid-cols-3 gap-2 items-end mb-2 px-1">
-                {[1, 0, 2].map((index) => { // Orden visual: 2do, 1ro, 3ro
-                  const g = goleadores[index];
-                  if (!g) return <div key={index} />;
+                {[1, 0, 2].map((pos) => { // pos 1: Plata, pos 0: Oro, pos 2: Bronce
+                  const g = goleadores[pos];
+                  if (!g) return <div key={pos} />;
                   
-                  const isFirst = index === 0;
-                  const isSecond = index === 1;
-                  const isThird = index === 2;
+                  const isFirst = pos === 0;
+                  const isSecond = pos === 1;
+                  const isThird = pos === 2;
 
                   return (
-                    <div key={index} className={`flex flex-col items-center ${isFirst ? 'z-10' : ''}`}>
-                      {/* Avatar/Escudo Circle */}
-                      <div className={`relative rounded-full mb-2 flex items-center justify-center 
-                        ${isFirst ? 'w-16 h-16 border-2 border-yellow-500 shadow-[0_0_15px_rgba(234,179,8,0.3)]' : 
-                          isSecond ? 'w-12 h-12 border-2 border-zinc-400' : 
-                          'w-12 h-12 border-2 border-orange-700'}`}>
-                        <div className="relative w-3/4 h-3/4">
-                          <Image src={`/escudos/${g.equipos?.[0]?.id}.png`} 
-                            alt="" 
+                    <div key={pos} className={`flex flex-col items-center ${isFirst ? 'z-10' : ''}`}>
+                      {/* Escudo Circle con Sombras de Podio */}
+                      <div className={`relative rounded-full mb-2 flex items-center justify-center transition-all duration-500
+                        ${isFirst ? 'w-20 h-20 border-2 border-yellow-500 shadow-[0_0_25px_rgba(234,179,8,0.5)] bg-zinc-900' : 
+                          isSecond ? 'w-16 h-16 border-2 border-zinc-400 shadow-[0_0_15px_rgba(161,161,170,0.3)] bg-zinc-900' : 
+                          'w-16 h-16 border-2 border-orange-800 shadow-[0_0_15px_rgba(154,52,18,0.3)] bg-zinc-900'}`}>
+                        
+                        <div className="relative w-3/5 h-3/5">
+                          <Image 
+                            src={g.equipos?.[0]?.id ? `/escudos/${g.equipos[0].id}.png` : '/escudos/default.png'} 
+                            alt={g.equipos?.[0]?.nombre || "Escudo"} 
                             fill 
-                            className="object-contain" />
+                            className="object-contain" 
+                          />
                         </div>
-                        {/* Medalla */}
-                        <div className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black
-                          ${isFirst ? 'bg-yellow-500 text-black' : isSecond ? 'bg-zinc-400 text-black' : 'bg-orange-700 text-white'}`}>
-                          {index + 1}
+
+                        {/* Medalla Identificadora */}
+                        <div className={`absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black border-2 border-black
+                          ${isFirst ? 'bg-yellow-500 text-black' : isSecond ? 'bg-zinc-400 text-black' : 'bg-orange-800 text-white'}`}>
+                          {pos + 1}
                         </div>
                       </div>
+
                       {/* Info del Podio */}
                       <div className="text-center w-full">
-                        <p className={`font-black uppercase truncate text-[10px] ${isFirst ? 'text-white' : 'text-zinc-400'}`}>
+                        <p className={`font-black uppercase truncate text-[10px] ${isFirst ? 'text-white' : 'text-zinc-500'}`}>
                           {g.nombre.split(' ')[0]}
                         </p>
                         <div className="flex flex-col leading-none">
-                          <span className={`font-black italic ${isFirst ? 'text-green-500 text-xl' : 'text-green-500/80 text-lg'}`}>
+                          <span className={`font-black italic ${isFirst ? 'text-green-500 text-2xl' : 'text-green-500/80 text-xl'}`}>
                             {g.goles}
                           </span>
                           <span className="text-[7px] text-zinc-600 uppercase font-black">Goles</span>
@@ -195,7 +200,6 @@ export default async function Home() {
             </div>
           </div>
         </section>
-
        {/* BOTTOM LEFT: Resultados Recientes */}
         <section className="lg:col-span-6">
           <h2 className="text-zinc-500 text-xs font-bold uppercase tracking-[0.2em] mb-4 ml-2 italic text-center">
