@@ -150,51 +150,59 @@ export default async function Home() {
         </section>
 
         {/* BOTTOM LEFT: Resultados Recientes - Optimizado para móvil */}
-        <section className="lg:col-span-6">
-          <h2 className="text-zinc-500 text-xs font-bold uppercase tracking-[0.2em] mb-4 ml-2 italic">Resultados Recientes</h2>
-          <div className="space-y-3">
-            {partidos && partidos.map((partido: any) => (
-              <div key={partido.id} className="bg-zinc-900/30 border border-zinc-800 p-4 rounded-xl flex flex-col gap-3">
-                <div className="flex justify-between items-center gap-2">
-                  {/* Equipo Local */}
-                  <div className="flex-1 flex flex-col items-center md:items-end md:flex-row md:justify-end gap-2 overflow-hidden">
-                    <div className="flex gap-0.5 order-2 md:order-1">
-                      {partido.sanciones
-                        ?.filter((s: any) => s.equipos?.id === partido.equipo_local?.id)
-                        .map((s: any, i: number) => (
-                          <div key={i} className={`w-2 h-3 rounded-[1px] ${s.tipo === 'amarilla' ? 'bg-yellow-400' : 'bg-red-600'}`} />
-                        ))}
+        {/* RESULTADOS RECIENTES: Optimización Vertical para Móvil */}
+          <section className="lg:col-span-12">
+            <h2 className="text-zinc-500 text-[10px] font-black uppercase tracking-[0.2em] mb-4 ml-2 italic text-center lg:text-left">
+              Resultados Recientes
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {partidos && partidos.map((partido: any) => (
+                <div key={partido.id} className="bg-zinc-900/30 border border-zinc-800 p-4 rounded-2xl">
+                  <div className="flex flex-col gap-4">
+                    
+                    {/* Fila Equipo Local */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="relative w-8 h-8 shrink-0">
+                          <Image src={`/escudos/${partido.equipo_local?.id}.png`} alt="" fill className="object-contain" />
+                        </div>
+                        <span className="font-bold text-xs uppercase truncate">{partido.equipo_local?.nombre}</span>
+                      </div>
+                      <span className="text-xl font-black text-white">{partido.goles_local}</span>
                     </div>
-                    <span className="font-bold text-[10px] md:text-xs uppercase truncate order-3 md:order-2">{partido.equipo_local?.nombre}</span>
-                    <div className="relative w-7 h-7 md:w-7 md:h-7 shrink-0 order-1 md:order-3">
-                      <Image src={`/escudos/${partido.equipo_local?.id}.png`} alt="" fill className="object-contain" />
-                    </div>
-                  </div>
 
-                  {/* Marcador */}
-                  <div className="bg-zinc-800 px-3 py-1 rounded font-mono font-black text-green-500 text-sm md:text-base shrink-0">
-                    {partido.goles_local} - {partido.goles_visita}
-                  </div>
+                    {/* Divisor / Marcador Central (Visual) */}
+                    <div className="h-[1px] bg-zinc-800 w-full flex items-center justify-center">
+                      <span className="bg-zinc-900 px-3 text-[10px] font-black text-zinc-700 italic">FINAL</span>
+                    </div>
 
-                  {/* Equipo Visita */}
-                  <div className="flex-1 flex flex-col items-center md:items-start md:flex-row gap-2 overflow-hidden">
-                    <div className="relative w-7 h-7 md:w-7 md:h-7 shrink-0">
-                      <Image src={`/escudos/${partido.equipo_visita?.id}.png`} alt="" fill className="object-contain" />
+                    {/* Fila Equipo Visita */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="relative w-8 h-8 shrink-0">
+                          <Image src={`/escudos/${partido.equipo_visita?.id}.png`} alt="" fill className="object-contain" />
+                        </div>
+                        <span className="font-bold text-xs uppercase truncate">{partido.equipo_visita?.nombre}</span>
+                      </div>
+                      <span className="text-xl font-black text-white">{partido.goles_visita}</span>
                     </div>
-                    <span className="font-bold text-[10px] md:text-xs uppercase truncate">{partido.equipo_visita?.nombre}</span>
-                    <div className="flex gap-0.5">
-                      {partido.sanciones
-                        ?.filter((s: any) => s.equipos?.id === partido.equipo_visita?.id)
-                        .map((s: any, i: number) => (
-                          <div key={i} className={`w-2 h-3 rounded-[1px] ${s.tipo === 'amarilla' ? 'bg-yellow-400' : 'bg-red-600'}`} />
-                        ))}
+
+                    {/* Sección de Sanciones (Debajo de los equipos) */}
+                    <div className="flex justify-center gap-2 mt-1">
+                      {partido.sanciones?.map((s: any, i: number) => (
+                        <div 
+                          key={i} 
+                          className={`w-2.5 h-3.5 rounded-[1px] ${s.tipo === 'amarilla' ? 'bg-yellow-400' : 'bg-red-600'}`} 
+                          title={`Sanción equipo ID: ${s.equipos?.id}`}
+                        />
+                      ))}
                     </div>
+
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        </section>
+              ))}
+            </div>
+          </section>
 
         {/* BOTTOM RIGHT: Próximos Encuentros */}
         {proximos && proximos.length > 0 && (
