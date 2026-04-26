@@ -171,49 +171,54 @@ export default function Home() {
           </motion.div>
         </section>
 
-        {/* RESULTADOS RECIENTES: Centrado Perfecto en PC y Móvil */}
+        {/* RESULTADOS RECIENTES: Versión Minimalista "Broadcast Style" */}
 <motion.section 
   variants={itemVariants} 
   initial="hidden" 
   animate="visible" 
-  className="lg:col-span-12 mt-4"
+  className="lg:col-span-12 mt-8"
 >
-  <h2 className="text-zinc-500 text-[10px] font-black uppercase tracking-[0.2em] mb-4 ml-2 italic text-center lg:text-left">
-    Resultados Recientes
-  </h2>
-  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+  <div className="flex items-center justify-between mb-6 px-2">
+    <h2 className="text-zinc-500 text-[10px] font-black uppercase tracking-[0.3em] italic">
+      Últimos Resultados
+    </h2>
+    <div className="h-[1px] flex-1 bg-zinc-800 ml-4 opacity-50"></div>
+  </div>
+
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
     {data.partidos.map((partido: any) => (
       <motion.div 
-        whileHover={{ scale: 1.02 }} 
+        whileHover={{ y: -2 }} 
         key={partido.id} 
-        className="bg-zinc-900/30 border border-zinc-800 p-4 rounded-2xl"
+        className="bg-zinc-900/20 border-l-2 border-green-500 p-5 rounded-r-xl transition-all"
       >
-        <div className="flex items-center w-full">
+        <div className="flex items-center justify-between">
           
-          {/* Contenedor Izquierdo: Ocupa el 50% disponible y alinea a la derecha */}
-          <div className="flex-1 flex items-center justify-end gap-3 min-w-0">
-            <span className="font-black text-[10px] md:text-xs uppercase truncate text-right">
-              {partido.equipo_local?.nombre}
-            </span>
-            <div className="relative w-8 h-8 shrink-0">
-              <Image src={`/escudos/${partido.equipo_local?.id}.png`} alt="" fill className="object-contain" />
+          {/* Bloque Equipos */}
+          <div className="flex flex-col gap-1 flex-1 min-w-0">
+            <div className="flex items-center justify-between pr-4">
+              <span className="font-black text-xs md:text-sm uppercase tracking-tighter truncate text-zinc-200">
+                {partido.equipo_local?.nombre}
+              </span>
+              <span className={`font-mono font-black text-lg ${partido.goles_local > partido.goles_visita ? 'text-green-500' : 'text-zinc-600'}`}>
+                {partido.goles_local}
+              </span>
+            </div>
+            
+            <div className="flex items-center justify-between pr-4">
+              <span className="font-black text-xs md:text-sm uppercase tracking-tighter truncate text-zinc-200">
+                {partido.equipo_visita?.nombre}
+              </span>
+              <span className={`font-mono font-black text-lg ${partido.goles_visita > partido.goles_local ? 'text-green-500' : 'text-zinc-600'}`}>
+                {partido.goles_visita}
+              </span>
             </div>
           </div>
 
-          {/* Marcador Central: Ancho fijo para que actúe como ancla central */}
-          <div className="flex flex-col items-center px-4 shrink-0">
-            <div className="bg-zinc-800 px-3 py-1 rounded-lg font-mono font-black text-green-500 text-sm md:text-base border border-zinc-700/50 shadow-inner">
-              {partido.goles_local} - {partido.goles_visita}
-            </div>
-          </div>
-
-          {/* Contenedor Derecho: Ocupa el 50% disponible y alinea a la izquierda */}
-          <div className="flex-1 flex items-center justify-start gap-3 min-w-0">
-            <div className="relative w-8 h-8 shrink-0">
-              <Image src={`/escudos/${partido.equipo_visita?.id}.png`} alt="" fill className="object-contain" />
-            </div>
-            <span className="font-black text-[10px] md:text-xs uppercase truncate text-left">
-              {partido.equipo_visita?.nombre}
+          {/* Badge de Estado */}
+          <div className="pl-4 border-l border-zinc-800 flex items-center justify-center">
+            <span className="[writing-mode:vertical-lr] rotate-180 text-[8px] font-black text-zinc-700 tracking-[0.2em]">
+              FINAL
             </span>
           </div>
 
