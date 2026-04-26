@@ -158,6 +158,13 @@ export default async function Home() {
                 <div className="flex justify-between items-center gap-2">
                   {/* Equipo Local */}
                   <div className="flex-1 flex flex-col items-center md:items-end md:flex-row md:justify-end gap-2 overflow-hidden">
+                    <div className="flex gap-0.5 order-2 md:order-1">
+                      {partido.sanciones
+                        ?.filter((s: any) => s.equipos?.id === partido.equipo_local?.id)
+                        .map((s: any, i: number) => (
+                          <div key={i} className={`w-2 h-3 rounded-[1px] ${s.tipo === 'amarilla' ? 'bg-yellow-400' : 'bg-red-600'}`} />
+                        ))}
+                    </div>
                     <span className="font-bold text-[10px] md:text-xs uppercase truncate order-3 md:order-2">{partido.equipo_local?.nombre}</span>
                     <div className="relative w-7 h-7 md:w-7 md:h-7 shrink-0 order-1 md:order-3">
                       <Image src={`/escudos/${partido.equipo_local?.id}.png`} alt="" fill className="object-contain" />
