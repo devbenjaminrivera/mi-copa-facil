@@ -12,6 +12,7 @@ export default async function Home() {
     .order('df', { ascending: false })
     .order('gf', { ascending: false })
     .order('nombre', { ascending: true });
+  
 
   const { data: partidos } = await supabase
   .from('partidos')
@@ -25,6 +26,8 @@ export default async function Home() {
   .order('created_at', { ascending: false })
   .limit(5);
 
+  const ahora = new Date().toISOString();
+
   const { data: proximos } = await supabase
     .from('partidos')
     .select(`
@@ -33,6 +36,7 @@ export default async function Home() {
       equipo_visita:equipos!equipo_visita(id, nombre)
     `)
     .eq('estado', 'programado')
+    .gt('fecha', ahora)
     .order('fecha', { ascending: true })
     .limit(4);
 
@@ -222,7 +226,7 @@ export default async function Home() {
       </div>
 
       <footer className="max-w-7xl mx-auto mt-20 pb-8 text-center text-zinc-700 text-[10px] uppercase tracking-[0.4em]">
-        DESARROLLADO POR BENJAMÍN RIVERA ARANEDA • 2026
+        BENJAMÍN RIVERA ARANEDA • 2026
       </footer>
     </main>
   );
