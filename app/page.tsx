@@ -133,7 +133,10 @@ export default async function Home() {
                           isSecond ? 'w-12 h-12 border-2 border-zinc-400' : 
                           'w-12 h-12 border-2 border-orange-700'}`}>
                         <div className="relative w-3/4 h-3/4">
-                          <Image src={`/escudos/${g.equipos?.id}.png`} alt="" fill className="object-contain" />
+                          <Image src={`/escudos/${g.equipos?.[0]?.id}.png`} 
+                            alt="" 
+                            fill 
+                            className="object-contain" />
                         </div>
                         {/* Medalla */}
                         <div className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black
