@@ -135,7 +135,8 @@ export default async function Home() {
                         
                         <div className="relative w-3/5 h-3/5">
                           <Image 
-                            src={g.equipos?.[0]?.id ? `/escudos/${g.equipos[0].id}.png` : '/escudos/default.png'} 
+                            // Accedemos explícitamente a la primera posición del array de equipos
+                            src={`/escudos/${g.equipos?.[0]?.id}.png`} 
                             alt={g.equipos?.[0]?.nombre || "Escudo"} 
                             fill 
                             className="object-contain" 
