@@ -171,29 +171,57 @@ export default function Home() {
           </motion.div>
         </section>
 
-        {/* RESULTADOS RECIENTES */}
-        <motion.section variants={itemVariants} initial="hidden" animate="visible" className="lg:col-span-12 mt-4">
-          <h2 className="text-zinc-500 text-[10px] font-black uppercase tracking-[0.2em] mb-4 ml-2 italic text-center lg:text-left">Resultados Recientes</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {data.partidos.map((partido: any) => (
-              <motion.div whileHover={{ scale: 1.02 }} key={partido.id} className="bg-zinc-900/30 border border-zinc-800 p-4 rounded-2xl">
-                <div className="flex items-center justify-between">
-                  <div className="flex-1 flex items-center justify-end gap-2 min-w-0">
-                    <span className="font-black text-[10px] uppercase truncate text-right">{partido.equipo_local?.nombre}</span>
-                    <Image src={`/escudos/${partido.equipo_local?.id}.png`} alt="" width={28} height={28} className="object-contain" />
-                  </div>
-                  <div className="mx-3 px-3 py-1 bg-zinc-800 rounded-lg font-mono font-black text-green-500 text-sm border border-zinc-700/50 shadow-inner">
-                    {partido.goles_local} - {partido.goles_visita}
-                  </div>
-                  <div className="flex-1 flex items-center justify-start gap-2 min-w-0">
-                    <Image src={`/escudos/${partido.equipo_visita?.id}.png`} alt="" width={28} height={28} className="object-contain" />
-                    <span className="font-black text-[10px] uppercase truncate">{partido.equipo_visita?.nombre}</span>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
+        {/* RESULTADOS RECIENTES: Centrado Perfecto en PC y Móvil */}
+<motion.section 
+  variants={itemVariants} 
+  initial="hidden" 
+  animate="visible" 
+  className="lg:col-span-12 mt-4"
+>
+  <h2 className="text-zinc-500 text-[10px] font-black uppercase tracking-[0.2em] mb-4 ml-2 italic text-center lg:text-left">
+    Resultados Recientes
+  </h2>
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    {data.partidos.map((partido: any) => (
+      <motion.div 
+        whileHover={{ scale: 1.02 }} 
+        key={partido.id} 
+        className="bg-zinc-900/30 border border-zinc-800 p-4 rounded-2xl"
+      >
+        <div className="flex items-center w-full">
+          
+          {/* Contenedor Izquierdo: Ocupa el 50% disponible y alinea a la derecha */}
+          <div className="flex-1 flex items-center justify-end gap-3 min-w-0">
+            <span className="font-black text-[10px] md:text-xs uppercase truncate text-right">
+              {partido.equipo_local?.nombre}
+            </span>
+            <div className="relative w-8 h-8 shrink-0">
+              <Image src={`/escudos/${partido.equipo_local?.id}.png`} alt="" fill className="object-contain" />
+            </div>
           </div>
-        </motion.section>
+
+          {/* Marcador Central: Ancho fijo para que actúe como ancla central */}
+          <div className="flex flex-col items-center px-4 shrink-0">
+            <div className="bg-zinc-800 px-3 py-1 rounded-lg font-mono font-black text-green-500 text-sm md:text-base border border-zinc-700/50 shadow-inner">
+              {partido.goles_local} - {partido.goles_visita}
+            </div>
+          </div>
+
+          {/* Contenedor Derecho: Ocupa el 50% disponible y alinea a la izquierda */}
+          <div className="flex-1 flex items-center justify-start gap-3 min-w-0">
+            <div className="relative w-8 h-8 shrink-0">
+              <Image src={`/escudos/${partido.equipo_visita?.id}.png`} alt="" fill className="object-contain" />
+            </div>
+            <span className="font-black text-[10px] md:text-xs uppercase truncate text-left">
+              {partido.equipo_visita?.nombre}
+            </span>
+          </div>
+
+        </div>
+      </motion.div>
+    ))}
+  </div>
+</motion.section>
       </div>
 
       <footer className="mt-20 pb-10 text-center opacity-50">
