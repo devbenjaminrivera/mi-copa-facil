@@ -9,6 +9,7 @@ export default function GestionJugadores() {
   const [nombre, setNombre] = useState('');
   const [numeroCamiseta, setNumeroCamiseta] = useState('');
   const [equipoId, setEquipoId] = useState('');
+  const [busqueda, setBusqueda] = useState('');
 
   const fetchData = async () => {
     const { data: eq } = await supabase.from('equipos').select('*').order('nombre');
@@ -70,7 +71,12 @@ export default function GestionJugadores() {
   }else {
     alert("Error al registrar: " + error.message);
   }
+
 };
+
+const jugadoresFiltrados = jugadores.filter(j => 
+  j.nombre.toLowerCase().includes(busqueda.toLowerCase())
+  );
 
   return (
     <div className="p-8 bg-black min-h-screen text-white font-sans">
@@ -112,6 +118,19 @@ export default function GestionJugadores() {
           </button>
         </form>
 
+        <div className="mb-6">
+          <div className="relative">
+            <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-zinc-500">🔍</span>
+            <input 
+              type="text"
+              placeholder="BUSCAR JUGADOR POR NOMBRE..."
+              value={busqueda}
+              onChange={(e) => setBusqueda(e.target.value)}
+              className="w-full bg-zinc-900/30 border border-zinc-800 pl-10 pr-4 py-3 rounded-xl focus:border-green-500 outline-none text-xs font-bold tracking-widest uppercase"
+            />
+          </div>
+        </div>
+
         <div className="bg-zinc-900/30 rounded-xl border border-zinc-800 overflow-hidden shadow-2xl">
           <table className="w-full text-left border-collapse">
             <thead className="bg-zinc-800/50 text-zinc-500 text-[10px] uppercase tracking-widest">
@@ -124,7 +143,7 @@ export default function GestionJugadores() {
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-800/50">
-              {jugadores.map(j => (
+              {jugadoresFiltrados.map(j => (
                 <tr key={j.id} className="hover:bg-white/[0.02] transition group">
                   <td className="p-4 text-sm font-bold">{j.nombre}</td>
                   <td className="p-4">
