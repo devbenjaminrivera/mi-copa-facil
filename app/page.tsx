@@ -26,7 +26,7 @@ export default async function Home() {
   .order('created_at', { ascending: false })
   .limit(5);
 
-  const ahora = new Date(new Date().getTime() - (4 * 60 * 60 * 1000)).toISOString();
+  const ahora = new Date().toISOString();
 
   const { data: proximos } = await supabase
     .from('partidos')
@@ -204,7 +204,14 @@ export default async function Home() {
               {proximos.map((p: any) => (
                 <div key={p.id} className="bg-gradient-to-br from-zinc-900 to-black border border-zinc-800 p-4 rounded-2xl flex flex-col items-center">
                   <div className="text-[10px] text-green-500 font-mono mb-2 uppercase">
-                    {new Date(p.fecha).toLocaleString('es-CL', { weekday: 'long', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                    {new Date(p.fecha).toLocaleString('es-CL', { 
+                      timeZone: 'America/Santiago', 
+                      weekday: 'long', // Mantengo el día de la semana que tenías
+                      day: 'numeric', 
+                      month: 'short', 
+                      hour: '2-digit', 
+                      minute: '2-digit' 
+                    })}
                   </div>
                   <div className="flex justify-between items-center w-full px-2">
                     <div className="flex-1 flex items-center gap-2 justify-end overflow-hidden">

@@ -15,7 +15,7 @@ export default function ProgramarCalendario() {
     if (eq) setEquipos(eq);
 
     // OBTENEMOS LA HORA ACTUAL EN FORMATO ISO
-    const ahora = new Date(new Date().getTime() - (4 * 60 * 60 * 1000)).toISOString();
+    const ahora = new Date().toISOString();
 
     // FILTRAMOS: Solo partidos 'programados' cuya fecha sea MAYOR que 'ahora'
     const { data: part } = await supabase
@@ -37,18 +37,21 @@ export default function ProgramarCalendario() {
   }, []);
 
   const agendar = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!localId || !visitaId || !fecha) return alert("Completa todos los campos");
-    if (localId === visitaId) return alert("No puedes elegir el mismo equipo");
+  e.preventDefault();
+  if (!localId || !visitaId || !fecha) return alert("Completa todos los campos");
 
-    const { error } = await supabase.from('partidos').insert([
-      { 
-        equipo_local: localId, 
-        equipo_visita: visitaId, 
-        fecha: fecha,
-        estado: 'programado' 
-      }
-    ]);
+  // AJUSTE: Convertimos la fecha del input a un objeto Date y luego a ISO 
+  // pero asegurando que se guarde con el desfase correcto.
+  const fechaAjustada = new Date(fecha).toISOString();
+
+  const { error } = await supabase.from('partidos').insert([
+    { 
+      equipo_local: localId, 
+      equipo_visita: visitaId, 
+      fecha: fechaAjustada, // Usamos la fecha procesada
+      estado: 'programado' 
+    }
+  ]);
 
     if (error) alert("Error: " + error.message);
     else {
@@ -115,8 +118,14 @@ export default function ProgramarCalendario() {
             partidosProgramados.map((p) => (
               <div key={p.id} className="bg-zinc-900/30 border border-zinc-800 p-5 rounded-3xl flex justify-between items-center group hover:border-zinc-600 transition-all">
                 <div>
-                  <p className="text-[10px] text-green-500 font-mono font-black mb-1 uppercase tracking-widest">
-                    {new Date(p.fecha).toLocaleString('es-CL', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                   <p className="text-[10px] text-green-500 font-mono font-black mb-1 uppercase tracking-widest">
+                    {new Date(p.fecha).toLocaleString('es-CL', { 
+                      timeZone: 'America/Santiago', 
+                      day: 'numeric', 
+                      month: 'short', 
+                      hour: '2-digit', 
+                      minute: '2-digit' 
+                    })}
                   </p>
                   <p className="text-sm font-black uppercase tracking-tight italic">
                     {p.equipo_local?.nombre} <span className="text-zinc-700 mx-2 not-italic">vs</span> {p.equipo_visita?.nombre}
