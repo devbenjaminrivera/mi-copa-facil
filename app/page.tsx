@@ -36,7 +36,7 @@ export default function Home() {
       const [resEq, resPart, resProx, resGol] = await Promise.all([
         supabase.from('equipos').select('*').order('puntos', { ascending: false }).order('df', { ascending: false }).order('gf', { ascending: false }),
         supabase.from('partidos').select(`id, goles_local, goles_visita, equipo_local:equipos!equipo_local(id, nombre), equipo_visita:equipos!equipo_visita(id, nombre)`).eq('estado', 'jugado').order('created_at', { ascending: false }).limit(5),
-        supabase.from('partidos').select(`id, fecha, equipo_local:equipos!equipo_local(id, nombre), equipo_visita:equipos!equipo_visita(id, nombre)`).eq('estado', 'programado').gt('fecha', ahora).order('fecha', { ascending: true }).limit(4),
+        supabase.from('partidos').select(`id, fecha, jornada, equipo_local:equipos!equipo_local(id, nombre), equipo_visita:equipos!equipo_visita(id, nombre)`).eq('estado', 'programado').gt('fecha', ahora).order('jornada', { ascending: true }).order('fecha', { ascending: true }),
         supabase.from('jugadores').select(`nombre, goles, equipos:id_equipo (id, nombre)`).gt('goles', 0).order('goles', { ascending: false }).limit(5)
       ]);
 
@@ -49,6 +49,14 @@ export default function Home() {
     };
     fetchAllData();
   }, []);
+
+  // LÓGICA PARA AGRUPAR POR JORNADA
+  const partidosPorJornada = data.proximos.reduce((acc: any, partido: any) => {
+    const j = partido.jornada || 1;
+    if (!acc[j]) acc[j] = [];
+    acc[j].push(partido);
+    return acc;
+  }, {});
 
   return (
     <main className="p-4 md:p-8 bg-black text-white min-h-screen font-sans pt-20">
@@ -222,70 +230,82 @@ export default function Home() {
           </div>
         </motion.section>
 
-       {/* PRÓXIMOS ENCUENTROS: Optimización de tamaño para PC */}
-{data.proximos && data.proximos.length > 0 && (
-  <motion.section 
-    variants={itemVariants} 
-    initial="hidden" 
-    animate="visible" 
-    className="lg:col-span-12 mt-12"
-  >
-    <div className="flex items-center justify-between mb-6 px-2">
-      <h2 className="text-zinc-500 text-[10px] font-black uppercase tracking-[0.3em] italic">
-        Próximos Encuentros
-      </h2>
-      <div className="h-[1px] flex-1 bg-zinc-800 ml-4 opacity-50"></div>
-    </div>
+        {/* PRÓXIMOS ENCUENTROS POR JORNADA: Distribución por Columnas (PC) */}
+<motion.section 
+  variants={itemVariants} 
+  initial="hidden" 
+  animate="visible" 
+  className="lg:col-span-12 mt-12"
+>
+  <div className="flex items-center justify-between mb-8 px-2">
+    <h2 className="text-zinc-500 text-[10px] font-black uppercase tracking-[0.3em] italic">
+      PRÓXIMOS ENCUENTROS
+    </h2>
+    <div className="h-[1px] flex-1 bg-zinc-800 ml-4 opacity-50"></div>
+  </div>
 
-    {/* Cambiamos a 2 columnas en tablets (md) y 3 en PC (lg) para reducir el ancho innecesario */}
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {data.proximos.map((p: any) => (
-        <motion.div 
-          key={p.id} 
-          whileHover={{ y: -2 }}
-          className="bg-zinc-900/40 border border-zinc-800/50 p-5 rounded-2xl flex flex-col items-center gap-4"
-        >
-          {/* Fecha del encuentro: Más compacta */}
-          <div className="text-[9px] text-green-500 font-mono font-black uppercase tracking-tighter bg-green-500/10 px-3 py-1 rounded-full">
-            {new Date(p.fecha).toLocaleString('es-CL', { 
-              weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' 
-            })}
-          </div>
-          
-          <div className="flex items-center justify-between w-full gap-2 px-1">
-            {/* Equipo Local */}
-            <div className="flex-1 flex items-center justify-end gap-2 min-w-0">
-              <span className="text-[10px] font-black uppercase text-zinc-200 text-right truncate">
-                {p.equipo_local?.nombre}
-              </span>
-              <div className="relative w-7 h-7 shrink-0">
-                <Image src={`/escudos/${p.equipo_local?.id}.png`} alt="" fill className="object-contain" />
+  {/* Grid principal: 1 columna en móvil, 2 columnas en PC para separar Jornada 1 de Jornada 2 */}
+  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    {Object.keys(partidosPorJornada).sort((a, b) => Number(a) - Number(b)).map((numJornada) => (
+      <div key={numJornada} className="bg-zinc-900/10 border border-zinc-800/50 p-6 rounded-[2rem] space-y-4">
+        
+        {/* Encabezado del Recuadro de Jornada */}
+        <div className="flex items-center justify-between mb-4 px-2">
+          <span className="text-green-500 text-[11px] font-black uppercase tracking-widest">
+            Jornada {numJornada}
+          </span>
+          <span className="text-zinc-700 text-[9px] font-bold uppercase italic">
+            {partidosPorJornada[numJornada].length} Partidos
+          </span>
+        </div>
+
+        {/* Lista de partidos dentro de la jornada (una sola columna interna) */}
+        <div className="space-y-3">
+          {partidosPorJornada[numJornada].map((p: any) => (
+            <motion.div 
+              key={p.id} 
+              whileHover={{ x: 4 }}
+              className="bg-zinc-900/60 border border-zinc-800 p-4 rounded-2xl flex flex-col items-center gap-3 transition-all hover:border-zinc-700"
+            >
+              <div className="text-[9px] text-green-500 font-mono font-black uppercase tracking-tighter bg-white/5 px-2 py-0.5 rounded-full">
+                {new Date(p.fecha).toLocaleString('es-CL', { 
+                  weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' 
+                })}
               </div>
-            </div>
+              
+              <div className="flex items-center justify-between w-full gap-2">
+                <div className="flex-1 flex items-center justify-end gap-2 min-w-0">
+                  <span className="text-[10px] font-black uppercase text-zinc-200 text-right truncate">
+                    {p.equipo_local?.nombre}
+                  </span>
+                  <div className="relative w-8 h-8 shrink-0">
+                    <Image src={`/escudos/${p.equipo_local?.id}.png`} alt="" fill className="object-contain" />
+                  </div>
+                </div>
 
-            {/* Marcador VS sutil */}
-            <span className="text-zinc-800 font-black italic text-[10px] shrink-0 px-1">VS</span>
+                <span className="text-zinc-800 font-black italic text-[9px] shrink-0">VS</span>
 
-            {/* Equipo Visita */}
-            <div className="flex-1 flex items-center justify-start gap-2 min-w-0">
-              <div className="relative w-7 h-7 shrink-0">
-                <Image src={`/escudos/${p.equipo_visita?.id}.png`} alt="" fill className="object-contain" />
+                <div className="flex-1 flex items-center justify-start gap-2 min-w-0">
+                  <div className="relative w-8 h-8 shrink-0">
+                    <Image src={`/escudos/${p.equipo_visita?.id}.png`} alt="" fill className="object-contain" />
+                  </div>
+                  <span className="text-[10px] font-black uppercase text-zinc-200 text-left truncate">
+                    {p.equipo_visita?.nombre}
+                  </span>
+                </div>
               </div>
-              <span className="text-[10px] font-black uppercase text-zinc-200 text-left truncate">
-                {p.equipo_visita?.nombre}
-              </span>
-            </div>
-          </div>
-        </motion.div>
-      ))}
-    </div>
-  </motion.section>
-)}
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    ))}
+  </div>
+</motion.section>
       </div>
 
       <footer className="mt-20 pb-10 text-center opacity-50">
         <p className="text-zinc-700 text-[8px] uppercase tracking-[0.5em] font-black">
-          {new Date().getFullYear()} • COPA CEVI • DESARROLLADO POR BENJAMÍN RIVERA ARANEDA
+          2026 • COPA CEVI • DESARROLLADO POR BENJAMÍN RIVERA ARANEDA
         </p>
       </footer>
     </main>

@@ -73,6 +73,18 @@ export default function GestionJugadores() {
   }
 
 };
+  const editarNumeroCamiseta = async (id: string, nuevoNumero: number) => {
+    const { error } = await supabase
+      .from('jugadores')
+      .update({ numero_camiseta: nuevoNumero })
+      .eq('id', id);
+
+    if (!error) {
+      fetchData(); // Refresca la lista para asegurar que los datos están sincronizados
+    } else {
+      alert("Error al actualizar el número: " + error.message);
+    }
+  };
 
 const jugadoresFiltrados = jugadores.filter(j => 
   j.nombre.toLowerCase().includes(busqueda.toLowerCase())
@@ -132,75 +144,87 @@ const jugadoresFiltrados = jugadores.filter(j =>
         </div>
 
         <div className="bg-zinc-900/30 rounded-xl border border-zinc-800 overflow-hidden shadow-2xl">
-          <table className="w-full text-left border-collapse">
-            <thead className="bg-zinc-800/50 text-zinc-500 text-[10px] uppercase tracking-widest">
-              <tr>
-                <th className="p-4">Jugador</th>
-                <th className="p-4">Sanciones</th>
-                <th className="p-4">Equipo</th>
-                <th className="p-4 text-center">Goles</th>
-                <th className="p-4 text-right">Acciones</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-zinc-800/50">
-              {jugadoresFiltrados.map(j => (
-                <tr key={j.id} className="hover:bg-white/[0.02] transition group">
-                  <td className="p-4 text-sm font-bold">{j.nombre}</td>
-                  <td className="p-4">
-                    <div className="flex items-center gap-2">
-                      <div className="flex gap-1.5">
-                        {j.sanciones && j.sanciones.length > 0 ? (
-                          j.sanciones.map((s: any) => (
-                            <button 
-                              key={s.id}
-                              onClick={() => quitarSancion(s.id)}
-                              className={`w-3 h-4 rounded-[1px] relative group/card cursor-pointer transition-transform hover:scale-110 ${
-                                s.tipo === 'amarilla' ? 'bg-yellow-400' : 'bg-red-600'
-                              }`}
-                            >
-                              <span className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/card:opacity-100 bg-black/40 text-[8px] font-bold text-white">✕</span>
-                            </button>
-                          ))
-                        ) : (
-                          <span className="text-[10px] text-zinc-700 italic">Limpio</span>
-                        )}
-                      </div>
-                      <select 
-                        className="bg-zinc-800 text-[10px] rounded px-1 py-0.5 outline-none border border-zinc-700 focus:border-green-500 opacity-0 group-hover:opacity-100 transition-opacity"
-                        onChange={(e) => {
-                          agregarSancion(j.id, e.target.value);
-                          e.target.value = "";
-                        }}
-                      >
-                        <option value="">+</option>
-                        <option value="amarilla">🟨 Amarilla</option>
-                        <option value="roja">🟥 Roja</option>
-                      </select>
-                    </div>
-                  </td>
-                  <td className="p-4 text-zinc-500 text-xs uppercase">{j.equipos?.nombre}</td>
-                  <td className="p-4">
-                    <div className="flex justify-center">
-                      <input 
-                        type="number"
-                        defaultValue={j.goles}
-                        onBlur={(e) => corregirGoles(j.id, parseInt(e.target.value) || 0)}
-                        className="w-12 bg-black border border-zinc-800 text-center text-sm font-bold text-green-500 rounded p-1 focus:border-green-500 outline-none"
-                      />
-                    </div>
-                  </td>
-                  <td className="p-4 text-right">
-                    <button onClick={() => eliminarJugador(j.id)} className="text-zinc-600 hover:text-red-500 transition-colors p-2">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                      </svg>
+  <table className="w-full text-left border-collapse">
+    <thead className="bg-zinc-800/50 text-zinc-500 text-[10px] uppercase tracking-widest">
+      <tr>
+        <th className="p-4">Jugador</th>
+        <th className="p-4">Sanciones</th>
+        <th className="p-4">Equipo</th>
+        <th className="p-4 text-center">Goles</th>
+        <th className="p-4 text-right">Acciones</th>
+      </tr>
+    </thead>
+    <tbody className="divide-y divide-zinc-800/50">
+      {jugadoresFiltrados.map(j => (
+        <tr key={j.id} className="hover:bg-white/[0.02] transition group">
+          <td className="p-4 text-sm font-bold">
+            <div className="flex items-center gap-3">
+              {/* Input para editar el número de camiseta */}
+              <input 
+                type="number"
+                defaultValue={j.numero_camiseta}
+                onBlur={(e) => editarNumeroCamiseta(j.id, parseInt(e.target.value) || 0)}
+                className="w-10 bg-zinc-800 border border-zinc-700 text-center text-[10px] font-mono text-zinc-400 rounded p-1 focus:border-green-500 outline-none"
+                placeholder="N°"
+              />
+              <span>{j.nombre}</span>
+            </div>
+          </td>
+          <td className="p-4">
+            <div className="flex items-center gap-2">
+              <div className="flex gap-1.5">
+                {j.sanciones && j.sanciones.length > 0 ? (
+                  j.sanciones.map((s: any) => (
+                    <button 
+                      key={s.id}
+                      onClick={() => quitarSancion(s.id)}
+                      className={`w-3 h-4 rounded-[1px] relative group/card cursor-pointer transition-transform hover:scale-110 ${
+                        s.tipo === 'amarilla' ? 'bg-yellow-400' : 'bg-red-600'
+                      }`}
+                    >
+                      <span className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/card:opacity-100 bg-black/40 text-[8px] font-bold text-white">✕</span>
                     </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                  ))
+                ) : (
+                  <span className="text-[10px] text-zinc-700 italic">Limpio</span>
+                )}
+              </div>
+              <select 
+                className="bg-zinc-800 text-[10px] rounded px-1 py-0.5 outline-none border border-zinc-700 focus:border-green-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                onChange={(e) => {
+                  agregarSancion(j.id, e.target.value);
+                  e.target.value = "";
+                }}
+              >
+                <option value="">+</option>
+                <option value="amarilla">🟨 Amarilla</option>
+                <option value="roja">🟥 Roja</option>
+              </select>
+            </div>
+          </td>
+          <td className="p-4 text-zinc-500 text-xs uppercase">{j.equipos?.nombre}</td>
+          <td className="p-4 text-center">
+            <div className="flex justify-center">
+              <input 
+                type="number"
+                defaultValue={j.goles}
+                onBlur={(e) => corregirGoles(j.id, parseInt(e.target.value) || 0)}
+                className="w-12 bg-black border border-zinc-800 text-center text-sm font-bold text-green-500 rounded p-1 focus:border-green-500 outline-none"
+              />
+            </div>
+          </td>
+          <td className="p-4 text-right">
+            <button onClick={() => eliminarJugador(j.id)} className="text-zinc-600 hover:text-red-500 transition-colors p-2">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </button>
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
       </div>
     </div>
   );
