@@ -67,7 +67,7 @@ export default function Home() {
         className="max-w-7xl mx-auto mb-10"
       >
         <h1 className="text-2xl md:text-3xl font-extrabold tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-600">
-          🏆 COPA CEVI
+          ⭐ ESTADISTICAS OFICIALES
         </h1>
       </motion.div>
       

@@ -19,7 +19,7 @@ export default function Navbar() {
           <Link href="/" className="flex items-center gap-3 z-50">
             {/* Si tienes un logo en /public, ajusta la ruta aquí */}
             <div className="relative w-8 h-8 md:w-10 md:h-10">
-              <Image src="/escudos/default.png" alt="Logo" fill className="object-contain" />
+              <Image src="/logo.png" alt="cevi" fill className="object-contain" />
             </div>
             <span className="text-xl md:text-2xl font-black italic tracking-tighter text-white">
               COPA <span className="text-green-500">CEVI</span>
