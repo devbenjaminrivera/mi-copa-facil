@@ -20,6 +20,9 @@ export default function RegistrarPartido() {
   
   const [sanciones, setSanciones] = useState<{jugador_id: string, tipo: 'amarilla' | 'roja'}[]>([]);
 
+  const [mvpId, setMvpId] = useState(''); // Para el jugador destacado
+  const [jornada, setJornada] = useState(''); // Para la jornada del partido
+
   // Carga inicial de equipos
   useEffect(() => {
     const fetchEquipos = async () => {
@@ -30,10 +33,10 @@ export default function RegistrarPartido() {
   }, []);
 
   const iniciarPartido = async () => {
-    if (!localId || !visitaId || localId === visitaId) {
-      alert("Selecciona dos equipos distintos");
-      return;
-    }
+  if (!localId || !visitaId || localId === visitaId || !jornada) {
+    alert("Selecciona equipos distintos y define la jornada");
+    return;
+  }
 
     // 1. CARGA DE JUGADORES (Antes de pasar al siguiente paso)
     // Nota: Verifica si en tu DB es 'equipo_id' o 'id_equipo'
@@ -52,15 +55,17 @@ export default function RegistrarPartido() {
 
     // 2. CREACIÓN DEL REGISTRO DE PARTIDO
     const { data, error } = await supabase
-      .from('partidos')
-      .insert([{
-        equipo_local: localId,
-        equipo_visita: visitaId,
-        goles_local: golesL,
-        goles_visita: golesV,
-        estado: 'jugado'
-      }])
-      .select();
+    .from('partidos')
+    .insert([{
+      equipo_local: localId,
+      equipo_visita: visitaId,
+      goles_local: golesL,
+      goles_visita: golesV,
+      jornada: parseInt(jornada),
+      estado: 'jugado',
+      fecha: new Date().toISOString() // <--- ESTO GUARDA LA FECHA Y HORA ACTUAL
+    }])
+    .select();
 
     if (error) {
       alert("Error en Supabase: " + error.message);
@@ -73,6 +78,7 @@ export default function RegistrarPartido() {
   };
 
   const finalizarRegistro = async () => {
+    if (!mvpId) return alert("Debes seleccionar al MVP del encuentro"); // Validación
     const faltaGoleadorLocal = goleadoresL.some(id => id === '');
     const faltaGoleadorVisita = goleadoresV.some(id => id === '');
 
@@ -82,6 +88,13 @@ export default function RegistrarPartido() {
     }
 
     try {
+      const { error: errorMvp } = await supabase
+        .from('partidos')
+        .update({ id_mvp: parseInt(mvpId) })
+        .eq('id', partidoId);
+
+      if (errorMvp) throw errorMvp;
+
   const todosLosGoles = [
     ...goleadoresL.map(id => ({ partido_id: partidoId, jugador_id: id, id_equipo: localId })),
     ...goleadoresV.map(id => ({ partido_id: partidoId, jugador_id: id, id_equipo: visitaId }))
@@ -120,7 +133,7 @@ export default function RegistrarPartido() {
         g_visita: golesV
       });
 
-      alert("Acta cerrada y goleadores actualizados.");
+      alert("Acta cerrada, goleadores y MVP actualizados.");
       window.location.href = '/admin';
 
     } catch (err) {
@@ -140,54 +153,71 @@ export default function RegistrarPartido() {
         </header>
 
         {paso === 1 ? (
-          <div className="bg-zinc-900/50 border border-zinc-800 p-10 rounded-[2.5rem] shadow-2xl">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
-              <div className="space-y-4">
-                <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest block ml-2">Local</label>
-                <select 
-                  className="w-full bg-black border border-zinc-800 p-4 rounded-2xl font-bold outline-none focus:border-green-500 transition-all"
-                  onChange={(e) => setLocalId(e.target.value)}
-                  value={localId}
-                >
-                  <option value="">Seleccionar Equipo</option>
-                  {equipos.map(e => <option key={e.id} value={e.id}>{e.nombre}</option>)}
-                </select>
-                <input 
-                  type="number" 
-                  placeholder="Goles"
-                  className="w-full bg-black border border-zinc-800 p-4 rounded-2xl text-center text-3xl font-black text-green-500 outline-none"
-                  onChange={(e) => setGolesL(parseInt(e.target.value) || 0)}
-                />
-              </div>
+        <div className="bg-zinc-900/50 border border-zinc-800 p-10 rounded-[2.5rem] shadow-2xl">
+          
+          {/* SECCIÓN DE JORNADA: Ahora arriba y centrada */}
+          <div className="max-w-[200px] mx-auto mb-10 text-center">
+            <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest block mb-2">Número de Jornada</label>
+            <input 
+              type="number" 
+              placeholder="Ej: 1"
+              className="w-full bg-black border border-zinc-800 p-3 rounded-2xl font-bold text-center outline-none focus:border-green-500 transition-all"
+              onChange={(e) => setJornada(e.target.value)}
+              value={jornada}
+            />
+          </div>
 
-              <div className="text-center text-zinc-800 font-black italic text-5xl opacity-50">VS</div>
-
-              <div className="space-y-4">
-                <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest block ml-2">Visita</label>
-                <select 
-                  className="w-full bg-black border border-zinc-800 p-4 rounded-2xl font-bold outline-none focus:border-green-500 transition-all"
-                  onChange={(e) => setVisitaId(e.target.value)}
-                  value={visitaId}
-                >
-                  <option value="">Seleccionar Equipo</option>
-                  {equipos.map(e => <option key={e.id} value={e.id}>{e.nombre}</option>)}
-                </select>
-                <input 
-                  type="number" 
-                  placeholder="Goles"
-                  className="w-full bg-black border border-zinc-800 p-4 rounded-2xl text-center text-3xl font-black text-green-500 outline-none"
-                  onChange={(e) => setGolesV(parseInt(e.target.value) || 0)}
-                />
-              </div>
+          {/* GRID DE ENCUENTRO: Recuperamos las 3 columnas limpias */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
+            {/* EQUIPO LOCAL */}
+            <div className="space-y-4">
+              <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest block ml-2">Local</label>
+              <select 
+                className="w-full bg-black border border-zinc-800 p-4 rounded-2xl font-bold outline-none focus:border-green-500 transition-all"
+                onChange={(e) => setLocalId(e.target.value)}
+                value={localId}
+              >
+                <option value="">Seleccionar Equipo</option>
+                {equipos.map(e => <option key={e.id} value={e.id}>{e.nombre}</option>)}
+              </select>
+              <input 
+                type="number" 
+                placeholder="0"
+                className="w-full bg-black border border-zinc-800 p-4 rounded-2xl text-center text-5xl font-black text-green-500 outline-none"
+                onChange={(e) => setGolesL(parseInt(e.target.value) || 0)}
+              />
             </div>
 
-            <button 
-              onClick={iniciarPartido}
-              className="w-full mt-10 bg-white text-black py-5 rounded-2xl font-black uppercase tracking-[0.2em] hover:bg-green-500 transition-all text-xs"
-            >
-              Confirmar Marcador e Ir a Detalles →
-            </button>
+            {/* SEPARADOR VS */}
+            <div className="text-center text-zinc-800 font-black italic text-5xl opacity-50 hidden md:block">VS</div>
+
+            {/* EQUIPO VISITA */}
+            <div className="space-y-4">
+              <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest block ml-2">Visita</label>
+              <select 
+                className="w-full bg-black border border-zinc-800 p-4 rounded-2xl font-bold outline-none focus:border-green-500 transition-all"
+                onChange={(e) => setVisitaId(e.target.value)}
+                value={visitaId}
+              >
+                <option value="">Seleccionar Equipo</option>
+                {equipos.map(e => <option key={e.id} value={e.id}>{e.nombre}</option>)}
+              </select>
+              <input 
+                type="number" 
+                placeholder="0"
+                className="w-full bg-black border border-zinc-800 p-4 rounded-2xl text-center text-5xl font-black text-green-500 outline-none"
+                onChange={(e) => setGolesV(parseInt(e.target.value) || 0)}
+              />
+            </div>
           </div>
+
+          <button 
+            onClick={iniciarPartido}
+            className="w-full mt-12 bg-white text-black py-5 rounded-2xl font-black uppercase tracking-[0.2em] hover:bg-green-500 transition-all text-xs"
+          >
+            Confirmar Marcador e Ir a Detalles →
+          </button>
+        </div>
         ) : (
           <div className="space-y-10">
             {/* Registro de Goleadores */}
@@ -277,7 +307,19 @@ export default function RegistrarPartido() {
                     <p className="text-center text-zinc-600 text-[10px] font-bold uppercase tracking-widest py-4">No hay sanciones registradas</p>
                 )}
               </div>
-
+<div className="bg-zinc-900 border border-yellow-500/20 p-8 rounded-[2.5rem] mb-6">
+  <h2 className="text-xs font-black uppercase tracking-[0.2em] text-yellow-500 mb-4 text-center">🌟 Jugador Destacado (MVP)</h2>
+  <select 
+    className="w-full bg-black border border-zinc-800 p-4 rounded-2xl font-bold outline-none focus:border-yellow-500 text-yellow-500"
+    onChange={(e) => setMvpId(e.target.value)}
+    value={mvpId}
+  >
+    <option value="">Seleccionar el mejor de la cancha</option>
+    {[...jugadoresLocal, ...jugadoresVisita].map(j => (
+      <option key={j.id} value={j.id}>{j.nombre} ({jugadoresLocal.some(jl => jl.id === j.id) ? '⭐' : '⭐'})</option>
+    ))}
+  </select>
+</div>
               <button 
                 onClick={finalizarRegistro}
                 className="w-full mt-12 bg-green-600 hover:bg-green-400 text-black py-5 rounded-2xl font-black uppercase tracking-[0.3em] transition-all text-xs"

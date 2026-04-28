@@ -10,6 +10,7 @@ export default function Navbar() {
   const links = [
     { name: 'Dashboard', href: '/' },
     { name: 'Equipos', href: '/equipos' },
+    { name: 'Resultados', href: '/resultados'},
   ];
 
   return (
@@ -45,7 +46,6 @@ export default function Navbar() {
             ))}
           </div>
         </div>
-
         <div className="flex items-center">
           <AdminButton />
         </div>
