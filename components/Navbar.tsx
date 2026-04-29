@@ -35,7 +35,7 @@ export default function Navbar() {
               Equipos
             </Link>
             <Link href="/resultados" className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 hover:text-green-500 transition-colors">
-              Resultados
+              Partidos
             </Link>
             <Link href="/login" className="bg-white/10 hover:bg-white text-white hover:text-black px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all">
               Login →
@@ -74,7 +74,7 @@ export default function Navbar() {
             Equipos
           </Link>
           <Link onClick={closeMenu} href="/resultados" className="text-sm font-black uppercase tracking-[0.2em] text-zinc-400 hover:text-green-500 py-2 border-b border-zinc-900">
-            Resultados
+            Partidos
           </Link>
           <Link onClick={closeMenu} href="/login" className="mt-4 bg-green-600 text-black text-center py-3 rounded-xl text-xs font-black uppercase tracking-widest">
             Login
