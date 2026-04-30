@@ -88,12 +88,12 @@ export default function Home() {
                   <tr className="text-zinc-500 uppercase text-[10px] tracking-widest border-b border-zinc-800">
                     <th className="px-4 py-4 text-center">Pos</th>
                     <th className="px-4 py-4">Equipo</th>
+                    <th className="px-4 py-4 text-right">Pts</th>
                     <th className="px-4 py-4 text-center">PJ</th>
                     <th className="px-4 py-4 text-center text-green-500/70">G</th>
                     <th className="px-4 py-4 text-center text-yellow-500/70">E</th>
                     <th className="px-4 py-4 text-center text-red-500/70">P</th>
                     <th className="px-4 py-4 text-center">DG</th>
-                    <th className="px-4 py-4 text-right">Pts</th>
                   </tr>
                 </thead>
                 <motion.tbody variants={containerVariants} className="divide-y divide-zinc-800/50">
@@ -106,12 +106,12 @@ export default function Home() {
                           {eq.nombre}
                         </div>
                       </td>
+                      <td className="px-4 py-4 text-right font-black text-green-400">{eq.puntos || 0}</td>
                       <td className="px-4 py-4 text-center text-zinc-400">{eq.pj || 0}</td>
                       <td className="px-4 py-4 text-center text-zinc-500">{eq.pg || 0}</td>
                       <td className="px-4 py-4 text-center text-zinc-500">{eq.pe || 0}</td>
                       <td className="px-4 py-4 text-center text-zinc-500">{eq.pp || 0}</td>
                       <td className="px-4 py-4 text-center font-mono text-zinc-300">{(eq.df || 0) > 0 ? `+${eq.df}` : eq.df || 0}</td>
-                      <td className="px-4 py-4 text-right font-black text-green-400">{eq.puntos || 0}</td>
                     </motion.tr>
                   ))}
                 </motion.tbody>
