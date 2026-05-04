@@ -25,6 +25,32 @@ const itemVariants: Variants = {
     }
   }
 };
+  // NUEVO COMPONENTE: Dibuja los rectángulos de tarjetas
+// NUEVO COMPONENTE: Dibuja tarjetas reales
+const RenderTarjetas = ({ partido, equipoId }: { partido: any, equipoId: string }) => {
+  const tarjetasEquipo = partido.sanciones?.filter((s: any) => s.id_equipo === equipoId) || [];
+  
+  if (tarjetasEquipo.length === 0) return null;
+
+  return (
+    <div className="flex gap-[3px] ml-2 items-center">
+      {tarjetasEquipo.map((s: any, i: number) => (
+        <div 
+          key={i} 
+          className={`
+            w-[10px] h-[14px] 
+            rounded-[2px] 
+            ${s.tipo === 'amarilla' ? 'bg-yellow-400' : 'bg-red-600'} 
+            border-[0.5px] border-black/20 
+            shadow-[0_1px_2px_rgba(0,0,0,0.5)]
+            rotate-[-5deg]
+          `}
+          title={s.tipo.toUpperCase()}
+        />
+      ))}
+    </div>
+  );
+};
 
 export default function Home() {
   const [data, setData] = useState<any>({ equipos: [], partidos: [], proximos: [], goleadores: [] });
@@ -34,11 +60,12 @@ export default function Home() {
       const ahora = new Date().toISOString();
       
       const [resEq, resPart, resProx, resGol] = await Promise.all([
-        supabase.from('equipos').select('*').order('puntos', { ascending: false }).order('df', { ascending: false }).order('gf', { ascending: false }),
-        supabase.from('partidos').select(`id, goles_local, goles_visita, equipo_local:equipos!equipo_local(id, nombre), equipo_visita:equipos!equipo_visita(id, nombre)`).eq('estado', 'jugado').order('created_at', { ascending: false }).limit(5),
-        supabase.from('partidos').select(`id, fecha, jornada, equipo_local:equipos!equipo_local(id, nombre), equipo_visita:equipos!equipo_visita(id, nombre)`).eq('estado', 'programado').gt('fecha', ahora).order('jornada', { ascending: true }).order('fecha', { ascending: true }),
-        supabase.from('jugadores').select(`nombre, goles, equipos:id_equipo (id, nombre)`).gt('goles', 0).order('goles', { ascending: false }).limit(5)
-      ]);
+  supabase.from('equipos').select('*').order('puntos', { ascending: false }).order('df', { ascending: false }).order('gf', { ascending: false }),
+  // AQUÍ ESTÁ EL CAMBIO: Se añadió sanciones(tipo, id_equipo)
+  supabase.from('partidos').select(`id, goles_local, goles_visita, equipo_local:equipos!equipo_local(id, nombre), equipo_visita:equipos!equipo_visita(id, nombre), sanciones(tipo, id_equipo)`).eq('estado', 'jugado').order('created_at', { ascending: false }).limit(5),
+  supabase.from('partidos').select(`id, fecha, jornada, equipo_local:equipos!equipo_local(id, nombre), equipo_visita:equipos!equipo_visita(id, nombre)`).eq('estado', 'programado').gt('fecha', ahora).order('jornada', { ascending: true }).order('fecha', { ascending: true }),
+  supabase.from('jugadores').select(`nombre, goles, equipos:id_equipo (id, nombre)`).gt('goles', 0).order('goles', { ascending: false }).limit(5)
+]);
 
       setData({
         equipos: resEq.data || [],
@@ -202,22 +229,33 @@ export default function Home() {
               >
                 <div className="flex items-center justify-between">
                   <div className="flex flex-col gap-1 flex-1 min-w-0">
+                    
+                    {/* EQUIPO LOCAL Y SUS TARJETAS */}
                     <div className="flex items-center justify-between pr-4">
-                      <span className="font-black text-xs md:text-sm uppercase tracking-tighter truncate text-zinc-200">
-                        {partido.equipo_local?.nombre}
-                      </span>
+                      <div className="flex items-center">
+                        <span className="font-black text-xs md:text-sm uppercase tracking-tighter truncate text-zinc-200">
+                          {partido.equipo_local?.nombre}
+                        </span>
+                        <RenderTarjetas partido={partido} equipoId={partido.equipo_local?.id} />
+                      </div>
                       <span className={`font-mono font-black text-lg ${partido.goles_local > partido.goles_visita ? 'text-green-500' : 'text-zinc-600'}`}>
                         {partido.goles_local}
                       </span>
                     </div>
-                    <div className="flex items-center justify-between pr-4">
-                      <span className="font-black text-xs md:text-sm uppercase tracking-tighter truncate text-zinc-200">
-                        {partido.equipo_visita?.nombre}
-                      </span>
+
+                    {/* EQUIPO VISITA Y SUS TARJETAS */}
+                    <div className="flex items-center justify-between pr-4 mt-1">
+                      <div className="flex items-center">
+                        <span className="font-black text-xs md:text-sm uppercase tracking-tighter truncate text-zinc-200">
+                          {partido.equipo_visita?.nombre}
+                        </span>
+                        <RenderTarjetas partido={partido} equipoId={partido.equipo_visita?.id} />
+                      </div>
                       <span className={`font-mono font-black text-lg ${partido.goles_visita > partido.goles_local ? 'text-green-500' : 'text-zinc-600'}`}>
                         {partido.goles_visita}
                       </span>
                     </div>
+
                   </div>
                   <div className="pl-4 border-l border-zinc-800 flex items-center justify-center">
                     <span className="[writing-mode:vertical-lr] rotate-180 text-[8px] font-black text-zinc-700 tracking-[0.2em]">
