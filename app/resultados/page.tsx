@@ -76,7 +76,7 @@ export default function ResultadosCompletos() {
     <main className="p-4 md:p-8 bg-black text-white min-h-screen pt-20">
       <div className="max-w-5xl mx-auto">
         <h1 className="text-2xl md:text-4xl font-black italic uppercase tracking-tighter mb-8 md:mb-12 text-green-500 text-center md:text-left">
-          ⚽ Historial de Resultados
+          Historial de Resultados
         </h1>
 
         <div className="space-y-12 md:space-y-20">
