@@ -112,7 +112,9 @@ export default function RegistrarPartido() {
   const todasLasSanciones = sanciones
     .filter(s => s.jugador_id !== '')
     .map(s => {
-      const esLocal = jugadoresLocal.some(j => j.id === s.jugador_id);
+      // FIX: Forzamos ambos IDs a String para que la comparación sea perfecta
+      const esLocal = jugadoresLocal.some(j => String(j.id) === String(s.jugador_id));
+      
       return { 
         partido_id: partidoId, 
         jugador_id: s.jugador_id, 
@@ -275,16 +277,38 @@ export default function RegistrarPartido() {
                 {sanciones.map((s, i) => (
                   <div key={i} className="flex gap-4 items-center bg-black/60 p-4 rounded-2xl border border-zinc-800/50">
                     <select 
-                      className="flex-1 bg-transparent font-bold text-sm outline-none"
+                      className="flex-1 bg-transparent font-bold text-sm outline-none text-white"
+                      value={s.jugador_id}
                       onChange={(e) => {
                         const copy = [...sanciones];
                         copy[i].jugador_id = e.target.value;
                         setSanciones(copy);
                       }}
                     >
-                      <option value="">Jugador amonestado/expulsado</option>
-                      {[...jugadoresLocal, ...jugadoresVisita].map(j => (
-                        <option key={j.id} value={j.id} className="bg-zinc-900">{j.nombre}</option>
+                      <option value="" className="bg-zinc-900 text-zinc-400">
+                        Jugador amonestado/expulsado
+                      </option>
+                      
+                      {/* Falso Separador: Equipo Local */}
+                      <option disabled className="bg-zinc-800 text-green-500 font-black text-[10px] tracking-widest uppercase">
+                        ──────── EQUIPO LOCAL ────────
+                      </option>
+                      
+                      {jugadoresLocal.map(j => (
+                        <option key={j.id} value={j.id} className="bg-zinc-900 text-white">
+                          {j.nombre}
+                        </option>
+                      ))}
+
+                      {/* Falso Separador: Equipo Visita */}
+                      <option disabled className="bg-zinc-800 text-green-500 font-black text-[10px] tracking-widest uppercase">
+                        ──────── EQUIPO VISITA ────────
+                      </option>
+                      
+                      {jugadoresVisita.map(j => (
+                        <option key={j.id} value={j.id} className="bg-zinc-900 text-white">
+                          {j.nombre}
+                        </option>
                       ))}
                     </select>
                     
@@ -307,7 +331,7 @@ export default function RegistrarPartido() {
                     <p className="text-center text-zinc-600 text-[10px] font-bold uppercase tracking-widest py-4">No hay sanciones registradas</p>
                 )}
               </div>
-<div className="bg-zinc-900 border border-yellow-500/20 p-8 rounded-[2.5rem] mb-6">
+<div className="mt-12 bg-zinc-900 border border-yellow-500/20 p-8 rounded-[2.5rem] mb-6">
   <h2 className="text-xs font-black uppercase tracking-[0.2em] text-yellow-500 mb-4 text-center">🌟 Jugador Destacado (MVP)</h2>
   <select 
     className="w-full bg-black border border-zinc-800 p-4 rounded-2xl font-bold outline-none focus:border-yellow-500 text-yellow-500"
