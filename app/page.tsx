@@ -25,36 +25,34 @@ const itemVariants: Variants = {
     }
   }
 };
-  // NUEVO COMPONENTE: Dibuja los rectángulos de tarjetas
-// NUEVO COMPONENTE: Dibuja tarjetas reales
- // NUEVO COMPONENTE: Dibuja UNA sola tarjeta representativa por equipo
+
 const RenderTarjetas = ({ partido, equipoId }: { partido: any, equipoId: string | number }) => {
-  // 1. FORZAMOS A STRING: String(s.id_equipo) === String(equipoId)
-  // Esto evita el error de que un ID sea número y el otro texto
+  // 1. Filtramos a prueba de balas convirtiendo a String
   const tarjetasEquipo = partido.sanciones?.filter((s: any) => 
     String(s.id_equipo) === String(equipoId)
   ) || [];
   
   if (tarjetasEquipo.length === 0) return null;
 
+  // 2. Evaluamos la existencia de cada tipo de tarjeta
+  const huboAmarilla = tarjetasEquipo.some((s: any) => s.tipo === 'amarilla');
   const huboRoja = tarjetasEquipo.some((s: any) => s.tipo === 'roja');
-  
-  const colorTarjeta = huboRoja ? 'bg-red-600' : 'bg-yellow-400';
-  const textoHover = huboRoja ? 'Sufrió Expulsión' : 'Sufrió Amonestación';
 
+  // 3. Renderizamos basándonos en la existencia, no en la cantidad
   return (
-    <div className="flex ml-2 items-center">
-      <div 
-        className={`
-          w-[10px] h-[14px] 
-          rounded-[2px] 
-          ${colorTarjeta} 
-          border-[0.5px] border-black/20 
-          shadow-[0_1px_2px_rgba(0,0,0,0.5)]
-          rotate-[-5deg]
-        `}
-        title={textoHover}
-      />
+    <div className="flex ml-2 items-center gap-[3px]">
+      {huboAmarilla && (
+        <div 
+          className="w-[10px] h-[14px] rounded-[2px] bg-yellow-400 border-[0.5px] border-black/20 shadow-[0_1px_2px_rgba(0,0,0,0.5)] rotate-[-5deg]"
+          title="Sufrió Amonestación(es)"
+        />
+      )}
+      {huboRoja && (
+        <div 
+          className="w-[10px] h-[14px] rounded-[2px] bg-red-600 border-[0.5px] border-black/20 shadow-[0_1px_2px_rgba(0,0,0,0.5)] rotate-[5deg]"
+          title="Sufrió Expulsión(es)"
+        />
+      )}
     </div>
   );
 };
@@ -245,7 +243,7 @@ export default function Home() {
                         </span>
                         
                         {/* DESACTIVADO TEMPORALMENTE */}
-                        {/* <RenderTarjetas partido={partido} equipoId={partido.equipo_local?.id} /> */}
+                         <RenderTarjetas partido={partido} equipoId={partido.equipo_local?.id} /> 
                         
                       </div>
                       <span className={`font-mono font-black text-lg ${partido.goles_local > partido.goles_visita ? 'text-green-500' : 'text-zinc-600'}`}>
@@ -261,7 +259,7 @@ export default function Home() {
                         </span>
                         
                         {/* DESACTIVADO TEMPORALMENTE */}
-                        {/* <RenderTarjetas partido={partido} equipoId={partido.equipo_visita?.id} /> */}
+                         <RenderTarjetas partido={partido} equipoId={partido.equipo_visita?.id} />
                         
                       </div>
                       <span className={`font-mono font-black text-lg ${partido.goles_visita > partido.goles_local ? 'text-green-500' : 'text-zinc-600'}`}>
