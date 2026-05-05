@@ -27,27 +27,34 @@ const itemVariants: Variants = {
 };
   // NUEVO COMPONENTE: Dibuja los rectángulos de tarjetas
 // NUEVO COMPONENTE: Dibuja tarjetas reales
-const RenderTarjetas = ({ partido, equipoId }: { partido: any, equipoId: string }) => {
-  const tarjetasEquipo = partido.sanciones?.filter((s: any) => s.id_equipo === equipoId) || [];
+ // NUEVO COMPONENTE: Dibuja UNA sola tarjeta representativa por equipo
+const RenderTarjetas = ({ partido, equipoId }: { partido: any, equipoId: string | number }) => {
+  // 1. FORZAMOS A STRING: String(s.id_equipo) === String(equipoId)
+  // Esto evita el error de que un ID sea número y el otro texto
+  const tarjetasEquipo = partido.sanciones?.filter((s: any) => 
+    String(s.id_equipo) === String(equipoId)
+  ) || [];
   
   if (tarjetasEquipo.length === 0) return null;
 
+  const huboRoja = tarjetasEquipo.some((s: any) => s.tipo === 'roja');
+  
+  const colorTarjeta = huboRoja ? 'bg-red-600' : 'bg-yellow-400';
+  const textoHover = huboRoja ? 'Sufrió Expulsión' : 'Sufrió Amonestación';
+
   return (
-    <div className="flex gap-[3px] ml-2 items-center">
-      {tarjetasEquipo.map((s: any, i: number) => (
-        <div 
-          key={i} 
-          className={`
-            w-[10px] h-[14px] 
-            rounded-[2px] 
-            ${s.tipo === 'amarilla' ? 'bg-yellow-400' : 'bg-red-600'} 
-            border-[0.5px] border-black/20 
-            shadow-[0_1px_2px_rgba(0,0,0,0.5)]
-            rotate-[-5deg]
-          `}
-          title={s.tipo.toUpperCase()}
-        />
-      ))}
+    <div className="flex ml-2 items-center">
+      <div 
+        className={`
+          w-[10px] h-[14px] 
+          rounded-[2px] 
+          ${colorTarjeta} 
+          border-[0.5px] border-black/20 
+          shadow-[0_1px_2px_rgba(0,0,0,0.5)]
+          rotate-[-5deg]
+        `}
+        title={textoHover}
+      />
     </div>
   );
 };
@@ -236,7 +243,10 @@ export default function Home() {
                         <span className="font-black text-xs md:text-sm uppercase tracking-tighter truncate text-zinc-200">
                           {partido.equipo_local?.nombre}
                         </span>
-                        <RenderTarjetas partido={partido} equipoId={partido.equipo_local?.id} />
+                        
+                        {/* DESACTIVADO TEMPORALMENTE */}
+                        {/* <RenderTarjetas partido={partido} equipoId={partido.equipo_local?.id} /> */}
+                        
                       </div>
                       <span className={`font-mono font-black text-lg ${partido.goles_local > partido.goles_visita ? 'text-green-500' : 'text-zinc-600'}`}>
                         {partido.goles_local}
@@ -249,7 +259,10 @@ export default function Home() {
                         <span className="font-black text-xs md:text-sm uppercase tracking-tighter truncate text-zinc-200">
                           {partido.equipo_visita?.nombre}
                         </span>
-                        <RenderTarjetas partido={partido} equipoId={partido.equipo_visita?.id} />
+                        
+                        {/* DESACTIVADO TEMPORALMENTE */}
+                        {/* <RenderTarjetas partido={partido} equipoId={partido.equipo_visita?.id} /> */}
+                        
                       </div>
                       <span className={`font-mono font-black text-lg ${partido.goles_visita > partido.goles_local ? 'text-green-500' : 'text-zinc-600'}`}>
                         {partido.goles_visita}

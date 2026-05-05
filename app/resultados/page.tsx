@@ -103,37 +103,30 @@ export default function ResultadosCompletos() {
                     {/* FIN GRID PRINCIPAL */}
 
                     {/* 2. NUEVO GRID: SANCIONES (Totalmente independiente) */}
+                    {/* DESACTIVADO TEMPORALMENTE: SANCIONES */}
+                    {/* 
                     {p.sanciones && p.sanciones.length > 0 && (
                       <div className="grid grid-cols-3 gap-2 md:gap-8 mt-6 pt-4 border-t border-zinc-800/50">
                         
-                        {/* Sanciones Equipo Local */}
                         <div className="flex flex-col items-end gap-1.5">
                           {p.sanciones.filter((s: any) => s.id_equipo === p.equipo_local.id).map((s: any, i: number) => (
                             <div key={i} className="flex items-center gap-2">
                               <span className="text-[9px] md:text-[10px] font-bold text-zinc-400 uppercase tracking-tight">
                                 {s.jugador?.nombre || 'Jugador'}
                               </span>
-                              <div 
-                                className={`w-[8px] h-[12px] md:w-[10px] md:h-[14px] rounded-[2px] ${s.tipo === 'amarilla' ? 'bg-yellow-400' : 'bg-red-600'} border-[0.5px] border-black/20 shadow-[0_1px_2px_rgba(0,0,0,0.5)] rotate-[5deg]`} 
-                                title={s.tipo} 
-                              />
+                              <div className={`w-[8px] h-[12px] md:w-[10px] md:h-[14px] rounded-[2px] ${s.tipo === 'amarilla' ? 'bg-yellow-400' : 'bg-red-600'} border-[0.5px] border-black/20 shadow-[0_1px_2px_rgba(0,0,0,0.5)] rotate-[5deg]`} title={s.tipo} />
                             </div>
                           ))}
                         </div>
 
-                        {/* Título Central */}
                         <div className="flex justify-center items-start pt-1">
                            <span className="text-[8px] font-black tracking-[0.3em] text-zinc-700 uppercase">Tarjetas</span>
                         </div>
 
-                        {/* Sanciones Equipo Visita */}
                         <div className="flex flex-col items-start gap-1.5">
                           {p.sanciones.filter((s: any) => s.id_equipo === p.equipo_visita.id).map((s: any, i: number) => (
                             <div key={i} className="flex items-center gap-2">
-                              <div 
-                                className={`w-[8px] h-[12px] md:w-[10px] md:h-[14px] rounded-[2px] ${s.tipo === 'amarilla' ? 'bg-yellow-400' : 'bg-red-600'} border-[0.5px] border-black/20 shadow-[0_1px_2px_rgba(0,0,0,0.5)] rotate-[-5deg]`} 
-                                title={s.tipo} 
-                              />
+                              <div className={`w-[8px] h-[12px] md:w-[10px] md:h-[14px] rounded-[2px] ${s.tipo === 'amarilla' ? 'bg-yellow-400' : 'bg-red-600'} border-[0.5px] border-black/20 shadow-[0_1px_2px_rgba(0,0,0,0.5)] rotate-[-5deg]`} title={s.tipo} />
                               <span className="text-[9px] md:text-[10px] font-bold text-zinc-400 uppercase tracking-tight">
                                 {s.jugador?.nombre || 'Jugador'}
                               </span>
@@ -143,6 +136,7 @@ export default function ResultadosCompletos() {
 
                       </div>
                     )}
+              
                     {/* FIN SANCIONES */}
 
                     {/* 3. FOOTER DEL PARTIDO (MVP y Fecha) */}
