@@ -4,6 +4,7 @@ import { supabase } from '@/lib/supabase';
 import Image from 'next/image';
 import { motion, Variants } from 'framer-motion';
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 
 // Variantes para animaciones de entrada
 const containerVariants: Variants = {
@@ -218,63 +219,52 @@ export default function Home() {
           animate="visible" 
           className="lg:col-span-12 mt-8"
         >
-          <div className="flex items-center justify-between mb-6 px-2">
-            <h2 className="text-zinc-500 text-[10px] font-black uppercase tracking-[0.3em] italic">
-              Últimos Resultados
-            </h2>
-            <div className="h-[1px] flex-1 bg-zinc-800 ml-4 opacity-50"></div>
-          </div>
-
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {data.partidos.map((partido: any) => (
-              <motion.div 
-                whileHover={{ y: -2 }} 
-                key={partido.id} 
-                className="bg-zinc-900/20 border-l-2 border-green-500 p-5 rounded-r-xl transition-all"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex flex-col gap-1 flex-1 min-w-0">
-                    
-                    {/* EQUIPO LOCAL Y SUS TARJETAS */}
-                    <div className="flex items-center justify-between pr-4">
-                      <div className="flex items-center">
-                        <span className="font-black text-xs md:text-sm uppercase tracking-tighter truncate text-zinc-200">
-                          {partido.equipo_local?.nombre}
+              <Link href={`/resultados#partido-${partido.id}`} key={partido.id}>
+                <motion.div 
+                  whileHover={{ y: -2 }} 
+                  className="bg-zinc-900/20 border-l-2 border-green-500 p-5 rounded-r-xl transition-all cursor-pointer hover:bg-zinc-900/40 hover:shadow-lg"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex flex-col gap-1 flex-1 min-w-0">
+                      
+                      {/* EQUIPO LOCAL Y SUS TARJETAS */}
+                      <div className="flex items-center justify-between pr-4">
+                        <div className="flex items-center">
+                          <span className="font-black text-xs md:text-sm uppercase tracking-tighter truncate text-zinc-200">
+                            {partido.equipo_local?.nombre}
+                          </span>
+                          <RenderTarjetas partido={partido} equipoId={partido.equipo_local?.id} /> 
+                        </div>
+                        <span className={`font-mono font-black text-lg ${partido.goles_local > partido.goles_visita ? 'text-green-500' : 'text-zinc-600'}`}>
+                          {partido.goles_local}
                         </span>
-                        
-                        {/* DESACTIVADO TEMPORALMENTE */}
-                         <RenderTarjetas partido={partido} equipoId={partido.equipo_local?.id} /> 
-                        
                       </div>
-                      <span className={`font-mono font-black text-lg ${partido.goles_local > partido.goles_visita ? 'text-green-500' : 'text-zinc-600'}`}>
-                        {partido.goles_local}
+
+                      {/* EQUIPO VISITA Y SUS TARJETAS */}
+                      <div className="flex items-center justify-between pr-4 mt-1">
+                        <div className="flex items-center">
+                          <span className="font-black text-xs md:text-sm uppercase tracking-tighter truncate text-zinc-200">
+                            {partido.equipo_visita?.nombre}
+                          </span>
+                          <RenderTarjetas partido={partido} equipoId={partido.equipo_visita?.id} />
+                        </div>
+                        <span className={`font-mono font-black text-lg ${partido.goles_visita > partido.goles_local ? 'text-green-500' : 'text-zinc-600'}`}>
+                          {partido.goles_visita}
+                        </span>
+                      </div>
+
+                    </div>
+                    {/* Botón visual para indicar que es clickeable */}
+                    <div className="pl-4 border-l border-zinc-800 flex items-center justify-center text-zinc-600 group-hover:text-green-500 transition-colors">
+                      <span className="[writing-mode:vertical-lr] rotate-180 text-[8px] font-black tracking-[0.2em]">
+                        VER MÁS
                       </span>
                     </div>
-
-                    {/* EQUIPO VISITA Y SUS TARJETAS */}
-                    <div className="flex items-center justify-between pr-4 mt-1">
-                      <div className="flex items-center">
-                        <span className="font-black text-xs md:text-sm uppercase tracking-tighter truncate text-zinc-200">
-                          {partido.equipo_visita?.nombre}
-                        </span>
-                        
-                        {/* DESACTIVADO TEMPORALMENTE */}
-                         <RenderTarjetas partido={partido} equipoId={partido.equipo_visita?.id} />
-                        
-                      </div>
-                      <span className={`font-mono font-black text-lg ${partido.goles_visita > partido.goles_local ? 'text-green-500' : 'text-zinc-600'}`}>
-                        {partido.goles_visita}
-                      </span>
-                    </div>
-
                   </div>
-                  <div className="pl-4 border-l border-zinc-800 flex items-center justify-center">
-                    <span className="[writing-mode:vertical-lr] rotate-180 text-[8px] font-black text-zinc-700 tracking-[0.2em]">
-                      FINAL
-                    </span>
-                  </div>
-                </div>
-              </motion.div>
+                </motion.div>
+              </Link>
             ))}
           </div>
         </motion.section>

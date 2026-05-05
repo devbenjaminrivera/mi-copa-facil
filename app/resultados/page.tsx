@@ -21,7 +21,7 @@ export default function ResultadosCompletos() {
           mvp:jugadores!id_mvp(nombre),
           equipo_local:equipos!equipo_local(id, nombre), 
           equipo_visita:equipos!equipo_visita(id, nombre),
-          sanciones(tipo, id_equipo, jugador:jugadores(nombre)) // <-- ESTO ES LO NUEVO
+          sanciones(tipo, id_equipo, jugador:jugadores(nombre))
         `)
         .eq('estado', 'jugado')
         .order('jornada', { ascending: false })
@@ -31,6 +31,39 @@ export default function ResultadosCompletos() {
     };
     fetchPartidos();
   }, []);
+
+ // EFECTO DE NAVEGACIÓN Y BRILLO
+  useEffect(() => {
+    if (partidos.length > 0 && window.location.hash) {
+      const hash = window.location.hash; // Ej: "#partido-110"
+      const idBuscado = hash.replace('#partido-', ''); // Nos quedamos solo con "110"
+      
+      // 1. Le decimos a React que este partido debe brillar
+      setPartidoDestacado(idBuscado);
+
+      // 2. Intentamos hacer el scroll
+      let intentos = 0;
+      const buscador = setInterval(() => {
+        const elemento = document.querySelector(hash);
+        if (elemento) {
+          clearInterval(buscador);
+          // Hará scroll solo si hay espacio suficiente en la página
+          elemento.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          
+          // 3. A los 2 segundos, apagamos el brillo
+          setTimeout(() => {
+            setPartidoDestacado(null);
+          }, 2000);
+        }
+        
+        intentos++;
+        if (intentos >= 10) clearInterval(buscador);
+      }, 100);
+
+      return () => clearInterval(buscador);
+    }
+  }, [partidos]);
+  const [partidoDestacado, setPartidoDestacado] = useState<string | null>(null);
 
   const jornadas = partidos.reduce((acc: any, partido: any) => {
     const j = partido.jornada || 1;
@@ -62,7 +95,13 @@ export default function ResultadosCompletos() {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     key={p.id}
-                    className="bg-zinc-900/30 border border-zinc-800 p-5 md:p-8 rounded-[2rem] md:rounded-[2.5rem] group hover:border-zinc-600 transition-all shadow-xl"
+                    id={`partido-${p.id}`}
+                    className={`scroll-mt-28 p-5 md:p-8 rounded-[2rem] md:rounded-[2.5rem] group transition-all shadow-xl border
+                      ${String(partidoDestacado) === String(p.id) 
+                        ? 'bg-zinc-800/90 border-green-500 ring-4 ring-green-500/30 scale-[1.02]' 
+                        : 'bg-zinc-900/30 border-zinc-800 hover:border-zinc-600'
+                      }
+                    `}
                   >
                     {/* 1. GRID PRINCIPAL (Solo Equipos y Marcador) */}
                     <div className="grid grid-cols-3 items-center gap-2 md:gap-8">
