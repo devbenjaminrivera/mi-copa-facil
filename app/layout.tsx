@@ -1,4 +1,3 @@
-// layout principal
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -28,7 +27,8 @@ export default function RootLayout({
   return (
     <html
       lang="es"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased bg-black`}
+      style={{ colorScheme: 'dark' }}
     >
       <body className="min-h-full flex flex-col bg-black pt-16 text-white">
         {/* Aquí renderizamos la Navbar para que aparezca en todas las páginas */}

@@ -75,14 +75,14 @@ export default function Home() {
 
   return (
     <main className="bg-black text-white min-h-screen font-sans">
-      <div className="max-w-7xl mx-auto px-4 md:px-8 pt-24 pb-20">
+      <div className="max-w-7xl mx-auto px-4 md:px-8 pt-20 md:pt-24 pb-20">
 
         {/* ── HERO HEADER ──────────────────────────────────────────── */}
         <motion.header
           initial={{ opacity: 0, y: -12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="mb-12 md:mb-16"
+          className="mb-10 md:mb-16"
         >
           <p className="text-green-500 font-mono text-[10px] uppercase tracking-[0.35em] mb-3">
             Copa CEVI 2026 — Estadísticas Oficiales
