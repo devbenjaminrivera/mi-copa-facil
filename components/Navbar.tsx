@@ -3,82 +3,116 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { usePathname } from 'next/navigation';
+
+const NAV_LINKS = [
+  { href: '/',           label: 'Dashboard' },
+  { href: '/equipos',    label: 'Equipos'   },
+  { href: '/resultados', label: 'Resultados'},
+];
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const pathname = usePathname();
 
-  // Cierra el menú al hacer clic en un enlace en móvil
   const closeMenu = () => setIsOpen(false);
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-black/90 backdrop-blur-md border-b border-zinc-800">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-black/95 backdrop-blur-md border-b border-zinc-800/80">
       <div className="max-w-7xl mx-auto px-4 md:px-8">
-        <div className="flex items-center justify-between h-20">
-          
-          {/* 1. LOGO CEVI */}
-          <Link href="/" className="flex items-center gap-3 z-50">
-            {/* Si tienes un logo en /public, ajusta la ruta aquí */}
-            <div className="relative w-8 h-8 md:w-10 md:h-10">
-              <Image src="/logo.png" alt="cevi" fill className="object-contain" />
+        <div className="flex items-center justify-between h-16">
+
+          {/* LOGO */}
+          <Link href="/" className="flex items-center gap-2.5 z-50 shrink-0">
+            <div className="relative w-7 h-7 md:w-8 md:h-8">
+              <Image src="/logo.png" alt="Copa CEVI" fill className="object-contain" />
             </div>
-            <span className="text-xl md:text-2xl font-black italic tracking-tighter text-white">
+            <span className="text-base md:text-lg font-black italic tracking-tighter text-white">
               COPA <span className="text-green-500">CEVI</span>
             </span>
           </Link>
 
-          {/* 2. ENLACES VERSIÓN PC (Ocultos en móvil con hidden md:flex) */}
-          <div className="hidden md:flex items-center gap-8">
-            <Link href="/" className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 hover:text-green-500 transition-colors">
-              Dashboard
-            </Link>
-            <Link href="/equipos" className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 hover:text-green-500 transition-colors">
-              Equipos
-            </Link>
-            <Link href="/resultados" className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 hover:text-green-500 transition-colors">
-              Partidos
-            </Link>
-            <Link href="/login" className="bg-white/10 hover:bg-white text-white hover:text-black px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all">
-              Login →
+          {/* NAV DESKTOP */}
+          <div className="hidden md:flex items-center gap-1">
+            {NAV_LINKS.map(({ href, label }) => {
+              const isActive = href === '/' ? pathname === '/' : pathname.startsWith(href);
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all
+                    ${isActive
+                      ? 'bg-zinc-800 text-white'
+                      : 'text-zinc-500 hover:text-white hover:bg-zinc-900'
+                    }
+                  `}
+                >
+                  {label}
+                </Link>
+              );
+            })}
+          </div>
+
+          {/* ACCIONES DESKTOP */}
+          <div className="hidden md:flex items-center gap-3">
+            <Link
+              href="/login"
+              className="border border-zinc-800 hover:border-zinc-600 hover:bg-zinc-900 text-zinc-400 hover:text-white px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all"
+            >
+              Admin →
             </Link>
           </div>
 
-          {/* 3. BOTÓN HAMBURGUESA VERSIÓN MÓVIL (Oculto en PC con md:hidden) */}
-          <button 
+          {/* HAMBURGUESA MÓVIL */}
+          <button
             onClick={() => setIsOpen(!isOpen)}
-            className="md:hidden text-zinc-400 hover:text-white p-2 focus:outline-none z-50"
+            className="md:hidden p-2 text-zinc-400 hover:text-white transition-colors z-50"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              {isOpen ? (
-                // Ícono de "X" cuando está abierto
+            {isOpen ? (
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              ) : (
-                // Ícono de 3 rayas cuando está cerrado
+              </svg>
+            ) : (
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              )}
-            </svg>
+              </svg>
+            )}
           </button>
         </div>
       </div>
 
-      {/* 4. MENÚ DESPLEGABLE MÓVIL */}
-      <div 
-        className={`md:hidden absolute top-20 left-0 w-full bg-zinc-950 border-b border-zinc-800 transition-all duration-300 ease-in-out overflow-hidden ${
-          isOpen ? 'max-h-96 opacity-100 py-4' : 'max-h-0 opacity-0 py-0'
-        }`}
-      >
-        <div className="flex flex-col gap-4 px-6">
-          <Link onClick={closeMenu} href="/" className="text-sm font-black uppercase tracking-[0.2em] text-zinc-400 hover:text-green-500 py-2 border-b border-zinc-900">
-            Dashboard
-          </Link>
-          <Link onClick={closeMenu} href="/equipos" className="text-sm font-black uppercase tracking-[0.2em] text-zinc-400 hover:text-green-500 py-2 border-b border-zinc-900">
-            Equipos
-          </Link>
-          <Link onClick={closeMenu} href="/resultados" className="text-sm font-black uppercase tracking-[0.2em] text-zinc-400 hover:text-green-500 py-2 border-b border-zinc-900">
-            Partidos
-          </Link>
-          <Link onClick={closeMenu} href="/login" className="mt-4 bg-green-600 text-black text-center py-3 rounded-xl text-xs font-black uppercase tracking-widest">
-            Login
-          </Link>
+      {/* MENÚ MÓVIL */}
+      <div className={`md:hidden border-t border-zinc-800/60 transition-all duration-200 overflow-hidden
+        ${isOpen ? 'max-h-72 opacity-100' : 'max-h-0 opacity-0'}
+      `}>
+        <div className="flex flex-col px-4 py-3 gap-1 bg-zinc-950">
+          {NAV_LINKS.map(({ href, label }) => {
+            const isActive = href === '/' ? pathname === '/' : pathname.startsWith(href);
+            return (
+              <Link
+                key={href}
+                href={href}
+                onClick={closeMenu}
+                className={`px-4 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all
+                  ${isActive
+                    ? 'bg-zinc-800 text-white'
+                    : 'text-zinc-500 hover:text-white hover:bg-zinc-900'
+                  }
+                `}
+              >
+                {label}
+              </Link>
+            );
+          })}
+          <div className="border-t border-zinc-800 mt-2 pt-2">
+            <Link
+              href="/login"
+              onClick={closeMenu}
+              className="block w-full text-center py-3 rounded-xl text-[10px] font-black uppercase tracking-widest text-zinc-500 border border-zinc-800 hover:border-zinc-700 hover:text-white transition-all"
+            >
+              Admin →
+            </Link>
+          </div>
         </div>
       </div>
     </nav>

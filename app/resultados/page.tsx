@@ -7,21 +7,23 @@ import { useState, useEffect } from 'react';
 
 export default function ResultadosCompletos() {
   const [partidos, setPartidos] = useState<any[]>([]);
+  const [partidoDestacado, setPartidoDestacado] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchPartidos = async () => {
       const { data } = await supabase
         .from('partidos')
         .select(`
-          id, 
-          goles_local, 
-          goles_visita, 
+          id,
+          goles_local,
+          goles_visita,
           jornada,
           fecha,
           mvp:jugadores!id_mvp(nombre),
-          equipo_local:equipos!equipo_local(id, nombre), 
+          equipo_local:equipos!equipo_local(id, nombre),
           equipo_visita:equipos!equipo_visita(id, nombre),
-          sanciones(tipo, id_equipo, jugador:jugadores(nombre))
+          sanciones(tipo, id_equipo, jugador:jugadores(nombre)),
+          goles(id_equipo, jugador:jugadores(nombre))
         `)
         .eq('estado', 'jugado')
         .order('jornada', { ascending: false })
@@ -32,30 +34,21 @@ export default function ResultadosCompletos() {
     fetchPartidos();
   }, []);
 
- // EFECTO DE NAVEGACIÓN Y BRILLO
+  // SCROLL + HIGHLIGHT al navegar desde el dashboard
   useEffect(() => {
     if (partidos.length > 0 && window.location.hash) {
-      const hash = window.location.hash; // Ej: "#partido-110"
-      const idBuscado = hash.replace('#partido-', ''); // Nos quedamos solo con "110"
-      
-      // 1. Le decimos a React que este partido debe brillar
+      const hash = window.location.hash;
+      const idBuscado = hash.replace('#partido-', '');
       setPartidoDestacado(idBuscado);
 
-      // 2. Intentamos hacer el scroll
       let intentos = 0;
       const buscador = setInterval(() => {
         const elemento = document.querySelector(hash);
         if (elemento) {
           clearInterval(buscador);
-          // Hará scroll solo si hay espacio suficiente en la página
           elemento.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          
-          // 3. A los 2 segundos, apagamos el brillo
-          setTimeout(() => {
-            setPartidoDestacado(null);
-          }, 2000);
+          setTimeout(() => setPartidoDestacado(null), 2000);
         }
-        
         intentos++;
         if (intentos >= 10) clearInterval(buscador);
       }, 100);
@@ -63,7 +56,6 @@ export default function ResultadosCompletos() {
       return () => clearInterval(buscador);
     }
   }, [partidos]);
-  const [partidoDestacado, setPartidoDestacado] = useState<string | null>(null);
 
   const jornadas = partidos.reduce((acc: any, partido: any) => {
     const j = partido.jornada || 1;
@@ -72,146 +64,251 @@ export default function ResultadosCompletos() {
     return acc;
   }, {});
 
+  // Agrupa los goles de un partido por equipo y cuenta repeticiones
+  const getGoleadoresPorEquipo = (partido: any, equipoId: number) => {
+    const goles = partido.goles?.filter(
+      (g: any) => String(g.id_equipo) === String(equipoId)
+    ) || [];
+
+    // Contar cuántos goles hizo cada jugador
+    const conteo: Record<string, number> = {};
+    goles.forEach((g: any) => {
+      const nombre = g.jugador?.nombre || 'Desconocido';
+      conteo[nombre] = (conteo[nombre] || 0) + 1;
+    });
+
+    return Object.entries(conteo); // [['Nombre', cantidad], ...]
+  };
+
   return (
     <main className="p-4 md:p-8 bg-black text-white min-h-screen pt-20">
       <div className="max-w-5xl mx-auto">
-        <h1 className="text-2xl md:text-4xl font-black italic uppercase tracking-tighter mb-8 md:mb-12 text-green-500 text-center md:text-left">
-          Historial de Resultados
-        </h1>
 
-        <div className="space-y-12 md:space-y-20">
-          {Object.keys(jornadas).sort((a, b) => Number(b) - Number(a)).map((num) => (
-            <section key={num} className="relative">
-              <div className="sticky top-16 md:top-20 z-10 bg-black/90 backdrop-blur-md py-3 mb-6 border-b border-zinc-800">
-                <h2 className="text-lg md:text-xl font-black uppercase text-zinc-500 tracking-widest italic">
-                  Jornada {num}
-                </h2>
-              </div>
+        {/* HEADER */}
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-10 md:mb-14"
+        >
+          <p className="text-green-500 font-mono text-[10px] uppercase tracking-[0.3em] mb-3">
+            Copa CEVI 2026
+          </p>
+          <h1 className="text-3xl md:text-5xl font-black italic uppercase tracking-tighter leading-none">
+            Resultados
+          </h1>
+        </motion.div>
 
-              <div className="grid grid-cols-1 gap-6">
-                {jornadas[num].map((p: any) => (
-                  <motion.div 
-                    initial={{ opacity: 0, y: 10 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    key={p.id}
-                    id={`partido-${p.id}`}
-                    className={`scroll-mt-28 p-5 md:p-8 rounded-[2rem] md:rounded-[2.5rem] group transition-all shadow-xl border
-                      ${String(partidoDestacado) === String(p.id) 
-                        ? 'bg-zinc-800/90 border-green-500 ring-4 ring-green-500/30 scale-[1.02]' 
-                        : 'bg-zinc-900/30 border-zinc-800 hover:border-zinc-600'
-                      }
-                    `}
-                  >
-                    {/* 1. GRID PRINCIPAL (Solo Equipos y Marcador) */}
-                    <div className="grid grid-cols-3 items-center gap-2 md:gap-8">
-                      
-                      {/* Equipo Local */}
-                      <div className="flex flex-col md:flex-row items-center justify-end gap-2 md:gap-4 text-center md:text-right">
-                        <span className="order-2 md:order-1 font-black uppercase text-[10px] md:text-base leading-tight">
-                          {p.equipo_local?.nombre}
-                        </span>
-                        <div className="order-1 md:order-2 relative w-10 h-10 md:w-16 md:h-16 shrink-0">
-                          <Image src={`/escudos/${p.equipo_local?.id}.png`} alt="" fill className="object-contain" />
-                        </div>
-                      </div>
+        <div className="space-y-14 md:space-y-20">
+          {Object.keys(jornadas)
+            .sort((a, b) => Number(b) - Number(a))
+            .map((num) => (
+              <section key={num} className="relative">
 
-                      {/* Marcador Central */}
-                      <div className="flex flex-col items-center gap-1">
-                        <div className="flex items-center gap-2 md:gap-4 bg-white/5 px-4 py-2 md:px-8 md:py-3 rounded-2xl border border-white/5 group-hover:border-green-500/30 transition-all">
-                          <span className="text-2xl md:text-5xl font-black font-mono tracking-tighter">
-                            {p.goles_local}
-                          </span>
-                          <span className="text-zinc-700 font-black italic text-[10px] md:text-base">VS</span>
-                          <span className="text-2xl md:text-5xl font-black font-mono tracking-tighter">
-                            {p.goles_visita}
-                          </span>
-                        </div>
-                      </div>
+                {/* STICKY JORNADA HEADER */}
+                <div className="sticky top-16 md:top-20 z-10 bg-black/90 backdrop-blur-md py-3 mb-5 border-b border-zinc-800/60">
+                  <div className="flex items-center gap-3">
+                    <h2 className="text-xs font-black uppercase tracking-[0.3em] text-zinc-500 italic">
+                      Jornada {num}
+                    </h2>
+                    <div className="h-px flex-1 bg-zinc-900" />
+                    <span className="text-[9px] font-mono text-zinc-700">
+                      {jornadas[num].length} partido{jornadas[num].length !== 1 ? 's' : ''}
+                    </span>
+                  </div>
+                </div>
 
-                      {/* Equipo Visita */}
-                      <div className="flex flex-col md:flex-row items-center justify-start gap-2 md:gap-4 text-center md:text-left">
-                        <div className="relative w-10 h-10 md:w-16 md:h-16 shrink-0">
-                          <Image src={`/escudos/${p.equipo_visita?.id}.png`} alt="" fill className="object-contain" />
-                        </div>
-                        <span className="font-black uppercase text-[10px] md:text-base leading-tight">
-                          {p.equipo_visita?.nombre}
-                        </span>
-                      </div>
-                    </div>
-                    {/* FIN GRID PRINCIPAL */}
+                <div className="grid grid-cols-1 gap-4">
+                  {jornadas[num].map((p: any) => {
+                    const isDestacado = String(partidoDestacado) === String(p.id);
+                    const goleadoresLocal = getGoleadoresPorEquipo(p, p.equipo_local?.id);
+                    const goleadoresVisita = getGoleadoresPorEquipo(p, p.equipo_visita?.id);
+                    const hayGoles = goleadoresLocal.length > 0 || goleadoresVisita.length > 0;
+                    const haySanciones = p.sanciones && p.sanciones.length > 0;
 
-                    {/* 2. NUEVO GRID: SANCIONES (Totalmente independiente) */}
-                    {/* DESACTIVADO TEMPORALMENTE: SANCIONES */}
-                    
-                    {p.sanciones && p.sanciones.length > 0 && (
-                      <div className="grid grid-cols-3 gap-2 md:gap-8 mt-6 pt-4 border-t border-zinc-800/50">
-                        
-                        {/* Sanciones Equipo Local (Alineado a la derecha) */}
-                        <div className="flex flex-col items-end gap-1.5">
-                          {p.sanciones
-                            .filter((s: any) => String(s.id_equipo) === String(p.equipo_local?.id)) /* <-- FIX AQUÍ */
-                            .map((s: any, i: number) => (
-                            <div key={i} className="flex items-center gap-2">
-                              <span className="text-[9px] md:text-[10px] font-bold text-zinc-400 uppercase tracking-tight">
-                                {s.jugador?.nombre || 'Jugador'}
+                    return (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        key={p.id}
+                        id={`partido-${p.id}`}
+                        className={`scroll-mt-28 rounded-2xl md:rounded-3xl border transition-all duration-300
+                          ${isDestacado
+                            ? 'bg-zinc-800/80 border-green-500 ring-2 ring-green-500/20'
+                            : 'bg-zinc-900/20 border-zinc-800/60 hover:border-zinc-700/80 hover:bg-zinc-900/30'
+                          }
+                        `}
+                      >
+                        {/* ── MARCADOR PRINCIPAL ───────────────────────── */}
+                        <div className="p-5 md:p-6">
+                          <div className="grid grid-cols-3 items-center gap-3 md:gap-6">
+
+                            {/* EQUIPO LOCAL */}
+                            <div className="flex flex-col md:flex-row items-center justify-end gap-2 md:gap-3 text-center md:text-right">
+                              <span className="order-2 md:order-1 font-black uppercase text-[11px] md:text-sm leading-tight text-zinc-200">
+                                {p.equipo_local?.nombre}
                               </span>
-                              <div className={`w-[8px] h-[12px] md:w-[10px] md:h-[14px] rounded-[2px] ${s.tipo === 'amarilla' ? 'bg-yellow-400' : 'bg-red-600'} border-[0.5px] border-black/20 shadow-[0_1px_2px_rgba(0,0,0,0.5)] rotate-[5deg]`} title={s.tipo} />
+                              <div className="order-1 md:order-2 relative w-9 h-9 md:w-14 md:h-14 shrink-0">
+                                <Image
+                                  src={`/escudos/${p.equipo_local?.id}.png`}
+                                  alt=""
+                                  fill
+                                  className="object-contain"
+                                />
+                              </div>
                             </div>
-                          ))}
-                        </div>
 
-                        {/* Espacio Central */}
-                        <div className="flex justify-center items-start pt-1">
-                           <span className="text-[8px] font-black tracking-[0.3em] text-zinc-700 uppercase">Tarjetas</span>
-                        </div>
+                            {/* MARCADOR CENTRAL */}
+                            <div className="flex flex-col items-center gap-1.5">
+                              <div className="flex items-center gap-2 md:gap-3 bg-black/40 border border-zinc-800/80 px-4 py-2 md:px-6 md:py-3 rounded-xl">
+                                <span className={`text-2xl md:text-4xl font-black font-mono tabular-nums
+                                  ${p.goles_local > p.goles_visita ? 'text-white' : 'text-zinc-600'}
+                                `}>
+                                  {p.goles_local}
+                                </span>
+                                <span className="text-zinc-700 font-black text-xs italic">–</span>
+                                <span className={`text-2xl md:text-4xl font-black font-mono tabular-nums
+                                  ${p.goles_visita > p.goles_local ? 'text-white' : 'text-zinc-600'}
+                                `}>
+                                  {p.goles_visita}
+                                </span>
+                              </div>
+                              {p.fecha && (
+                                <span className="text-[8px] font-mono text-zinc-700 uppercase tracking-wider">
+                                  {new Date(p.fecha).toLocaleDateString('es-CL', {
+                                    day: '2-digit', month: 'short', year: 'numeric'
+                                  })}
+                                </span>
+                              )}
+                            </div>
 
-                        {/* Sanciones Equipo Visita (Alineado a la izquierda) */}
-                        <div className="flex flex-col items-start gap-1.5">
-                          {p.sanciones
-                            .filter((s: any) => String(s.id_equipo) === String(p.equipo_visita?.id)) /* <-- FIX AQUÍ */
-                            .map((s: any, i: number) => (
-                            <div key={i} className="flex items-center gap-2">
-                              <div className={`w-[8px] h-[12px] md:w-[10px] md:h-[14px] rounded-[2px] ${s.tipo === 'amarilla' ? 'bg-yellow-400' : 'bg-red-600'} border-[0.5px] border-black/20 shadow-[0_1px_2px_rgba(0,0,0,0.5)] rotate-[-5deg]`} title={s.tipo} />
-                              <span className="text-[9px] md:text-[10px] font-bold text-zinc-400 uppercase tracking-tight">
-                                {s.jugador?.nombre || 'Jugador'}
+                            {/* EQUIPO VISITA */}
+                            <div className="flex flex-col md:flex-row items-center justify-start gap-2 md:gap-3 text-center md:text-left">
+                              <div className="relative w-9 h-9 md:w-14 md:h-14 shrink-0">
+                                <Image
+                                  src={`/escudos/${p.equipo_visita?.id}.png`}
+                                  alt=""
+                                  fill
+                                  className="object-contain"
+                                />
+                              </div>
+                              <span className="font-black uppercase text-[11px] md:text-sm leading-tight text-zinc-200">
+                                {p.equipo_visita?.nombre}
                               </span>
                             </div>
-                          ))}
+                          </div>
                         </div>
 
-                      </div>
-                    )}
-              
-                    {/* FIN SANCIONES */}
+                        {/* ── GOLEADORES ──────────────────────────────── */}
+                        {hayGoles && (
+                          <div className="border-t border-zinc-800/50 px-5 md:px-6 py-4">
+                            <div className="grid grid-cols-3 gap-3 items-start">
 
-                    {/* 3. FOOTER DEL PARTIDO (MVP y Fecha) */}
-                    <div className="mt-6 pt-5 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4">
-                      <div className="flex items-center gap-3 bg-yellow-500/5 px-4 py-1.5 rounded-full border border-yellow-500/10">
-                        <span className="text-[8px] md:text-[10px] font-black text-yellow-600 uppercase tracking-[0.2em]">MVP:</span>
-                        <span className="text-[10px] md:text-xs font-black text-yellow-500 uppercase italic">
-                          🌟 {p.mvp?.nombre || 'Pendiente'}
-                        </span>
-                      </div>
-                      
-                      <div className="flex flex-col items-center md:items-end">
-                         <span className="text-[9px] md:text-[10px] font-mono text-zinc-600 font-black uppercase tracking-tighter">
-                          {new Date(p.fecha).toLocaleString('es-CL', { 
-                            day: '2-digit', 
-                            month: 'long', 
-                            year: 'numeric',
-                          })}
-                        </span>
-                      </div>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            </section>
-          ))}
+                              {/* GOLES LOCAL */}
+                              <div className="flex flex-col items-end gap-1">
+                                {goleadoresLocal.map(([nombre, cantidad], i) => (
+                                  <div key={i} className="flex items-center gap-1.5">
+                                    <span className="text-[10px] md:text-xs text-zinc-400 font-medium text-right leading-tight">
+                                      {nombre}
+                                    </span>
+                                    {Array.from({ length: cantidad as number }).map((_, k) => (
+                                      <span key={k} className="text-[10px]">⚽</span>
+                                    ))}
+                                  </div>
+                                ))}
+                              </div>
+
+                              {/* ETIQUETA CENTRAL */}
+                              <div className="flex justify-center pt-0.5">
+                                <span className="text-[8px] font-black tracking-[0.25em] text-zinc-700 uppercase">
+                                  Goles
+                                </span>
+                              </div>
+
+                              {/* GOLES VISITA */}
+                              <div className="flex flex-col items-start gap-1">
+                                {goleadoresVisita.map(([nombre, cantidad], i) => (
+                                  <div key={i} className="flex items-center gap-1.5">
+                                    {Array.from({ length: cantidad as number }).map((_, k) => (
+                                      <span key={k} className="text-[10px]">⚽</span>
+                                    ))}
+                                    <span className="text-[10px] md:text-xs text-zinc-400 font-medium text-left leading-tight">
+                                      {nombre}
+                                    </span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* ── SANCIONES ───────────────────────────────── */}
+                        {haySanciones && (
+                          <div className="border-t border-zinc-800/50 px-5 md:px-6 py-4">
+                            <div className="grid grid-cols-3 gap-3 items-start">
+
+                              {/* SANCIONES LOCAL */}
+                              <div className="flex flex-col items-end gap-1.5">
+                                {p.sanciones
+                                  .filter((s: any) => String(s.id_equipo) === String(p.equipo_local?.id))
+                                  .map((s: any, i: number) => (
+                                    <div key={i} className="flex items-center gap-1.5">
+                                      <span className="text-[10px] text-zinc-500 text-right leading-tight">
+                                        {s.jugador?.nombre}
+                                      </span>
+                                      <div className={`w-2.5 h-3.5 rounded-[2px] shrink-0
+                                        ${s.tipo === 'amarilla' ? 'bg-yellow-400' : 'bg-red-600'}
+                                      `} />
+                                    </div>
+                                  ))}
+                              </div>
+
+                              {/* ETIQUETA CENTRAL */}
+                              <div className="flex justify-center pt-0.5">
+                                <span className="text-[8px] font-black tracking-[0.25em] text-zinc-700 uppercase">
+                                  Tarjetas
+                                </span>
+                              </div>
+
+                              {/* SANCIONES VISITA */}
+                              <div className="flex flex-col items-start gap-1.5">
+                                {p.sanciones
+                                  .filter((s: any) => String(s.id_equipo) === String(p.equipo_visita?.id))
+                                  .map((s: any, i: number) => (
+                                    <div key={i} className="flex items-center gap-1.5">
+                                      <div className={`w-2.5 h-3.5 rounded-[2px] shrink-0
+                                        ${s.tipo === 'amarilla' ? 'bg-yellow-400' : 'bg-red-600'}
+                                      `} />
+                                      <span className="text-[10px] text-zinc-500 text-left leading-tight">
+                                        {s.jugador?.nombre}
+                                      </span>
+                                    </div>
+                                  ))}
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* ── FOOTER MVP ───────────────────────────────── */}
+                        <div className={`px-5 md:px-6 py-3 flex items-center justify-between border-t border-zinc-800/40
+                          ${hayGoles || haySanciones ? '' : 'border-t'}
+                        `}>
+                          <div className="flex items-center gap-2">
+                            <span className="text-[8px] font-black text-yellow-600/70 uppercase tracking-[0.2em]">MVP</span>
+                            <span className="text-[10px] font-black text-yellow-500 uppercase italic">
+                              {p.mvp?.nombre ? `⭐ ${p.mvp.nombre}` : '—'}
+                            </span>
+                          </div>
+                        </div>
+
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              </section>
+            ))}
         </div>
       </div>
-      
 
       <style jsx>{`
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }

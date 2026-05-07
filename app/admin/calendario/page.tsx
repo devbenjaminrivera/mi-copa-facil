@@ -1,3 +1,4 @@
+// page calendario
 'use client';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
@@ -78,7 +79,7 @@ export default function ProgramarCalendario() {
   }, {});
 
   return (
-    <div className="p-8 bg-black min-h-screen text-white font-sans pt-24">
+    <div className="p-8 bg-black min-h-screen text-white font-sans">
       <div className="max-w-2xl mx-auto">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-2xl font-black italic uppercase tracking-tighter text-green-500">🗓️ Calendario</h1>
