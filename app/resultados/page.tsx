@@ -202,42 +202,49 @@ export default function ResultadosCompletos() {
                         {/* ── GOLEADORES ──────────────────────────────── */}
                         {hayGoles && (
                           <div className="border-t border-zinc-800/50 px-5 md:px-6 py-4">
-                            <div className="grid grid-cols-3 gap-3 items-start">
+                            <div className="grid grid-cols-3 gap-3 items-start min-w-0">
 
                               {/* GOLES LOCAL */}
-                              <div className="flex flex-col items-end gap-1">
+                              <div className="flex flex-col items-end gap-1 w-full min-w-0">
                                 {goleadoresLocal.map(([nombre, cantidad], i) => (
-                                  <div key={i} className="flex items-center gap-1.5">
-                                    <span className="text-[10px] md:text-xs text-zinc-400 font-medium text-right leading-tight">
+                                  <div key={i} className="flex items-center justify-end gap-1.5 md:gap-2 w-full min-w-0">
+                                    <span className="text-[9px] md:text-[10px] text-zinc-400 font-medium uppercase text-right leading-tight truncate max-w-[65px] min-[400px]:max-w-[90px] md:max-w-[150px]">
                                       {nombre}
                                     </span>
-                                    {Array.from({ length: cantidad as number }).map((_, k) => (
-                                      <span key={k} className="text-[10px]">⚽</span>
-                                    ))}
+                                    {/* Contenedor de balones blindado */}
+                                    <div className="flex flex-wrap justify-end gap-[2px] shrink-0 w-fit max-w-[40px] md:max-w-none">
+                                      {Array.from({ length: cantidad as number }).map((_, k) => (
+                                        <span key={k} className="text-[10px] leading-none">⚽</span>
+                                      ))}
+                                    </div>
                                   </div>
                                 ))}
                               </div>
 
                               {/* ETIQUETA CENTRAL */}
-                              <div className="flex justify-center pt-0.5">
+                              <div className="flex justify-center pt-0.5 shrink-0">
                                 <span className="text-[8px] font-black tracking-[0.25em] text-zinc-700 uppercase">
                                   Goles
                                 </span>
                               </div>
 
                               {/* GOLES VISITA */}
-                              <div className="flex flex-col items-start gap-1">
+                              <div className="flex flex-col items-start gap-1 w-full min-w-0">
                                 {goleadoresVisita.map(([nombre, cantidad], i) => (
-                                  <div key={i} className="flex items-center gap-1.5">
-                                    {Array.from({ length: cantidad as number }).map((_, k) => (
-                                      <span key={k} className="text-[10px]">⚽</span>
-                                    ))}
-                                    <span className="text-[10px] md:text-xs text-zinc-400 font-medium text-left leading-tight">
+                                  <div key={i} className="flex items-center justify-start gap-1.5 md:gap-2 w-full min-w-0">
+                                    {/* Contenedor de balones blindado */}
+                                    <div className="flex flex-wrap justify-start gap-[2px] shrink-0 w-fit max-w-[40px] md:max-w-none">
+                                      {Array.from({ length: cantidad as number }).map((_, k) => (
+                                        <span key={k} className="text-[10px] leading-none">⚽</span>
+                                      ))}
+                                    </div>
+                                    <span className="text-[9px] md:text-[10px] text-zinc-400 font-medium uppercase text-left leading-tight truncate max-w-[65px] min-[400px]:max-w-[90px] md:max-w-[150px]">
                                       {nombre}
                                     </span>
                                   </div>
                                 ))}
                               </div>
+                              
                             </div>
                           </div>
                         )}

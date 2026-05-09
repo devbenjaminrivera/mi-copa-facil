@@ -180,6 +180,13 @@ export default function Home() {
                   if (!g) return <div key={pos} className="flex-1" />;
                   const style = PODIO_STYLES[pos];
                   const equipoId = g.equipos?.[0]?.id || g.equipos?.id;
+
+                  // NUEVA LÓGICA: Primer nombre + Inicial del apellido
+                  const partesNombre = g.nombre.trim().split(' ');
+                  const nombreCorto = partesNombre.length > 1 
+                    ? `${partesNombre[0]} ${partesNombre[1].charAt(0)}` 
+                    : partesNombre[0];
+
                   return (
                     <motion.div
                       variants={itemVariants}
@@ -193,8 +200,12 @@ export default function Home() {
                         </div>
                       </div>
                       <div className="text-center">
-                        <p className="text-[9px] font-black uppercase text-zinc-400 truncate w-full px-1">
-                          {g.nombre.split(' ')[0]}
+                        {/* APLICAMOS LA NUEVA VARIABLE AQUÍ */}
+                        <p 
+                          className="text-[9px] font-black uppercase text-zinc-400 truncate w-full px-1" 
+                          title={g.nombre} // Agregamos un tooltip nativo por si pasan el mouse
+                        >
+                          {nombreCorto}
                         </p>
                         <p className={`font-black italic text-green-400 leading-none ${pos === 0 ? 'text-2xl' : 'text-xl'}`}>
                           {g.goles}
