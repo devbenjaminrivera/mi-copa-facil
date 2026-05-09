@@ -184,7 +184,7 @@ export default function Home() {
                   // NUEVA LÓGICA: Primer nombre + Inicial del apellido
                   const partesNombre = g.nombre.trim().split(' ');
                   const nombreCorto = partesNombre.length > 1 
-                    ? `${partesNombre[0]} ${partesNombre[1].charAt(0)}` 
+                    ? `${partesNombre[0]} ${partesNombre[1].charAt(0)}.` 
                     : partesNombre[0];
 
                   return (
