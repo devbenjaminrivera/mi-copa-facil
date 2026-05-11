@@ -397,10 +397,14 @@ export default function Home() {
 
         </div>
 
-        {/* FOOTER */}
-        <footer className="mt-20 text-center">
-          <p className="text-zinc-800 text-[8px] uppercase tracking-[0.5em] font-black">
-            2026 · Copa CEVI · Desarrollado por Benjamín Rivera Araneda
+        
+         {/* FOOTER */}
+        <footer className="mt-24 text-center border-t border-zinc-800/60 pt-8">
+          <p className="text-zinc-700 text-xs font-semibold tracking-widest uppercase">
+            2026 &copy; Copa CEVI
+          </p>
+          <p className="text-zinc-800 text-[10px] mt-2">
+            Desarrollado por Benjamín Rivera Araneda
           </p>
         </footer>
 
