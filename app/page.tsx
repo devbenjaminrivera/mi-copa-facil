@@ -2,37 +2,35 @@
 
 import { supabase } from '@/lib/supabase';
 import Image from 'next/image';
-import { motion, Variants } from 'framer-motion';
+import { motion, AnimatePresence, Variants } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
-const containerVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { staggerChildren: 0.07 } }
-};
+
+export default function Home() {
+  const [data, setData] = useState<any>({ equipos: [], partidos: [], proximos: [], goleadores: [] });
+  const [tab, setTab] = useState<'resultados' | 'proximos'>('resultados');
+
+  useEffect(() => {
+    const load = async () => {
+      const ahora = new Date().toISOString();
+      const [resEq, resPart, resProx, resGol] = await Promise.all([
+        supabase.from('equipos').select('*').order('puntos', { ascending: false }).order('df', { ascending: false }).order('gf', { ascending: false }),
+        supabase.from('partidos').select(`id, goles_local, goles_visita, fecha, equipo_local:equipos!equipo_local(id, nombre), equipo_visita:equipos!equipo_visita(id, nombre), sanciones(tipo, id_equipo)`).eq('estado', 'jugado').order('created_at', { ascending: false }).limit(6),
+        supabase.from('partidos').select(`id, fecha, jornada, equipo_local:equipos!equipo_local(id, nombre), equipo_visita:equipos!equipo_visita(id, nombre)`).eq('estado', 'programado').gt('fecha', ahora).order('jornada', { ascending: true }).order('fecha', { ascending: true }),
+        supabase.from('jugadores').select(`nombre, goles, equipos:id_equipo(id, nombre)`).gt('goles', 0).order('goles', { ascending: false }).limit(5),
+      ]);
+      setData({ equipos: resEq.data || [], partidos: resPart.data || [], proximos: resProx.data || [], goleadores: resGol.data || [] });
+    };
+    load();
+  }, []);
+
+  const lider = data.equipos[0];
+  const podioOrder = [1, 0, 2];
 
 const itemVariants: Variants = {
   hidden: { y: 16, opacity: 0 },
   visible: { y: 0, opacity: 1, transition: { duration: 0.4, ease: 'easeOut' } }
-};
-
-const RenderTarjetas = ({ partido, equipoId }: { partido: any; equipoId: string | number }) => {
-  const tarjetasEquipo = partido.sanciones?.filter((s: any) =>
-    String(s.id_equipo) === String(equipoId)
-  ) || [];
-  if (tarjetasEquipo.length === 0) return null;
-  const huboAmarilla = tarjetasEquipo.some((s: any) => s.tipo === 'amarilla');
-  const huboRoja = tarjetasEquipo.some((s: any) => s.tipo === 'roja');
-  return (
-    <div className="flex ml-1.5 items-center gap-[3px]">
-      {huboAmarilla && (
-        <div className="w-[8px] h-[11px] rounded-[2px] bg-yellow-400 rotate-[-5deg]" title="Amonestación" />
-      )}
-      {huboRoja && (
-        <div className="w-[8px] h-[11px] rounded-[2px] bg-red-600 rotate-[5deg]" title="Expulsión" />
-      )}
-    </div>
-  );
 };
 
 const PODIO_STYLES = [
@@ -41,136 +39,277 @@ const PODIO_STYLES = [
   { glow: 'drop-shadow-[0_0_12px_rgba(154,52,18,0.5)]',   badge: 'bg-orange-800 text-white', size: 'w-16 h-16' },
 ];
 
-export default function Home() {
-  const [data, setData] = useState<any>({ equipos: [], partidos: [], proximos: [], goleadores: [] });
-
-  useEffect(() => {
-    const fetchAllData = async () => {
-      const ahora = new Date().toISOString();
-      const [resEq, resPart, resProx, resGol] = await Promise.all([
-        supabase.from('equipos').select('*').order('puntos', { ascending: false }).order('df', { ascending: false }).order('gf', { ascending: false }),
-        supabase.from('partidos').select(`id, goles_local, goles_visita, equipo_local:equipos!equipo_local(id, nombre), equipo_visita:equipos!equipo_visita(id, nombre), sanciones(tipo, id_equipo)`).eq('estado', 'jugado').order('created_at', { ascending: false }).limit(5),
-        supabase.from('partidos').select(`id, fecha, jornada, equipo_local:equipos!equipo_local(id, nombre), equipo_visita:equipos!equipo_visita(id, nombre)`).eq('estado', 'programado').gt('fecha', ahora).order('jornada', { ascending: true }).order('fecha', { ascending: true }),
-        supabase.from('jugadores').select(`nombre, goles, equipos:id_equipo (id, nombre)`).gt('goles', 0).order('goles', { ascending: false }).limit(5),
-      ]);
-      setData({
-        equipos: resEq.data || [],
-        partidos: resPart.data || [],
-        proximos: resProx.data || [],
-        goleadores: resGol.data || [],
-      });
-    };
-    fetchAllData();
-  }, []);
-
-  const partidosPorJornada = data.proximos.reduce((acc: any, partido: any) => {
-    const j = partido.jornada || 1;
-    if (!acc[j]) acc[j] = [];
-    acc[j].push(partido);
-    return acc;
-  }, {});
-
-  // Posiciones del podio: 2°, 1°, 3°
-  const podioOrder = [1, 0, 2];
-
   return (
-    <main className="bg-black text-white min-h-screen font-sans">
-      <div className="max-w-7xl mx-auto px-4 md:px-8 pt-20 md:pt-24 pb-20">
+    <main className="bg-[#0a0a0a] text-white min-h-screen" style={{ fontFamily: "'Arial Narrow', 'Helvetica Condensed', Arial, sans-serif" }}>
 
-        {/* ── HERO HEADER ──────────────────────────────────────────── */}
-        <motion.header
-          initial={{ opacity: 0, y: -12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="mb-10 md:mb-16"
+      
+
+      <div className="max-w-6xl mx-auto px-4 md:px-8 pt-6 pb-24">
+
+        {/* ── MASTHEAD ─────────────────────────────────────────────── */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.6 }}
+          className="mb-8 md:mb-12 border-b border-zinc-800 pb-6"
         >
-          <p className="text-green-500 font-mono text-[10px] uppercase tracking-[0.35em] mb-3">
-            Copa CEVI 2026 — Estadísticas Oficiales
-          </p>
-          <h1 className="text-4xl md:text-6xl font-black tracking-tighter uppercase italic leading-none text-white">
-            Tabla de Posiciones
-          </h1>
-        </motion.header>
-
-        {/* ── GRID PRINCIPAL ───────────────────────────────────────── */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-
-          {/* ── CLASIFICACIÓN ──────────────────────────────────────── */}
-          <motion.section
-            variants={itemVariants} initial="hidden" animate="visible"
-            className="lg:col-span-8"
-          >
-            <p className="text-[10px] font-black uppercase tracking-[0.25em] text-zinc-600 mb-3 ml-1">
-              Clasificación general
-            </p>
-            <div className="border border-zinc-800/60 rounded-2xl overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse text-xs min-w-[520px]">
-                  <thead>
-                    <tr className="bg-zinc-900/80 text-zinc-600 uppercase text-[9px] tracking-widest border-b border-zinc-800">
-                      <th className="px-4 py-3.5 text-center w-10">#</th>
-                      <th className="px-4 py-3.5">Equipo</th>
-                      <th className="px-4 py-3.5 text-center text-green-500/80">Pts</th>
-                      <th className="px-4 py-3.5 text-center">PJ</th>
-                      <th className="px-4 py-3.5 text-center text-green-600/80">G</th>
-                      <th className="px-4 py-3.5 text-center text-yellow-600/80">E</th>
-                      <th className="px-4 py-3.5 text-center text-red-600/80">P</th>
-                      <th className="px-4 py-3.5 text-center">DG</th>
-                    </tr>
-                  </thead>
-                  <motion.tbody variants={containerVariants} className="divide-y divide-zinc-800/40">
-                    {data.equipos.map((eq: any, index: number) => (
-                      <motion.tr
-                        variants={itemVariants}
-                        key={eq.id}
-                        className={`transition-colors hover:bg-zinc-900/50 group
-                          ${index === 0 ? 'bg-green-500/5' : ''}
-                        `}
-                      >
-                        <td className="px-4 py-4 text-center">
-                          {index === 0
-                            ? <span className="text-green-500 font-black text-[10px]">①</span>
-                            : <span className="text-zinc-700 font-mono text-[10px]">{index + 1}</span>
-                          }
-                        </td>
-                        <td className="px-4 py-4">
-                          <div className="flex items-center gap-3">
-                            <div className="relative w-6 h-6 shrink-0">
-                              <Image src={`/escudos/${eq.id}.png`} alt="" fill className="object-contain" />
-                            </div>
-                            <span className={`font-black uppercase tracking-tight truncate text-xs
-                              ${index === 0 ? 'text-white' : 'text-zinc-300 group-hover:text-white transition-colors'}
-                            `}>
-                              {eq.nombre}
-                            </span>
-                          </div>
-                        </td>
-                        <td className="px-4 py-4 text-center font-black text-green-400 tabular-nums text-sm">
-                          {eq.puntos || 0}
-                        </td>
-                        <td className="px-4 py-4 text-center text-zinc-500 tabular-nums">{eq.pj || 0}</td>
-                        <td className="px-4 py-4 text-center text-zinc-500 tabular-nums">{eq.pg || 0}</td>
-                        <td className="px-4 py-4 text-center text-zinc-500 tabular-nums">{eq.pe || 0}</td>
-                        <td className="px-4 py-4 text-center text-zinc-500 tabular-nums">{eq.pp || 0}</td>
-                        <td className="px-4 py-4 text-center font-mono text-zinc-400 tabular-nums">
-                          {(eq.df || 0) > 0 ? `+${eq.df}` : eq.df || 0}
-                        </td>
-                      </motion.tr>
-                    ))}
-                  </motion.tbody>
-                </table>
-              </div>
+          <div className="flex items-end justify-between">
+            <div>
+              <p className="text-green-500 text-[9px] font-black uppercase tracking-[0.4em] mb-2">
+                DASHBOARD · 2026
+              </p>
+              <h1 style={{ fontFamily: "'Impact', 'Arial Narrow', sans-serif", fontSize: 'clamp(3rem, 10vw, 6rem)', lineHeight: 0.9, letterSpacing: '-0.02em' }}
+                className="uppercase text-white font-black italic">
+                COPA<br/>
+                <span className="text-green-500">CEVI</span>
+              </h1>
             </div>
-          </motion.section>
+            
+          </div>
+        </motion.div>
 
-          {/* ── TOP GOLEADORES ─────────────────────────────────────── */}
+        {/* ── LAYOUT PRINCIPAL ─────────────────────────────────────── */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-6 items-start">
+
+          {/* COLUMNA IZQUIERDA */}
+          <div className="space-y-6">
+
+            {/* LÍDER CARD — PORTADA */}
+            {lider && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+              >
+                <Link href={`/equipos/${lider.id}`}>
+                  <div className="relative overflow-hidden rounded-xl cursor-pointer group" style={{ background: 'linear-gradient(135deg, #111 0%, #0d0d0d 100%)' }}>
+                    {/* LÍNEAS DECORATIVAS */}
+                    <div className="absolute inset-0 opacity-5">
+                      {[...Array(8)].map((_, i) => (
+                        <div key={i} className="absolute border-t border-white" style={{ top: `${i * 14}%`, left: 0, right: 0, transform: `rotate(${i % 2 === 0 ? '-1deg' : '1deg'})` }} />
+                      ))}
+                    </div>
+
+                    <div className="relative p-6 md:p-8">
+                      <div className="flex items-start justify-between mb-6">
+                        <div>
+                          <span className="inline-block bg-green-500 text-black text-[8px] font-black uppercase tracking-[0.3em] px-2 py-0.5 mb-3">
+                            Líder del torneo
+                          </span>
+                          <h2 style={{ fontFamily: "'Impact', 'Arial Narrow', sans-serif", fontSize: 'clamp(1.8rem, 6vw, 3.5rem)', lineHeight: 0.9, letterSpacing: '-0.01em' }}
+                            className="uppercase text-white group-hover:text-green-400 transition-colors font-black italic">
+                            {lider.nombre}
+                          </h2>
+                        </div>
+                        <div className="relative w-20 h-20 md:w-28 md:h-28 shrink-0 ml-4" style={{ filter: 'drop-shadow(0 0 24px rgba(74,222,128,0.4))' }}>
+                          <Image src={`/escudos/${lider.id}.png`} alt="" fill className="object-contain" />
+                        </div>
+                      </div>
+
+                      {/* STATS HORIZONTALES */}
+                      <div className="grid grid-cols-4 gap-2 md:gap-4">
+                        {[
+                          { label: 'Puntos', value: lider.puntos, accent: true },
+                          { label: 'Jugados', value: lider.pj },
+                          { label: 'Ganados', value: lider.pg },
+                          { label: 'Dif. goles', value: lider.df > 0 ? `+${lider.df}` : lider.df },
+                        ].map(({ label, value, accent }) => (
+                          <div key={label} className="border-t-2 border-zinc-800 pt-3 group-hover:[&:first-child]:border-green-500 transition-colors">
+                            <p style={{ fontFamily: "'Impact', 'Arial Narrow', sans-serif" }}
+                              className={`text-3xl md:text-4xl font-black leading-none ${accent ? 'text-green-400' : 'text-white'}`}>
+                              {value ?? 0}
+                            </p>
+                            <p className="text-[8px] font-black uppercase tracking-widest text-zinc-600 mt-1">{label}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              </motion.div>
+            )}
+             
+            {/* TABLA DE POSICIONES */}
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+              <div className="flex items-center gap-3 mb-3">
+                <span className="text-[8px] font-black uppercase tracking-[0.3em] text-zinc-600">Tabla de posiciones</span>
+                <div className="flex-1 border-b border-zinc-900" />
+              </div>
+
+              <div className="rounded-xl overflow-hidden border border-zinc-900">
+                {/* CABECERA */}
+                <div className="grid grid-cols-[28px_1fr_44px_44px_44px_44px_44px_44px] bg-zinc-950 border-b border-zinc-800/60 px-3 py-2">
+                  {['#', 'Equipo', 'Pts', 'PJ', 'G', 'E', 'P', 'DG'].map((h, i) => (
+                    <span key={h} className={`text-[8px] font-black uppercase tracking-wider ${i === 0 ? 'text-zinc-700' : i === 2 ? 'text-green-600/70' : 'text-zinc-700'} ${i > 1 ? 'text-center' : ''}`}>
+                      {h}
+                    </span>
+                  ))}
+                </div>
+
+                {/* FILAS */}
+                {data.equipos.map((eq: any, i: number) => (
+                  <Link key={eq.id} href={`/equipos/${eq.id}`}>
+                    <motion.div
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.25 + i * 0.04 }}
+                      className={`grid grid-cols-[28px_1fr_44px_44px_44px_44px_44px_44px] px-3 py-3 border-b border-zinc-900/60 last:border-0 transition-colors hover:bg-zinc-900/50 group
+                        ${i === 0 ? 'bg-green-500/5' : ''}
+                      `}
+                    >
+                      <span className={`text-[9px] font-black font-mono self-center ${i === 0 ? 'text-green-500' : 'text-zinc-700'}`}>{i + 1}</span>
+                      <div className="flex items-center gap-2 min-w-0">
+                        <div className="relative w-5 h-5 shrink-0">
+                          <Image src={`/escudos/${eq.id}.png`} alt="" fill className="object-contain" />
+                        </div>
+                        <span className={`text-[11px] font-black uppercase tracking-tight truncate ${i === 0 ? 'text-white' : 'text-zinc-400 group-hover:text-white transition-colors'}`}>
+                          {eq.nombre}
+                        </span>
+                      </div>
+                      <span className="text-center text-sm font-black text-green-400 tabular-nums self-center">{eq.puntos || 0}</span>
+                      <span className="text-center text-[11px] text-zinc-600 tabular-nums self-center">{eq.pj || 0}</span>
+                      <span className="text-center text-[11px] text-zinc-600 tabular-nums self-center">{eq.pg || 0}</span>
+                      <span className="text-center text-[11px] text-zinc-600 tabular-nums self-center">{eq.pe || 0}</span>
+                      <span className="text-center text-[11px] text-zinc-600 tabular-nums self-center">{eq.pp || 0}</span>
+                      <span className={`text-center text-[11px] font-mono tabular-nums self-center ${(eq.df || 0) >= 0 ? 'text-zinc-500' : 'text-red-700'}`}>
+                        {(eq.df || 0) > 0 ? `+${eq.df}` : eq.df || 0}
+                      </span>
+                    </motion.div>
+                  </Link>
+                ))}
+              </div>
+            </motion.div>
+
+            {/* PARTIDOS — TABS */}
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+              {/* TAB SWITCHER */}
+              <div className="flex items-center gap-0 mb-4 border border-zinc-800 rounded-lg overflow-hidden w-fit">
+                {(['resultados', 'proximos'] as const).map((t) => (
+                  <button
+                    key={t}
+                    onClick={() => setTab(t)}
+                    className={`px-4 py-2 text-[9px] font-black uppercase tracking-widest transition-all
+                      ${tab === t ? 'bg-zinc-800 text-white' : 'text-zinc-600 hover:text-zinc-400'}
+                    `}
+                  >
+                    {t === 'resultados' ? 'Últimos resultados' : 'Próximos'}
+                  </button>
+                ))}
+              </div>
+
+              <AnimatePresence mode="wait">
+                {tab === 'resultados' ? (
+                  <motion.div
+                    key="resultados"
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -6 }}
+                    transition={{ duration: 0.2 }}
+                    className="space-y-2"
+                  >
+                    {data.partidos.map((p: any, i: number) => {
+                      const localWin = p.goles_local > p.goles_visita;
+                      const visitaWin = p.goles_visita > p.goles_local;
+                      return (
+                        <Link key={p.id} href={`/resultados#partido-${p.id}`}>
+                          <div className="grid grid-cols-[1fr_auto_1fr] gap-3 items-center px-4 py-3.5 rounded-xl border border-zinc-900 hover:border-zinc-700 hover:bg-zinc-900/30 transition-all group">
+                            {/* LOCAL */}
+                            <div className="flex items-center gap-2 justify-end min-w-0">
+                              <span className={`text-[11px] font-black uppercase tracking-tight truncate text-right ${localWin ? 'text-white' : 'text-zinc-600'}`}>
+                                {p.equipo_local?.nombre}
+                              </span>
+                              <div className="relative w-6 h-6 shrink-0">
+                                <Image src={`/escudos/${p.equipo_local?.id}.png`} alt="" fill className="object-contain" />
+                              </div>
+                            </div>
+                            {/* SCORE */}
+                            <div className="flex items-center gap-1.5 shrink-0">
+                              <span style={{ fontFamily: "'Impact', sans-serif" }} className={`text-xl leading-none tabular-nums ${localWin ? 'text-white' : 'text-zinc-700'}`}>
+                                {p.goles_local}
+                              </span>
+                              <span className="text-zinc-800 text-xs font-black">–</span>
+                              <span style={{ fontFamily: "'Impact', sans-serif" }} className={`text-xl leading-none tabular-nums ${visitaWin ? 'text-white' : 'text-zinc-700'}`}>
+                                {p.goles_visita}
+                              </span>
+                            </div>
+                            {/* VISITA */}
+                            <div className="flex items-center gap-2 min-w-0">
+                              <div className="relative w-6 h-6 shrink-0">
+                                <Image src={`/escudos/${p.equipo_visita?.id}.png`} alt="" fill className="object-contain" />
+                              </div>
+                              <span className={`text-[11px] font-black uppercase tracking-tight truncate ${visitaWin ? 'text-white' : 'text-zinc-600'}`}>
+                                {p.equipo_visita?.nombre}
+                              </span>
+                            </div>
+                          </div>
+                        </Link>
+                      );
+                    })}
+                    <div className="text-right pt-1">
+                      <Link href="/resultados" className="text-[8px] font-black uppercase tracking-widest text-zinc-700 hover:text-green-500 transition-colors">
+                        Ver historial completo →
+                      </Link>
+                    </div>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="proximos"
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -6 }}
+                    transition={{ duration: 0.2 }}
+                    className="space-y-2"
+                  >
+                    {data.proximos.length === 0 ? (
+                      <p className="text-center text-zinc-800 text-[9px] font-black uppercase tracking-widest py-10">
+                        No hay partidos programados
+                      </p>
+                    ) : data.proximos.map((p: any) => (
+                      <div key={p.id} className="grid grid-cols-[1fr_auto_1fr] gap-3 items-center px-4 py-3.5 rounded-xl border border-zinc-900">
+                        <div className="flex items-center gap-2 justify-end min-w-0">
+                          <span className="text-[11px] font-black uppercase tracking-tight truncate text-right text-zinc-400">
+                            {p.equipo_local?.nombre}
+                          </span>
+                          <div className="relative w-6 h-6 shrink-0">
+                            <Image src={`/escudos/${p.equipo_local?.id}.png`} alt="" fill className="object-contain" />
+                          </div>
+                        </div>
+                        <div className="flex flex-col items-center gap-0.5 shrink-0">
+                          <span className="text-[8px] font-black text-zinc-700 uppercase tracking-wider">
+                            {new Date(p.fecha).toLocaleDateString('es-CL', { day: '2-digit', month: 'short' })}
+                          </span>
+                          <span className="text-[9px] font-black text-green-600 uppercase tracking-widest border border-zinc-800 px-2 py-0.5 rounded">
+                            J{p.jornada}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 min-w-0">
+                          <div className="relative w-6 h-6 shrink-0">
+                            <Image src={`/escudos/${p.equipo_visita?.id}.png`} alt="" fill className="object-contain" />
+                          </div>
+                          <span className="text-[11px] font-black uppercase tracking-tight truncate text-zinc-400">
+                            {p.equipo_visita?.nombre}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
+          </div>
+
+          {/* COLUMNA DERECHA */}
+          <div className="space-y-5">
+
+            {/* ── TOP GOLEADORES ─────────────────────────────────────── */}
           <motion.section
             variants={itemVariants} initial="hidden" animate="visible"
             className="lg:col-span-4"
           >
-            <p className="text-[10px] font-black uppercase tracking-[0.25em] text-zinc-600 mb-3 ml-1">
-              Top goleadores
-            </p>
+            <div className="flex items-center gap-3 mb-3">
+                <span className="text-[8px] font-black uppercase tracking-[0.3em] text-zinc-600">Top goleadores</span>
+                <div className="flex-1 border-b border-zinc-900" />
+              </div>
 
             {/* PODIO */}
             {data.goleadores.length > 0 && (
@@ -182,7 +321,7 @@ export default function Home() {
                   const equipoId = g.equipos?.[0]?.id || g.equipos?.id;
 
                   // NUEVA LÓGICA: Primer nombre + Inicial del apellido
-                  const partesNombre = g.nombre.trim().split(' ');
+                  const partesNombre = (g.nombre || '').trim().split(' ');
                   const nombreCorto = partesNombre.length > 1 
                     ? `${partesNombre[0]} ${partesNombre[1].charAt(0)}.` 
                     : partesNombre[0];
@@ -238,7 +377,7 @@ export default function Home() {
                           <p className="font-black text-xs uppercase truncate text-zinc-300 group-hover:text-white transition-colors">
                             {g.nombre}
                           </p>
-                          <p className="text-[8px] text-zinc-600 uppercase tracking-widest truncate">
+                          <p className="text-[8px] text-zinc-700 uppercase tracking-widest truncate">
                             {g.equipos?.[0]?.nombre || g.equipos?.nombre}
                           </p>
                         </div>
@@ -251,160 +390,17 @@ export default function Home() {
             )}
           </motion.section>
 
-          {/* ── ÚLTIMOS RESULTADOS ─────────────────────────────────── */}
-          <motion.section
-            variants={itemVariants} initial="hidden" animate="visible"
-            className="lg:col-span-12 mt-4"
-          >
-            <div className="flex items-center gap-3 mb-4">
-              <p className="text-[10px] font-black uppercase tracking-[0.25em] text-zinc-600 shrink-0">
-                Últimos resultados
-              </p>
-              <div className="h-px flex-1 bg-zinc-900" />
-              <Link
-                href="/resultados"
-                className="text-[9px] font-black uppercase tracking-widest text-zinc-600 hover:text-green-500 transition-colors shrink-0"
-              >
-                Ver todos →
-              </Link>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {data.partidos.map((partido: any) => (
-                <Link href={`/resultados#partido-${partido.id}`} key={partido.id}>
-                  <motion.div
-                    whileHover={{ y: -2 }}
-                    className="group border border-zinc-800/60 rounded-2xl p-4 hover:border-zinc-700 hover:bg-zinc-900/30 transition-all cursor-pointer"
-                  >
-                    {/* LOCAL */}
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2 min-w-0">
-                        <div className="relative w-5 h-5 shrink-0">
-                          <Image src={`/escudos/${partido.equipo_local?.id}.png`} alt="" fill className="object-contain" />
-                        </div>
-                        <span className="font-black text-xs uppercase tracking-tight truncate text-zinc-300">
-                          {partido.equipo_local?.nombre}
-                        </span>
-                        <RenderTarjetas partido={partido} equipoId={partido.equipo_local?.id} />
-                      </div>
-                      <span className={`font-black font-mono text-base tabular-nums ml-2 shrink-0
-                        ${partido.goles_local > partido.goles_visita ? 'text-white' : 'text-zinc-600'}
-                      `}>
-                        {partido.goles_local}
-                      </span>
-                    </div>
-
-                    {/* VISITA */}
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2 min-w-0">
-                        <div className="relative w-5 h-5 shrink-0">
-                          <Image src={`/escudos/${partido.equipo_visita?.id}.png`} alt="" fill className="object-contain" />
-                        </div>
-                        <span className="font-black text-xs uppercase tracking-tight truncate text-zinc-300">
-                          {partido.equipo_visita?.nombre}
-                        </span>
-                        <RenderTarjetas partido={partido} equipoId={partido.equipo_visita?.id} />
-                      </div>
-                      <span className={`font-black font-mono text-base tabular-nums ml-2 shrink-0
-                        ${partido.goles_visita > partido.goles_local ? 'text-white' : 'text-zinc-600'}
-                      `}>
-                        {partido.goles_visita}
-                      </span>
-                    </div>
-
-                    {/* FOOTER CARD */}
-                    <div className="mt-3 pt-2.5 border-t border-zinc-800/40 flex justify-end">
-                      <span className="text-[8px] font-black uppercase tracking-[0.2em] text-zinc-700 group-hover:text-green-500 transition-colors">
-                        Ver detalle →
-                      </span>
-                    </div>
-                  </motion.div>
-                </Link>
-              ))}
-            </div>
-          </motion.section>
-
-          {/* ── PRÓXIMOS ENCUENTROS ────────────────────────────────── */}
-          {Object.keys(partidosPorJornada).length > 0 && (
-            <motion.section
-              variants={itemVariants} initial="hidden" animate="visible"
-              className="lg:col-span-12 mt-4"
-            >
-              <div className="flex items-center gap-3 mb-4">
-                <p className="text-[10px] font-black uppercase tracking-[0.25em] text-zinc-600 shrink-0">
-                  Próximos encuentros
-                </p>
-                <div className="h-px flex-1 bg-zinc-900" />
-              </div>
-
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                {Object.keys(partidosPorJornada)
-                  .sort((a, b) => Number(a) - Number(b))
-                  .map((numJornada) => (
-                    <div
-                      key={numJornada}
-                      className="border border-zinc-800/60 rounded-2xl overflow-hidden"
-                    >
-                      {/* HEADER JORNADA */}
-                      <div className="flex items-center justify-between px-5 py-3 border-b border-zinc-800/60 bg-zinc-900/40">
-                        <span className="text-[10px] font-black uppercase tracking-widest text-green-500">
-                          Jornada {numJornada}
-                        </span>
-                        <span className="text-[9px] font-mono text-zinc-700">
-                          {partidosPorJornada[numJornada].length} partido{partidosPorJornada[numJornada].length !== 1 ? 's' : ''}
-                        </span>
-                      </div>
-
-                      {/* PARTIDOS */}
-                      <div className="divide-y divide-zinc-800/40">
-                        {partidosPorJornada[numJornada].map((p: any) => (
-                          <div key={p.id} className="px-5 py-4 hover:bg-zinc-900/30 transition-colors">
-                            {/* FECHA */}
-                            <p className="text-[9px] font-mono text-green-500/70 uppercase tracking-wider mb-3">
-                              {new Date(p.fecha).toLocaleString('es-CL', {
-                                weekday: 'short', day: 'numeric', month: 'short',
-                                hour: '2-digit', minute: '2-digit',
-                              })}
-                            </p>
-                            {/* EQUIPOS */}
-                            <div className="flex items-center justify-between gap-3">
-                              <div className="flex-1 flex items-center justify-end gap-2 min-w-0">
-                                <span className="text-[10px] font-black uppercase text-zinc-300 text-right truncate">
-                                  {p.equipo_local?.nombre}
-                                </span>
-                                <div className="relative w-7 h-7 shrink-0">
-                                  <Image src={`/escudos/${p.equipo_local?.id}.png`} alt="" fill className="object-contain" />
-                                </div>
-                              </div>
-                              <span className="text-zinc-800 font-black italic text-[10px] shrink-0">VS</span>
-                              <div className="flex-1 flex items-center justify-start gap-2 min-w-0">
-                                <div className="relative w-7 h-7 shrink-0">
-                                  <Image src={`/escudos/${p.equipo_visita?.id}.png`} alt="" fill className="object-contain" />
-                                </div>
-                                <span className="text-[10px] font-black uppercase text-zinc-300 text-left truncate">
-                                  {p.equipo_visita?.nombre}
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-              </div>
-            </motion.section>
-          )}
-
+           
+          </div>
         </div>
 
-        
-         {/* FOOTER */}
-        <footer className="mt-24 text-center border-t border-zinc-800/60 pt-8">
-          <p className="text-zinc-700 text-xs font-semibold tracking-widest uppercase">
-            2026 &copy; Copa CEVI
+        {/* FOOTER */}
+        <footer className="mt-20 pt-6 border-t border-zinc-900 flex items-center justify-between">
+          <p className="text-zinc-800 text-[8px] uppercase tracking-[0.4em] font-black">
+            Copa CEVI 2026
           </p>
-          <p className="text-zinc-800 text-[10px] mt-2">
-            Desarrollado por Benjamín Rivera Araneda
+          <p className="text-zinc-800 text-[8px] uppercase tracking-[0.3em] font-black">
+            Benjamín Rivera Araneda
           </p>
         </footer>
 
