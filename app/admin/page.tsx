@@ -67,6 +67,19 @@ const CARDS = [
       </svg>
     ),
   },
+  {
+    title: 'Playoffs',
+    desc: 'Gestiona el bracket, crea llaves y registra resultados de eliminación.',
+    href: '/admin/playoffs',
+    accent: 'group-hover:border-yellow-500/60',
+    accentBar: 'bg-yellow-500',
+    shortcut: '06',
+    icon: (
+      <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+      </svg>
+    ),
+  },
 ];
 
 export default function AdminDashboard() {

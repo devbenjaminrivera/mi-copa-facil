@@ -14,7 +14,7 @@ export default function ResultadosCompletos() {
       const { data } = await supabase
         .from('partidos')
         .select(`
-          id, goles_local, goles_visita, jornada, fecha,
+          id, goles_local, goles_visita, jornada, fecha, fase, llave, penales_local, penales_visita,
           mvp:jugadores!id_mvp(nombre),
           equipo_local:equipos!equipo_local(id, nombre),
           equipo_visita:equipos!equipo_visita(id, nombre),
@@ -129,9 +129,9 @@ export default function ResultadosCompletos() {
               <div className="flex items-baseline gap-4 mb-6">
                 <h2
                   style={{ fontFamily: "'Impact', 'Arial Narrow', sans-serif", letterSpacing: '-0.01em' }}
-                  className="text-4xl md:text-5xl font-black italic uppercase text-zinc-800"
+                  className={`text-4xl md:text-5xl font-black italic uppercase leading-none ${Number(jornada) >= 99 ? 'text-yellow-700' : 'text-zinc-800'}`}
                 >
-                  JORNADA {jornada}
+                  {Number(jornada) >= 99 ? 'PLAYOFFS' : `JORNADA ${jornada}`}
                 </h2>
                 <div className="flex-1 h-px bg-zinc-900" />
                 <span className="text-[9px] font-black text-zinc-700 uppercase tracking-widest shrink-0">
@@ -147,8 +147,13 @@ export default function ResultadosCompletos() {
                   const goleadoresVisita = getGoleadoresPorEquipo(p, p.equipo_visita?.id);
                   const hayGoles = goleadoresLocal.length > 0 || goleadoresVisita.length > 0;
                   const haySanciones = p.sanciones?.length > 0;
-                  const localWin = p.goles_local > p.goles_visita;
-                  const visitaWin = p.goles_visita > p.goles_local;
+                  const localWinRegular = p.goles_local > p.goles_visita;
+                  const visitaWinRegular = p.goles_visita > p.goles_local;
+                  const empate = p.goles_local === p.goles_visita;
+                  const localWinPen = empate && p.penales_local != null && p.penales_local > p.penales_visita;
+                  const visitaWinPen = empate && p.penales_visita != null && p.penales_visita > p.penales_local;
+                  const localWin = localWinRegular || localWinPen;
+                  const visitaWin = visitaWinRegular || visitaWinPen;
 
                   return (
                     <div
@@ -198,6 +203,14 @@ export default function ResultadosCompletos() {
                             <p className="text-[7px] font-black text-zinc-800 uppercase tracking-widest md:hidden mt-1">
                               {new Date(p.fecha).toLocaleDateString('es-CL', { day: '2-digit', month: 'short' })}
                             </p>
+                          )}
+                          {p.penales_local != null && p.penales_visita != null && (
+                            <div className="flex items-center gap-1.5 mt-1">
+                              <span className="text-[7px] font-black uppercase tracking-widest text-yellow-700">Pen.</span>
+                              <span className="text-[10px] font-black font-mono text-yellow-500 tabular-nums">
+                                {p.penales_local} – {p.penales_visita}
+                              </span>
+                            </div>
                           )}
                         </div>
 
