@@ -30,13 +30,25 @@ export default function Home() {
         proximos: resProx.data || [],
         goleadores: resGol.data || [],
         playoffs: resPlayoffs.data || []
-      });
+      })
       setCargando(false);
     };
     load();
   }, []);
 
+  
+
   const isPlayoffsMode = data.playoffs.length > 0;
+
+  // Derivar campeón del partido final jugado
+  const finalJugado = data.playoffs.find((p: any) => p.llave === 'oro' && p.estado === 'jugado');
+  const campeon = finalJugado
+    ? (finalJugado.goles_local > finalJugado.goles_visita ||
+       (finalJugado.goles_local === finalJugado.goles_visita &&
+        (finalJugado.penales_local ?? 0) > (finalJugado.penales_visita ?? 0))
+      ? (Array.isArray(finalJugado.equipo_local) ? finalJugado.equipo_local[0] : finalJugado.equipo_local)
+      : (Array.isArray(finalJugado.equipo_visita) ? finalJugado.equipo_visita[0] : finalJugado.equipo_visita))
+    : null;
   const lider = data.equipos[0];
   const podioOrder = [1, 0, 2];
 
@@ -53,7 +65,7 @@ export default function Home() {
 
   if (cargando) return (
     <div className="bg-[#0a0a0a] min-h-screen text-white flex items-center justify-center font-black uppercase tracking-widest text-xs">
-      Cargando la arena...
+      Cargando Torneo...
     </div>
   );
 
@@ -77,6 +89,93 @@ export default function Home() {
 
           </div>
         </motion.div>
+
+        {/* BANNER CAMPEÓN */}
+        {campeon && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.1, duration: 0.6, ease: 'easeOut' }}
+            className="mb-10 relative overflow-hidden rounded-2xl"
+            style={{ background: 'linear-gradient(135deg, #1a1400 0%, #0d0d0d 40%, #1a1000 100%)' }}
+          >
+            {/* PARTÍCULAS DECORATIVAS */}
+            <div className="absolute inset-0 pointer-events-none overflow-hidden">
+              {[...Array(12)].map((_, i) => (
+                <motion.div
+                  key={i}
+                  className="absolute w-0.5 h-0.5 rounded-full bg-yellow-400"
+                  style={{
+                    left: `${8 + i * 8}%`,
+                    top: `${20 + (i % 3) * 25}%`,
+                    opacity: 0.3 + (i % 4) * 0.15,
+                  }}
+                  animate={{ y: [0, -8, 0], opacity: [0.2, 0.6, 0.2] }}
+                  transition={{ duration: 2 + i * 0.3, repeat: Infinity, delay: i * 0.2 }}
+                />
+              ))}
+            </div>
+
+            {/* BORDE DORADO */}
+            <div className="absolute inset-0 rounded-2xl border border-yellow-500/30 pointer-events-none" />
+            <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-yellow-500 to-transparent" />
+
+            <div className="relative px-6 md:px-10 py-8 flex flex-col md:flex-row items-center gap-6 md:gap-10">
+
+              {/* ESCUDO */}
+              <motion.div
+                animate={{ rotate: [-1, 1, -1] }}
+                transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+                className="relative shrink-0"
+                style={{
+                  width: 'clamp(80px, 15vw, 120px)',
+                  height: 'clamp(80px, 15vw, 120px)',
+                  filter: 'drop-shadow(0 0 30px rgba(234,179,8,0.5))',
+                }}
+              >
+                <Image src={`/escudos/${campeon.id}.png`} alt={campeon.nombre} fill className="object-contain" />
+              </motion.div>
+
+              {/* TEXTO */}
+              <div className="text-center md:text-left flex-1 min-w-0">
+                <motion.p
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                  className="text-[9px] font-black uppercase tracking-[0.5em] text-yellow-600 mb-2"
+                >
+                  🏆 Campeón Copa CEVI 2026
+                </motion.p>
+                <motion.h2
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4 }}
+                  style={{ fontFamily: "'Impact', 'Arial Narrow', sans-serif", fontSize: 'clamp(2rem, 8vw, 4.5rem)', lineHeight: 0.88, letterSpacing: '-0.02em' }}
+                  className="uppercase font-black italic text-white"
+                >
+                  {campeon.nombre}
+                </motion.h2>
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.6 }}
+                  className="text-[9px] font-black uppercase tracking-[0.3em] text-yellow-700 mt-3"
+                >
+                  {finalJugado.goles_local} – {finalJugado.goles_visita}
+                  {finalJugado.penales_local != null && ` · Pen. ${finalJugado.penales_local}–${finalJugado.penales_visita}`}
+                </motion.p>
+              </div>
+
+              {/* TROFEO DECORATIVO */}
+              <div className="hidden md:flex flex-col items-center gap-1 shrink-0 opacity-20">
+                <span style={{ fontFamily: "'Impact', sans-serif", fontSize: '6rem', lineHeight: 1 }} className="text-yellow-500 italic">
+                  1
+                </span>
+                <div className="w-12 h-[1.5px] bg-yellow-500" />
+              </div>
+            </div>
+          </motion.div>
+        )}
 
         {/* BRACKET PLAYOFFS — siempre visible cuando existe, arriba de todo */}
         {isPlayoffsMode && (
