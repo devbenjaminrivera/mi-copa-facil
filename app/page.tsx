@@ -30,13 +30,11 @@ export default function Home() {
         proximos: resProx.data || [],
         goleadores: resGol.data || [],
         playoffs: resPlayoffs.data || []
-      })
+      });
       setCargando(false);
     };
     load();
   }, []);
-
-  
 
   const isPlayoffsMode = data.playoffs.length > 0;
 
@@ -65,7 +63,7 @@ export default function Home() {
 
   if (cargando) return (
     <div className="bg-[#0a0a0a] min-h-screen text-white flex items-center justify-center font-black uppercase tracking-widest text-xs">
-      Cargando Torneo...
+      Cargando la arena...
     </div>
   );
 
@@ -564,11 +562,11 @@ function BracketMatch({ partido, titulo, placeholderA, placeholderB, isFinal = f
     </div>
   );
 
-  return (
+  const card = (
     <motion.div
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
-      className="rounded-xl overflow-hidden"
+      className={`rounded-xl overflow-hidden ${jugado ? 'cursor-pointer hover:brightness-110 transition-all' : ''}`}
       style={{
         border: `1px solid ${accentColor}${accentOpacity}`,
         boxShadow: isFinal ? `0 0 24px rgba(234, 179, 8, 0.07)` : 'none',
@@ -578,7 +576,6 @@ function BracketMatch({ partido, titulo, placeholderA, placeholderB, isFinal = f
       {/* HEADER RONDA */}
       <div className="flex items-center justify-between px-3 py-2 border-b border-zinc-900/80">
         <div className="flex items-center gap-2">
-          {/* DOT DE COLOR */}
           <div className="w-1.5 h-1.5 rounded-full shrink-0"
             style={{ background: accentColor, opacity: isFinal ? 1 : 0.5 }} />
           <span className="text-[8px] font-black uppercase tracking-[0.2em]"
@@ -586,10 +583,12 @@ function BracketMatch({ partido, titulo, placeholderA, placeholderB, isFinal = f
             {titulo}
           </span>
         </div>
-        <span className="text-[7px] font-black text-zinc-800 uppercase tracking-wider font-mono">
-          {partido?.fecha
+        <span className="text-[7px] font-black uppercase tracking-wider font-mono flex items-center gap-1.5"
+          style={{ color: jugado ? '#3f3f46' : '#27272a' }}>
+          {jugado && <span style={{ color: accentColor, opacity: 0.6 }}>→ ver acta</span>}
+          {!jugado && (partido?.fecha
             ? new Date(partido.fecha).toLocaleDateString('es-CL', { day: '2-digit', month: 'short' })
-            : pendiente ? 'Por confirmar' : ''}
+            : pendiente ? 'Por confirmar' : '')}
         </span>
       </div>
 
@@ -600,4 +599,8 @@ function BracketMatch({ partido, titulo, placeholderA, placeholderB, isFinal = f
       </div>
     </motion.div>
   );
+
+  return jugado && partido?.id
+    ? <Link href={`/resultados#partido-${partido.id}`}>{card}</Link>
+    : card;
 }
