@@ -17,7 +17,7 @@ export default function AdminButton() {
   return (
     <Link 
       href={isLogged ? "/admin" : "/login"} 
-      className="text-xs font-mono text-zinc-500 hover:text-green-400 border border-zinc-800 px-3 py-1 rounded-full transition-all bg-zinc-900/30"
+      className="text-xs font-mono text-zinc-500 hover:text-orange-400 border border-zinc-800 px-3 py-1 rounded-full transition-all bg-zinc-900/30"
     >
       {isLogged ? "PANEL >" : "LOGIN >"}
     </Link>

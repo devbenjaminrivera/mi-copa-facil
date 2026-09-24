@@ -64,7 +64,7 @@ export default function PerfilEquipo() {
     return (
       <main className="bg-[#0a0a0a] min-h-screen flex flex-col items-center justify-center">
         <p className="text-zinc-600 text-xs font-black uppercase tracking-widest mb-6">Equipo no encontrado</p>
-        <Link href="/equipos" className="text-green-500 font-black uppercase text-xs tracking-widest hover:text-green-400 transition-colors">
+        <Link href="/equipos" className="text-orange-500 font-black uppercase text-xs tracking-widest hover:text-orange-400 transition-colors">
           ← Volver a equipos
         </Link>
       </main>
@@ -87,7 +87,7 @@ export default function PerfilEquipo() {
             
             <Link
               href="/equipos"
-              className="inline-flex items-center gap-2 text-[9px] font-black uppercase tracking-[0.25em] text-zinc-500 hover:text-green-500 transition-colors mb-6"
+              className="inline-flex items-center gap-2 text-[9px] font-black uppercase tracking-[0.25em] text-zinc-500 hover:text-orange-500 transition-colors mb-6"
             >
               ← Volver a Clubes
             </Link>
@@ -108,7 +108,7 @@ export default function PerfilEquipo() {
                 
                 {/* TÍTULO */}
                 <div className="pb-2">
-                  <p className="text-green-500 text-[9px] font-black uppercase tracking-[0.4em] mb-2">
+                  <p className="text-orange-500 text-[9px] font-black uppercase tracking-[0.4em] mb-2">
                     Plantilla Oficial
                   </p>
                   <h1 
@@ -123,7 +123,7 @@ export default function PerfilEquipo() {
               {/* G - E - P (Victorias, Empates, Derrotas) */}
               <div className="flex justify-center md:justify-end gap-6 pb-2">
                  {[
-                  { label: 'PG', value: equipo.pg, color: 'text-green-500' },
+                  { label: 'PG', value: equipo.pg, color: 'text-orange-500' },
                   { label: 'PE', value: equipo.pe, color: 'text-yellow-500' },
                   { label: 'PP', value: equipo.pp, color: 'text-red-500' },
                 ].map(({ label, value, color }) => (
@@ -150,10 +150,10 @@ export default function PerfilEquipo() {
           className="grid grid-cols-4 gap-2 md:gap-4 mb-16"
         >
           {[
-            { label: 'Puntos', value: equipo.puntos, color: 'text-green-400', bg: 'bg-green-500/5', border: 'border-green-500/20' },
+            { label: 'Puntos', value: equipo.puntos, color: 'text-orange-400', bg: 'bg-orange-500/5', border: 'border-orange-500/20' },
             { label: 'Partidos', value: equipo.pj, color: 'text-white', bg: 'bg-zinc-950/50', border: 'border-zinc-900' },
             { label: 'Goles Favor', value: equipo.gf, color: 'text-white', bg: 'bg-zinc-950/50', border: 'border-zinc-900' },
-            { label: 'Dif. Goles', value: (equipo.df ?? 0) > 0 ? `+${equipo.df}` : equipo.df, color: (equipo.df ?? 0) >= 0 ? 'text-green-400' : 'text-red-400', bg: 'bg-zinc-950/50', border: 'border-zinc-900' },
+            { label: 'Dif. Goles', value: (equipo.df ?? 0) > 0 ? `+${equipo.df}` : equipo.df, color: (equipo.df ?? 0) >= 0 ? 'text-orange-400' : 'text-red-400', bg: 'bg-zinc-950/50', border: 'border-zinc-900' },
           ].map(({ label, value, color, bg, border }) => (
             <div key={label} className={`${bg} border ${border} rounded-[1.5rem] flex flex-col items-center py-6 px-2 transition-all hover:bg-zinc-900/50`}>
               <span style={{ fontFamily: "'Impact', sans-serif" }} className={`text-3xl md:text-5xl font-black tabular-nums ${color} leading-none`}>
@@ -209,7 +209,7 @@ function JugadorRow({ jugador, destacado = false }: { jugador: any; destacado?: 
   return (
     <div className={`group flex items-center justify-between rounded-[1.5rem] px-6 py-5 transition-all duration-300 border
       ${destacado
-        ? 'bg-zinc-950/40 border-zinc-800/80 hover:border-green-500/50 hover:bg-zinc-900/60 hover:shadow-[0_0_30px_rgba(74,222,128,0.05)]'
+        ? 'bg-zinc-950/40 border-zinc-800/80 hover:border-orange-500/50 hover:bg-zinc-900/60 hover:shadow-[0_0_30px_rgba(251, 146, 60,0.05)]'
         : 'bg-transparent border-zinc-900 hover:border-zinc-700 hover:bg-zinc-900/30'
       }
     `}>
@@ -217,7 +217,7 @@ function JugadorRow({ jugador, destacado = false }: { jugador: any; destacado?: 
         
         {/* NÚMERO CAMISETA */}
         <span style={{ fontFamily: "'Impact', sans-serif" }} className={`text-xl md:text-2xl italic w-8 text-center shrink-0 transition-colors
-          ${destacado ? 'text-green-500/80 group-hover:text-green-400' : 'text-zinc-800 group-hover:text-zinc-600'}
+          ${destacado ? 'text-orange-500/80 group-hover:text-orange-400' : 'text-zinc-800 group-hover:text-zinc-600'}
         `}>
           {jugador.numero_camiseta ?? '-'}
         </span>
@@ -248,7 +248,7 @@ function JugadorRow({ jugador, destacado = false }: { jugador: any; destacado?: 
           <span className="text-[10px] grayscale opacity-30 group-hover:grayscale-0 group-hover:opacity-100 transition-all">⚽</span>
         )}
         <span style={{ fontFamily: "'Impact', sans-serif" }} className={`text-2xl md:text-3xl italic tabular-nums transition-colors
-          ${jugador.goles > 0 ? 'text-green-500 group-hover:text-green-400' : 'text-zinc-800'}
+          ${jugador.goles > 0 ? 'text-orange-500 group-hover:text-orange-400' : 'text-zinc-800'}
         `}>
           {jugador.goles || 0}
         </span>

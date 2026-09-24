@@ -1,11 +1,9 @@
-// page login
 'use client';
 import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 
 export default function Login() {
-  // DEFINICIÓN DE ESTADOS (Esto es lo que faltaba en tu imagen)
   const [usernameInput, setUsernameInput] = useState('');
   const [passwordInput, setPasswordInput] = useState('');
   const [cargando, setCargando] = useState(false);
@@ -23,7 +21,7 @@ export default function Login() {
       .single();
 
     if (errorPerfil || !perfil) {
-      alert("El nombre de usuario no existe.");
+      alert("El nombre de usuario no existe o la base de datos no está disponible.");
       setCargando(false);
       return;
     }
@@ -44,32 +42,36 @@ export default function Login() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-black font-sans px-4">
-      <div className="w-full max-w-sm">
-        <div className="text-center mb-8">
-          <h1 className="text-2xl font-black tracking-tighter text-white uppercase">Acceso Admin</h1>
-          <p className="text-zinc-500 text-[10px] font-bold tracking-[0.3em] uppercase mt-2">Copa CEVI 2026</p>
+    <div className="flex items-center justify-center min-h-screen bg-[#050505] font-sans px-4 relative overflow-hidden">
+      {/* Background radial effects */}
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-orange-500/10 blur-[120px] rounded-full pointer-events-none" />
+      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500/10 blur-[120px] rounded-full pointer-events-none" />
+
+      <div className="w-full max-w-md relative z-10">
+        <div className="text-center mb-10">
+          <h1 className="font-outfit text-4xl font-black tracking-tight text-white uppercase drop-shadow-md">Acceso Admin</h1>
+          <p className="text-zinc-400 text-xs font-bold tracking-[0.3em] uppercase mt-2">Copa CEVI</p>
         </div>
 
-        <form onSubmit={handleLogin} className="space-y-4">
-          <div className="space-y-1">
-            <label className="text-[10px] text-zinc-500 uppercase font-black ml-1">Usuario</label>
+        <form onSubmit={handleLogin} className="space-y-6 bento-card p-8 md:p-10">
+          <div className="space-y-2">
+            <label className="text-[10px] text-zinc-400 uppercase font-bold tracking-widest ml-1">Usuario</label>
             <input 
               type="text" 
-              placeholder="Usuario" 
-              className="w-full bg-zinc-900 border border-zinc-800 p-4 rounded-2xl outline-none focus:border-green-500 transition-all text-sm text-white"
+              placeholder="Nombre de usuario" 
+              className="w-full bg-black/40 border border-white/10 p-4 rounded-xl outline-none focus:border-orange-500/50 focus:bg-black/60 transition-all text-sm text-white shadow-inner"
               value={usernameInput}
               onChange={(e) => setUsernameInput(e.target.value)}
               required
             />
           </div>
 
-          <div className="space-y-1">
-            <label className="text-[10px] text-zinc-500 uppercase font-black ml-1">Contraseña</label>
+          <div className="space-y-2">
+            <label className="text-[10px] text-zinc-400 uppercase font-bold tracking-widest ml-1">Contraseña</label>
             <input 
               type="password" 
               placeholder="••••••••" 
-              className="w-full bg-zinc-900 border border-zinc-800 p-4 rounded-2xl outline-none focus:border-green-500 transition-all text-sm text-white"
+              className="w-full bg-black/40 border border-white/10 p-4 rounded-xl outline-none focus:border-orange-500/50 focus:bg-black/60 transition-all text-sm text-white shadow-inner"
               value={passwordInput}
               onChange={(e) => setPasswordInput(e.target.value)}
               required
@@ -78,9 +80,9 @@ export default function Login() {
 
           <button 
             disabled={cargando}
-            className="w-full bg-white text-black font-black py-4 rounded-2xl uppercase tracking-widest hover:bg-green-400 transition-all shadow-lg shadow-white/5 active:scale-95"
+            className="w-full bg-white text-black font-black py-4 mt-4 rounded-xl uppercase text-xs tracking-widest hover:bg-zinc-200 transition-all shadow-lg hover:shadow-white/20 active:scale-95 disabled:opacity-50 disabled:active:scale-100"
           >
-            {cargando ? 'Verificando...' : 'Entrar'}
+            {cargando ? 'Verificando...' : 'Iniciar Sesión'}
           </button>
         </form>
       </div>

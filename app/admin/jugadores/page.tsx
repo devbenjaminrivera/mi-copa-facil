@@ -95,7 +95,7 @@ const jugadoresFiltrados = jugadores.filter(j =>
     <div className="p-8 bg-black min-h-screen text-white font-sans">
       <div className="max-w-5xl mx-auto">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-2xl font-bold text-green-500">🏃 Gestión de Jugadores</h1>
+          <h1 className="text-2xl font-bold text-orange-500">🏃 Gestión de Jugadores</h1>
           <Link href="/admin" className="text-zinc-500 hover:text-white text-xs font-mono">← Volver</Link>
         </div>
 
@@ -106,7 +106,7 @@ const jugadoresFiltrados = jugadores.filter(j =>
             placeholder="Nombre del jugador"
             value={nombre}
             onChange={(e) => setNombre(e.target.value)}
-            className="bg-black border border-zinc-800 p-3 rounded-xl focus:border-green-500 outline-none text-sm"
+            className="bg-black border border-zinc-800 p-3 rounded-xl focus:border-orange-500 outline-none text-sm"
             required
           />
           <input 
@@ -114,19 +114,19 @@ const jugadoresFiltrados = jugadores.filter(j =>
             placeholder="N° Camiseta"
             value={numeroCamiseta}
             onChange={(e) => setNumeroCamiseta(e.target.value)}
-            className="bg-black border border-zinc-800 p-3 rounded-xl focus:border-green-500 outline-none text-sm"
+            className="bg-black border border-zinc-800 p-3 rounded-xl focus:border-orange-500 outline-none text-sm"
             required
           />
           <select 
             value={equipoId}
             onChange={(e) => setEquipoId(e.target.value)}
-            className="bg-black border border-zinc-800 p-3 rounded-xl focus:border-green-500 outline-none text-sm"
+            className="bg-black border border-zinc-800 p-3 rounded-xl focus:border-orange-500 outline-none text-sm"
           >
             <option value="" >Seleccionar Equipo</option>
             {equipos.map(e => <option key={e.id} value={e.id}>{e.nombre}</option>)}
           </select>
           
-          <button className="md:col-span-3 bg-white text-black font-black uppercase py-3 rounded-xl hover:bg-green-500 transition-colors text-xs tracking-widest">
+          <button className="md:col-span-3 bg-white text-black font-black uppercase py-3 rounded-xl hover:bg-orange-500 transition-colors text-xs tracking-widest">
             Registrar Jugador
           </button>
         </form>
@@ -139,7 +139,7 @@ const jugadoresFiltrados = jugadores.filter(j =>
               placeholder="BUSCAR JUGADOR POR NOMBRE..."
               value={busqueda}
               onChange={(e) => setBusqueda(e.target.value)}
-              className="w-full bg-zinc-900/30 border border-zinc-800 pl-10 pr-4 py-3 rounded-xl focus:border-green-500 outline-none text-xs font-bold tracking-widest uppercase"
+              className="w-full bg-zinc-900/30 border border-zinc-800 pl-10 pr-4 py-3 rounded-xl focus:border-orange-500 outline-none text-xs font-bold tracking-widest uppercase"
             />
           </div>
         </div>
@@ -165,7 +165,7 @@ const jugadoresFiltrados = jugadores.filter(j =>
                 type="number"
                 defaultValue={j.numero_camiseta}
                 onBlur={(e) => editarNumeroCamiseta(j.id, parseInt(e.target.value) || 0)}
-                className="w-10 bg-zinc-800 border border-zinc-700 text-center text-[10px] font-mono text-zinc-400 rounded p-1 focus:border-green-500 outline-none"
+                className="w-10 bg-zinc-800 border border-zinc-700 text-center text-[10px] font-mono text-zinc-400 rounded p-1 focus:border-orange-500 outline-none"
                 placeholder="N°"
               />
               <span>{j.nombre}</span>
@@ -191,7 +191,7 @@ const jugadoresFiltrados = jugadores.filter(j =>
                 )}
               </div>
               <select 
-                className="bg-zinc-800 text-[10px] rounded px-1 py-0.5 outline-none border border-zinc-700 focus:border-green-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                className="bg-zinc-800 text-[10px] rounded px-1 py-0.5 outline-none border border-zinc-700 focus:border-orange-500 opacity-0 group-hover:opacity-100 transition-opacity"
                 onChange={(e) => {
                   agregarSancion(j.id, e.target.value);
                   e.target.value = "";
@@ -210,7 +210,7 @@ const jugadoresFiltrados = jugadores.filter(j =>
                 type="number"
                 defaultValue={j.goles}
                 onBlur={(e) => corregirGoles(j.id, parseInt(e.target.value) || 0)}
-                className="w-12 bg-black border border-zinc-800 text-center text-sm font-bold text-green-500 rounded p-1 focus:border-green-500 outline-none"
+                className="w-12 bg-black border border-zinc-800 text-center text-sm font-bold text-orange-500 rounded p-1 focus:border-orange-500 outline-none"
               />
             </div>
           </td>

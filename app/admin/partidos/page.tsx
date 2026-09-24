@@ -135,7 +135,7 @@ export default function RegistrarPartido() {
   };
 
   // ─── CLASES REUTILIZABLES ───────────────────────────────────────────
-  const inputBase = 'w-full bg-zinc-900/40 border border-zinc-800 hover:border-zinc-700 focus:border-green-500 p-4 rounded-2xl outline-none transition-all font-bold text-sm';
+  const inputBase = 'w-full bg-zinc-900/40 border border-zinc-800 hover:border-zinc-700 focus:border-orange-500 p-4 rounded-2xl outline-none transition-all font-bold text-sm';
   const selectBase = `${inputBase} cursor-pointer`;
 
   return (
@@ -144,7 +144,7 @@ export default function RegistrarPartido() {
 
         {/* HEADER */}
         <header className="mb-10 pt-6">
-          <p className="text-green-500 font-mono text-[10px] uppercase tracking-[0.3em] mb-3">
+          <p className="text-orange-500 font-mono text-[10px] uppercase tracking-[0.3em] mb-3">
             Admin / Partidos
           </p>
           <div className="flex items-end justify-between">
@@ -156,11 +156,11 @@ export default function RegistrarPartido() {
               {[1, 2].map(n => (
                 <div key={n} className="flex items-center gap-2">
                   <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-black transition-all
-                    ${paso >= n ? 'bg-green-500 text-black' : 'bg-zinc-800 text-zinc-600'}
+                    ${paso >= n ? 'bg-orange-500 text-black' : 'bg-zinc-800 text-zinc-600'}
                   `}>
                     {n}
                   </div>
-                  {n < 2 && <div className={`w-8 h-px transition-all ${paso > n ? 'bg-green-500' : 'bg-zinc-800'}`} />}
+                  {n < 2 && <div className={`w-8 h-px transition-all ${paso > n ? 'bg-orange-500' : 'bg-zinc-800'}`} />}
                 </div>
               ))}
               <span className="text-[9px] font-black uppercase tracking-widest text-zinc-600 ml-2">
@@ -205,7 +205,7 @@ export default function RegistrarPartido() {
                     type="number"
                     min="0"
                     placeholder="0"
-                    className={`${inputBase} text-center text-4xl font-black text-green-400 tracking-tighter py-6`}
+                    className={`${inputBase} text-center text-4xl font-black text-orange-400 tracking-tighter py-6`}
                     onChange={e => setGolesL(parseInt(e.target.value) || 0)}
                   />
                 </div>
@@ -228,7 +228,7 @@ export default function RegistrarPartido() {
                     type="number"
                     min="0"
                     placeholder="0"
-                    className={`${inputBase} text-center text-4xl font-black text-green-400 tracking-tighter py-6`}
+                    className={`${inputBase} text-center text-4xl font-black text-orange-400 tracking-tighter py-6`}
                     onChange={e => setGolesV(parseInt(e.target.value) || 0)}
                   />
                 </div>
@@ -239,7 +239,7 @@ export default function RegistrarPartido() {
             <button
               onClick={iniciarPartido}
               disabled={guardando}
-              className="w-full bg-white text-black hover:bg-green-400 disabled:bg-zinc-800 disabled:text-zinc-600 py-5 rounded-2xl font-black uppercase tracking-[0.2em] transition-all text-xs flex items-center justify-center gap-2"
+              className="w-full bg-white text-black hover:bg-orange-400 disabled:bg-zinc-800 disabled:text-zinc-600 py-5 rounded-2xl font-black uppercase tracking-[0.2em] transition-all text-xs flex items-center justify-center gap-2"
             >
               {guardando
                 ? <><div className="w-4 h-4 border-2 border-zinc-600 border-t-zinc-400 rounded-full animate-spin" /> Procesando...</>
@@ -258,9 +258,9 @@ export default function RegistrarPartido() {
               <div className="flex items-center gap-4">
                 <span className="text-sm font-black uppercase tracking-tight text-zinc-300">{equipoLocalNombre}</span>
                 <div className="flex items-center gap-2 bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-2">
-                  <span className="text-2xl font-black font-mono text-green-400">{golesL}</span>
+                  <span className="text-2xl font-black font-mono text-orange-400">{golesL}</span>
                   <span className="text-zinc-700 font-black text-sm">–</span>
-                  <span className="text-2xl font-black font-mono text-green-400">{golesV}</span>
+                  <span className="text-2xl font-black font-mono text-orange-400">{golesV}</span>
                 </div>
                 <span className="text-sm font-black uppercase tracking-tight text-zinc-300">{equipoVisitaNombre}</span>
               </div>
@@ -280,7 +280,7 @@ export default function RegistrarPartido() {
                   {/* LOCAL */}
                   {golesL > 0 && (
                     <div>
-                      <p className="text-[9px] font-black uppercase tracking-widest text-green-500 mb-3">
+                      <p className="text-[9px] font-black uppercase tracking-widest text-orange-500 mb-3">
                         {equipoLocalNombre}
                       </p>
                       <div className="space-y-2">
@@ -307,7 +307,7 @@ export default function RegistrarPartido() {
                   {/* VISITA */}
                   {golesV > 0 && (
                     <div>
-                      <p className="text-[9px] font-black uppercase tracking-widest text-green-500 mb-3">
+                      <p className="text-[9px] font-black uppercase tracking-widest text-orange-500 mb-3">
                         {equipoVisitaNombre}
                       </p>
                       <div className="space-y-2">
@@ -381,7 +381,7 @@ export default function RegistrarPartido() {
 
                       {/* SELECT TIPO */}
                       <select
-                        className={`shrink-0 bg-zinc-900/40 border border-zinc-800 hover:border-zinc-700 focus:border-green-500 p-3 rounded-2xl outline-none transition-all font-black text-[10px] uppercase tracking-wider cursor-pointer
+                        className={`shrink-0 bg-zinc-900/40 border border-zinc-800 hover:border-zinc-700 focus:border-orange-500 p-3 rounded-2xl outline-none transition-all font-black text-[10px] uppercase tracking-wider cursor-pointer
                           ${s.tipo === 'amarilla' ? 'text-yellow-400' : 'text-red-500'}
                         `}
                         value={s.tipo}
@@ -432,10 +432,10 @@ export default function RegistrarPartido() {
             <button
               onClick={finalizarRegistro}
               disabled={guardando}
-              className="w-full bg-green-600 hover:bg-green-500 disabled:bg-zinc-800 disabled:text-zinc-600 text-black py-5 rounded-2xl font-black uppercase tracking-[0.2em] transition-all text-xs flex items-center justify-center gap-2"
+              className="w-full bg-orange-600 hover:bg-orange-500 disabled:bg-zinc-800 disabled:text-zinc-600 text-black py-5 rounded-2xl font-black uppercase tracking-[0.2em] transition-all text-xs flex items-center justify-center gap-2"
             >
               {guardando
-                ? <><div className="w-4 h-4 border-2 border-green-800 border-t-green-400 rounded-full animate-spin" /> Guardando acta...</>
+                ? <><div className="w-4 h-4 border-2 border-orange-800 border-t-orange-400 rounded-full animate-spin" /> Guardando acta...</>
                 : 'Cerrar acta y actualizar torneo →'
               }
             </button>

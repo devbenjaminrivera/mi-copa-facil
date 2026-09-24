@@ -7,9 +7,10 @@ import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const NAV_LINKS = [
-  { href: '/',           label: 'Dashboard'  },
-  { href: '/equipos',    label: 'Equipos'    },
+  { href: '/', label: 'Dashboard' },
+  { href: '/equipos', label: 'Equipos' },
   { href: '/resultados', label: 'Resultados' },
+  { href: '/historial', label: 'Historial' },
 ];
 
 export default function Navbar() {
@@ -18,8 +19,7 @@ export default function Navbar() {
 
   return (
     <nav
-      className="fixed top-0 left-0 right-0 z-50 bg-[#0a0a0a]/98 backdrop-blur-sm border-b border-zinc-900"
-      style={{ fontFamily: "'Arial Narrow', 'Helvetica Condensed', Arial, sans-serif" }}
+      className="fixed top-0 left-0 right-0 z-50 bg-[#0a0a0a]/98 backdrop-blur-sm border-b border-zinc-900 font-narrow"
     >
       <div className="max-w-6xl mx-auto px-4 md:px-8">
         <div className="flex items-center justify-between h-14">
@@ -31,18 +31,16 @@ export default function Navbar() {
             </div>
             <div className="flex items-baseline gap-1">
               <span
-                style={{ fontFamily: "'Impact', 'Arial Narrow', sans-serif", letterSpacing: '-0.02em' }}
-                className="text-lg font-black italic uppercase text-white leading-none"
+                className="font-impact tracking-[-0.02em] text-lg font-black italic uppercase text-white leading-none"
               >
                 COPA
               </span>
               <span
-                style={{ fontFamily: "'Impact', 'Arial Narrow', sans-serif", letterSpacing: '-0.02em' }}
-                className="text-lg font-black italic uppercase text-green-500 leading-none group-hover:text-green-400 transition-colors"
+                className="font-impact tracking-[-0.02em] text-lg font-black italic uppercase text-orange-500 leading-none group-hover:text-orange-400 transition-colors"
               >
                 CEVI
               </span>
-            </div>            
+            </div>
           </Link>
 
           {/* NAV DESKTOP — separadores verticales entre links */}
@@ -65,7 +63,7 @@ export default function Navbar() {
                     {isActive && (
                       <motion.div
                         layoutId="nav-active"
-                        className="absolute bottom-0 left-3 right-3 h-[1.5px] bg-green-500"
+                        className="absolute bottom-0 left-3 right-3 h-[1.5px] bg-orange-500"
                         transition={{ type: 'spring', stiffness: 400, damping: 30 }}
                       />
                     )}
@@ -79,7 +77,7 @@ export default function Navbar() {
           <div className="hidden md:flex items-center gap-3">
             <Link
               href="/login"
-              className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-700 hover:text-green-500 transition-colors border-l border-zinc-900 pl-4"
+              className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-700 hover:text-orange-500 transition-colors border-l border-zinc-900 pl-4"
             >
               Admin →
             </Link>
@@ -136,15 +134,14 @@ export default function Navbar() {
                       className={`flex items-center justify-between py-4 border-b border-zinc-900 group`}
                     >
                       <span
-                        style={{ fontFamily: "'Impact', 'Arial Narrow', sans-serif", letterSpacing: '-0.01em' }}
-                        className={`text-2xl font-black italic uppercase transition-colors
+                        className={`font-impact tracking-[-0.01em] text-2xl font-black italic uppercase transition-colors
                           ${isActive ? 'text-white' : 'text-zinc-700 group-hover:text-zinc-300'}
                         `}
                       >
                         {label}
                       </span>
                       {isActive
-                        ? <div className="w-1.5 h-1.5 rounded-full bg-green-500 shrink-0" />
+                        ? <div className="w-1.5 h-1.5 rounded-full bg-orange-500 shrink-0" />
                         : <span className="text-zinc-800 text-xs font-black group-hover:text-zinc-600 transition-colors">→</span>
                       }
                     </Link>
@@ -161,7 +158,7 @@ export default function Navbar() {
                 <Link
                   href="/login"
                   onClick={() => setIsOpen(false)}
-                  className="text-[9px] font-black uppercase tracking-[0.3em] text-zinc-700 hover:text-green-500 transition-colors"
+                  className="text-[9px] font-black uppercase tracking-[0.3em] text-zinc-700 hover:text-orange-500 transition-colors"
                 >
                   Panel de administración →
                 </Link>

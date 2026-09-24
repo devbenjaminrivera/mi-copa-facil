@@ -11,6 +11,7 @@ const NAV_ITEMS = [
   { href: '/admin/jugadores',          label: 'Jugadores' },
   { href: '/admin/gestionar-equipos',  label: 'Equipos'   },
   { href: '/admin/historial',          label: 'Historial' },
+  { href: '/admin/ajustes',            label: 'Ajustes'   },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -40,7 +41,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     return (
       <div className="bg-black text-white h-screen flex items-center justify-center">
         <div className="flex items-center gap-3">
-          <div className="w-4 h-4 border border-zinc-700 border-t-green-500 rounded-full animate-spin" />
+          <div className="w-4 h-4 border border-zinc-700 border-t-orange-500 rounded-full animate-spin" />
           <span className="text-zinc-500 text-xs font-black uppercase tracking-[0.3em]">
             Verificando acceso...
           </span>
@@ -59,9 +60,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
             {/* LOGO / MARCA */}
             <Link href="/admin" className="flex items-center gap-2.5 shrink-0">
-              <div className="w-1.5 h-5 bg-green-500 rounded-full" />
+              <div className="w-1.5 h-5 bg-orange-500 rounded-full" />
               <span className="text-xs font-black uppercase tracking-[0.25em] text-white">
-                Copa <span className="text-green-500">CEVI</span>
+                Copa <span className="text-orange-500">CEVI</span>
               </span>
               <span className="hidden md:block text-[9px] font-black uppercase tracking-[0.2em] text-zinc-700 ml-1 border-l border-zinc-800 pl-2">
                 Admin

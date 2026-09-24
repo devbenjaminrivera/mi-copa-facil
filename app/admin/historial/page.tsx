@@ -73,7 +73,7 @@ export default function HistorialPartidos() {
         {/* HEADER */}
         <div className="flex items-center justify-between mb-12 border-b border-zinc-800 pb-8">
           <div>
-            <p className="text-green-500 font-mono text-[10px] uppercase tracking-[0.3em] mb-1">
+            <p className="text-orange-500 font-mono text-[10px] uppercase tracking-[0.3em] mb-1">
               Admin / Historial
             </p>
             <h1 className="text-3xl md:text-4xl font-black tracking-tighter uppercase italic">
@@ -152,13 +152,13 @@ export default function HistorialPartidos() {
                           {/* MARCADOR */}
                           <div className="shrink-0 flex items-center gap-1.5 bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 min-w-[72px] justify-center">
                             <span className={`text-base md:text-lg font-black font-mono tabular-nums
-                              ${res === 'local' ? 'text-green-400' : 'text-zinc-300'}
+                              ${res === 'local' ? 'text-orange-400' : 'text-zinc-300'}
                             `}>
                               {p.goles_local}
                             </span>
                             <span className="text-zinc-700 text-xs font-black">–</span>
                             <span className={`text-base md:text-lg font-black font-mono tabular-nums
-                              ${res === 'visita' ? 'text-green-400' : 'text-zinc-300'}
+                              ${res === 'visita' ? 'text-orange-400' : 'text-zinc-300'}
                             `}>
                               {p.goles_visita}
                             </span>

@@ -82,7 +82,7 @@ export default function ProgramarCalendario() {
     <div className="p-8 bg-black min-h-screen text-white font-sans">
       <div className="max-w-2xl mx-auto">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-2xl font-black italic uppercase tracking-tighter text-green-500">🗓️ Calendario</h1>
+          <h1 className="text-2xl font-black italic uppercase tracking-tighter text-orange-500">🗓️ Calendario</h1>
           <Link href="/admin" className="text-zinc-500 hover:text-white text-[10px] font-black uppercase tracking-widest transition-colors">
             ← VOLVER AL PANEL
           </Link>
@@ -91,7 +91,7 @@ export default function ProgramarCalendario() {
         <form onSubmit={agendar} className="space-y-4 bg-zinc-900/50 p-8 rounded-[2.5rem] border border-zinc-800 mb-12 shadow-2xl">
           <div className="grid grid-cols-2 gap-4">
             <select 
-              className="bg-black border border-zinc-800 p-4 rounded-2xl outline-none focus:border-green-500 text-sm font-bold transition-all" 
+              className="bg-black border border-zinc-800 p-4 rounded-2xl outline-none focus:border-orange-500 text-sm font-bold transition-all" 
               onChange={e => setLocalId(e.target.value)}
               value={localId}
             >
@@ -99,7 +99,7 @@ export default function ProgramarCalendario() {
               {equipos.map(eq => <option key={eq.id} value={eq.id} className="bg-zinc-900">{eq.nombre}</option>)}
             </select>
             <select 
-              className="bg-black border border-zinc-800 p-4 rounded-2xl outline-none focus:border-green-500 text-sm font-bold transition-all" 
+              className="bg-black border border-zinc-800 p-4 rounded-2xl outline-none focus:border-orange-500 text-sm font-bold transition-all" 
               onChange={e => setVisitaId(e.target.value)}
               value={visitaId}
             >
@@ -112,21 +112,21 @@ export default function ProgramarCalendario() {
             <input 
               type="number"
               placeholder="Jornada (ej: 1)"
-              className="bg-black border border-zinc-800 p-4 rounded-2xl outline-none focus:border-green-500 text-sm font-bold transition-all"
+              className="bg-black border border-zinc-800 p-4 rounded-2xl outline-none focus:border-orange-500 text-sm font-bold transition-all"
               onChange={e => setJornada(e.target.value)}
               value={jornada}
               required
             />
             <input 
               type="datetime-local" 
-              className="col-span-2 bg-black border border-zinc-800 p-4 rounded-2xl outline-none focus:border-green-500 text-sm font-bold color-scheme-dark transition-all"
+              className="col-span-2 bg-black border border-zinc-800 p-4 rounded-2xl outline-none focus:border-orange-500 text-sm font-bold color-scheme-dark transition-all"
               onChange={e => setFecha(e.target.value)}
               value={fecha}
               required
             />
           </div>
 
-          <button className="w-full bg-white text-black py-5 rounded-2xl font-black uppercase tracking-[0.2em] hover:bg-green-500 transition-all text-xs">
+          <button className="w-full bg-white text-black py-5 rounded-2xl font-black uppercase tracking-[0.2em] hover:bg-orange-500 transition-all text-xs">
             Publicar Partido en Cartelera
           </button>
         </form>
@@ -137,7 +137,7 @@ export default function ProgramarCalendario() {
           {Object.keys(partidosPorJornada).length > 0 ? (
             Object.keys(partidosPorJornada).sort((a, b) => Number(a) - Number(b)).map((numJornada) => (
               <div key={numJornada} className="space-y-3">
-                <h3 className="text-green-500 text-[9px] font-black uppercase tracking-widest ml-4">Jornada {numJornada}</h3>
+                <h3 className="text-orange-500 text-[9px] font-black uppercase tracking-widest ml-4">Jornada {numJornada}</h3>
                 {partidosPorJornada[numJornada].map((p: any) => (
                   <div key={p.id} className="bg-zinc-900/30 border border-zinc-800 p-5 rounded-3xl flex justify-between items-center group hover:border-zinc-600 transition-all">
                     <div>

@@ -44,7 +44,7 @@ export default function GestionarEquipos() {
 
         {/* HEADER */}
         <header className="mb-10 pt-6">
-          <p className="text-green-500 font-mono text-[10px] uppercase tracking-[0.3em] mb-3">
+          <p className="text-orange-500 font-mono text-[10px] uppercase tracking-[0.3em] mb-3">
             Admin / Equipos
           </p>
           <h1 className="text-4xl md:text-5xl font-black tracking-tighter uppercase italic leading-none">
@@ -61,17 +61,17 @@ export default function GestionarEquipos() {
             <input
               type="text"
               placeholder="Nombre del equipo..."
-              className="flex-1 bg-zinc-900/40 border border-zinc-800 hover:border-zinc-700 focus:border-green-500 p-4 rounded-2xl outline-none transition-all text-sm font-bold placeholder:text-zinc-700 placeholder:font-normal uppercase tracking-tight"
+              className="flex-1 bg-zinc-900/40 border border-zinc-800 hover:border-zinc-700 focus:border-orange-500 p-4 rounded-2xl outline-none transition-all text-sm font-bold placeholder:text-zinc-700 placeholder:font-normal uppercase tracking-tight"
               value={nombre}
               onChange={e => setNombre(e.target.value)}
             />
             <button
               type="submit"
               disabled={cargando || !nombre.trim()}
-              className="shrink-0 bg-green-600 hover:bg-green-500 disabled:bg-zinc-800 disabled:text-zinc-600 px-6 py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all"
+              className="shrink-0 bg-orange-600 hover:bg-orange-500 disabled:bg-zinc-800 disabled:text-zinc-600 px-6 py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all"
             >
               {cargando ? (
-                <div className="w-4 h-4 border border-green-400/30 border-t-green-400 rounded-full animate-spin" />
+                <div className="w-4 h-4 border border-orange-400/30 border-t-orange-400 rounded-full animate-spin" />
               ) : 'Añadir'}
             </button>
           </form>
@@ -119,7 +119,7 @@ export default function GestionarEquipos() {
                           if (e.key === 'Enter') (e.target as HTMLInputElement).blur();
                           if (e.key === 'Escape') setEditandoId(null);
                         }}
-                        className="w-full bg-transparent border-b border-green-500 outline-none text-sm font-black uppercase tracking-tight pb-0.5 text-white"
+                        className="w-full bg-transparent border-b border-orange-500 outline-none text-sm font-black uppercase tracking-tight pb-0.5 text-white"
                       />
                     ) : (
                       <button

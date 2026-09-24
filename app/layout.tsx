@@ -1,17 +1,17 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Outfit } from "next/font/google";
 import "./globals.css";
 import Navbar from '@/components/Navbar';
 import { Analytics } from "@vercel/analytics/next"
 
 const geistSans = Geist({
-  variable: "--font-geist-sans",
   subsets: ["latin"],
+  variable: "--font-geist-sans",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const outfit = Outfit({
   subsets: ["latin"],
+  variable: "--font-outfit",
 });
 
 export const metadata: Metadata = {
@@ -27,14 +27,11 @@ export default function RootLayout({
   return (
     <html
       lang="es"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased bg-black`}
+      className={`${geistSans.variable} ${outfit.variable} h-full antialiased`}
       style={{ colorScheme: 'dark' }}
     >
-      <body className="min-h-full flex flex-col bg-black pt-16 text-white">
-        {/* Aquí renderizamos la Navbar para que aparezca en todas las páginas */}
+      <body className="min-h-full flex flex-col font-geist pt-20 pb-10">
         <Navbar />
-        
-        {/* Aquí se renderiza el contenido de cada página (page.tsx) */}
         {children}
         <Analytics />
       </body>
